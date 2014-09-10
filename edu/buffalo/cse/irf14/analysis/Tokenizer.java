@@ -3,6 +3,8 @@
  */
 package edu.buffalo.cse.irf14.analysis;
 
+
+
 /**
  * @author nikhillo
  * Class that converts a given string into a {@link TokenStream} instance
@@ -39,6 +41,23 @@ public class Tokenizer {
 	 */
 	public TokenStream consume(String str) throws TokenizerException {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
+		//TokenStream tknStream=new TokenStream();
+		Token[] tkns=new Token[27];
+		String[] result = str.split("\\s");
+		
+	     for (int x=0; x<result.length; x++)
+	     {
+	    	 result[x].replaceAll("\\W"," ").trim();
+	    	 tkns[0]=new Token();
+	         tkns[0].setTermText(result[x]);
+	         tkns[0].setTermBuffer(result[x].toCharArray());//Add Other Info If needed after words
+	         tkns[0].merge(tkns);
+	      }
+		//StringTokenizer st = new StringTokenizer(str);
+        //while (st.hasMoreTokens()) {
+        //    tknStream.append((TokenStream)st.nextToken());//sends string to your function
+        //}
+		
 		return null;
 	}
 }

@@ -3,7 +3,10 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import edu.buffalo.cse.irf14.analysis.Tokenizer;
+import edu.buffalo.cse.irf14.analysis.TokenizerException;
 import edu.buffalo.cse.irf14.document.Document;
+import edu.buffalo.cse.irf14.document.FieldNames;
 
 /**
  * @author nikhillo
@@ -28,6 +31,25 @@ public class IndexWriter {
 	 */
 	public void addDocument(Document d) throws IndexerException {
 		//TODO : YOU MUST IMPLEMENT THIS
+		
+		//String[] xyz=d.getField(FieldNames.FILEID);
+		//System.out.println(xyz[0]);
+		d.getField(FieldNames.FILEID);
+		d.getField(FieldNames.CATEGORY);
+		d.getField(FieldNames.TITLE);
+		d.getField(FieldNames.AUTHOR);
+		d.getField(FieldNames.AUTHORORG);
+		d.getField(FieldNames.PLACE);
+		d.getField(FieldNames.NEWSDATE);
+		String[] cntnt=d.getField(FieldNames.CONTENT);
+		
+		Tokenizer tknzr=new Tokenizer();
+		try {
+			tknzr.consume(cntnt[0]);
+		} catch (TokenizerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
