@@ -3,6 +3,9 @@
  */
 package edu.buffalo.cse.irf14.analysis;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 
 
 /**
@@ -41,23 +44,35 @@ public class Tokenizer {
 	 */
 	public TokenStream consume(String str) throws TokenizerException {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
-		//TokenStream tknStream=new TokenStream();
-		Token[] tkns=new Token[27];
-		String[] result = str.split("\\s");
+		TokenStream tokenStream=new TokenStream();
 		
+		String[] result = str.split("\\s");
+		int len=result.length;
+		ArrayList<Token> al = new ArrayList<Token>();
+	     
+		Token[] token=new Token[len];
 	     for (int x=0; x<result.length; x++)
 	     {
-	    	 result[x].replaceAll("\\W"," ").trim();
-	    	 tkns[0]=new Token();
-	         tkns[0].setTermText(result[x]);
-	         tkns[0].setTermBuffer(result[x].toCharArray());//Add Other Info If needed after words
-	         tkns[0].merge(tkns);
+	    	 result[x].replaceAll(","," ").trim();
+	    	 token[x]=new Token();
+	         token[x].setTermText(result[x]);
+	         token[x].setTermBuffer(result[x].toCharArray());//Add Other Info If needed after words
+	         al.add(token[x]);
 	      }
-		//StringTokenizer st = new StringTokenizer(str);
-        //while (st.hasMoreTokens()) {
-        //    tknStream.append((TokenStream)st.nextToken());//sends string to your function
-        //}
+	     Iterator<Token> itr = al.iterator();
+	    /*while(itr.hasNext())
+	     {
+	    	 
+	    	Token tr=new Token();
+	    	tr=itr.next();
+	     System.out.println(tr.getTermText());
+	     }*/
+	    //tokenStream.append((TokenStream)itr);
+	    
+	     
+	     
 		
-		return null;
+		
+		return tokenStream;
 	}
 }

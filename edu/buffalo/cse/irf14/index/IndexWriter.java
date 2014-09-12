@@ -3,6 +3,7 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import edu.buffalo.cse.irf14.analysis.TokenStream;
 import edu.buffalo.cse.irf14.analysis.Tokenizer;
 import edu.buffalo.cse.irf14.analysis.TokenizerException;
 import edu.buffalo.cse.irf14.document.Document;
@@ -32,7 +33,7 @@ public class IndexWriter {
 	public void addDocument(Document d) throws IndexerException {
 		//TODO : YOU MUST IMPLEMENT THIS
 		
-		//String[] xyz=d.getField(FieldNames.FILEID);
+		/*String[] xyz=d.getField(FieldNames.FILEID);
 		//System.out.println(xyz[0]);
 		d.getField(FieldNames.FILEID);
 		d.getField(FieldNames.CATEGORY);
@@ -40,12 +41,20 @@ public class IndexWriter {
 		d.getField(FieldNames.AUTHOR);
 		d.getField(FieldNames.AUTHORORG);
 		d.getField(FieldNames.PLACE);
-		d.getField(FieldNames.NEWSDATE);
-		String[] cntnt=d.getField(FieldNames.CONTENT);
+		d.getField(FieldNames.NEWSDATE);*/
+		/*String[] fileId=d.getField(FieldNames.FILEID);
+		String[] category=d.getField(FieldNames.CATEGORY);
+		String[] title=d.getField(FieldNames.TITLE);
+		String[] author=d.getField(FieldNames.AUTHOR);
+		String[] authororg=d.getField(FieldNames.AUTHORORG);
+		String[] place=d.getField(FieldNames.PLACE);
+		String[] newsDate=d.getField(FieldNames.NEWSDATE);*/
+		String[] content=d.getField(FieldNames.CONTENT);
 		
-		Tokenizer tknzr=new Tokenizer();
+		Tokenizer tokenizer=new Tokenizer();
+		
 		try {
-			tknzr.consume(cntnt[0]);
+			TokenStream tokenStream=tokenizer.consume(content[0]);
 		} catch (TokenizerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
