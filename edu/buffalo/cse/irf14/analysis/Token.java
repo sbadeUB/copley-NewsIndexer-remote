@@ -3,6 +3,8 @@
  */
 package edu.buffalo.cse.irf14.analysis;
 
+import java.util.ArrayList;
+
 /**
  * @author nikhillo
  * This class represents the smallest indexable unit of text.
@@ -65,8 +67,14 @@ public class Token {
 	 * Also the token order must be maintained.
 	 * @param tokens The token array to be merged
 	 */
-	protected void merge(Token...tokens) {
+	protected void merge(ArrayList<Token> mergertokens) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
+		
+		//=new ArrayList<Token>();
+		//Token[] tokens= 
+		
+		
+		
 	}
 	
 	/**
