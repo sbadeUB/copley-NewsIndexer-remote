@@ -43,12 +43,13 @@ public class Tokenizer {
 	 * tokenization
 	 */
 	public TokenStream consume(String str) throws TokenizerException {
-		//TODO : YOU MUST IMPLEMENT THIS METHOD
+	//TODO : YOU MUST IMPLEMENT THIS METHOD
 		TokenStream tokenStream=new TokenStream();
-		
-		String[] result = str.split("\\s");
+	      str=str.trim();
+		String[] result = str.split("\\s+");
 		int len=result.length;
 		ArrayList<Token> al = new ArrayList<Token>();
+	     
 	     
 		Token[] token=new Token[len];
 	     for (int x=0; x<result.length; x++)
@@ -59,19 +60,14 @@ public class Tokenizer {
 	         token[x].setTermBuffer(result[x].toCharArray());//Add Other Info If needed after words
 	         al.add(token[x]);
 	      }
-	     Iterator<Token> itr = al.iterator();
-	    /*while(itr.hasNext())
-	     {
-	    	 
-	    	Token tr=new Token();
-	    	tr=itr.next();
-	     System.out.println(tr.getTermText());
-	     }*/
-	    //tokenStream.append((TokenStream)itr);
+	    TokenStream ts=new TokenStream();
+	     ts.setTokenstream(al);
 	    
-	     
-	     
-		
+	    
+	    TokenStream tkStream=new TokenStream();
+	    tkStream.streamoftokens=ts.getTokenstream();
+	     for(Token t:tkStream.streamoftokens)
+	    	System.out.println(t.getTermText());
 		
 		return tokenStream;
 	}
