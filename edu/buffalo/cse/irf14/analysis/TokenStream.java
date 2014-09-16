@@ -12,6 +12,29 @@ import java.util.Iterator;
  * behavior
  */
 public class TokenStream implements Iterator<Token>{
+	ArrayList<Token> streamoftokens= new ArrayList<Token>();
+	
+	public void  setTokenstream(List<Token> listoftokens) {
+		for(Token t: listoftokens)
+		{
+			/*if(t.getTermBuffer().length==0)
+			{
+			continue;
+			}
+			else
+			{
+		streamoftokens.add(t);
+			}*/
+		streamoftokens.add(t);
+		}
+		
+	}
+	public ArrayList<Token> getTokenstream()
+	{
+		
+		return streamoftokens;
+	}
+	
 	
 	/**
 	 * Method that checks if there is any Token left in the stream
