@@ -3,6 +3,7 @@
  */
 package edu.buffalo.cse.irf14.analysis;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -14,7 +15,7 @@ import java.util.Iterator;
 public class TokenStream implements Iterator<Token>{
 	ArrayList<Token> streamoftokens= new ArrayList<Token>();
 	
-	public void  setTokenstream(List<Token> listoftokens) {
+	public void  setTokenstream(ArrayList<Token> listoftokens) {
 		for(Token t: listoftokens)
 		{
 			/*if(t.getTermBuffer().length==0)

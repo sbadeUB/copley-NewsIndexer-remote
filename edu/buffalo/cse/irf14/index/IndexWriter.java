@@ -55,8 +55,8 @@ public class IndexWriter {
 		
 		try {
 			TokenStream tokenStream=tokenizer.consume(content[0]);
-			TokenFilterFactory tff=new TokenFilterFactory();
-		  TokenFilterFactory tff2=TokenFilterFactory.getInstance();
+		//	TokenFilterFactory tff=new TokenFilterFactory();
+		//  TokenFilterFactory tff2=TokenFilterFactory.getInstance();
 			
 		} catch (TokenizerException e) {
 			// TODO Auto-generated catch block
