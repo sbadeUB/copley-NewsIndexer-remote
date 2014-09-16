@@ -23,7 +23,8 @@ public class TokenFilterFactory {
 	 */
 	public static TokenFilterFactory getInstance() {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
-		return null;
+		TokenFilterFactory tff=new TokenFilterFactory();
+		return tff;
 	}
 	
 	/**
@@ -36,6 +37,26 @@ public class TokenFilterFactory {
 	 */
 	public TokenFilter getFilterByType(TokenFilterType type, TokenStream stream) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
-		return null;
+		TokenFilter tf=null;
+		
+					
+		switch(type) {
+		
+		
+		case SYMBOL:
+			{
+				TokenFilterSymbol tfs=new TokenFilterSymbol();
+			
+			tf=tfs.symbolProcessing(stream);
+		
+			break;
+			
+		}
+			
+		default:
+			break;
+		}
+		return tf;
+	
 	}
 }

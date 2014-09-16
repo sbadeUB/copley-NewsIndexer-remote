@@ -20,4 +20,10 @@ public abstract class TokenFilter implements Analyzer {
 	public TokenFilter(TokenStream stream) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
 	}
+	//public TokenFilter TokenFilterSymbol(TokenStream ts)
+//	{
+		//TokenFilter tfs=null;
+		//return tfs;
+	
+	//}
 }

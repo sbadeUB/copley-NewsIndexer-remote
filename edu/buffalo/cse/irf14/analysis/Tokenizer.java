@@ -69,6 +69,6 @@ public class Tokenizer {
 	     for(Token t:tkStream.streamoftokens)
 	    	System.out.println(t.getTermText());
 		
-		return tokenStream;
+		return ts;
 	}
 }

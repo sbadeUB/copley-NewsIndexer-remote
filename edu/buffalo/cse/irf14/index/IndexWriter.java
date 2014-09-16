@@ -3,6 +3,9 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import edu.buffalo.cse.irf14.analysis.TokenFilter;
+import edu.buffalo.cse.irf14.analysis.TokenFilterFactory;
+import edu.buffalo.cse.irf14.analysis.TokenFilterType;
 import edu.buffalo.cse.irf14.analysis.TokenStream;
 import edu.buffalo.cse.irf14.analysis.Tokenizer;
 import edu.buffalo.cse.irf14.analysis.TokenizerException;
@@ -55,6 +58,9 @@ public class IndexWriter {
 		
 		try {
 			TokenStream tokenStream=tokenizer.consume(content[0]);
+			TokenFilterFactory tfff=TokenFilterFactory.getInstance();
+			TokenFilter tf=tfff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);
+			
 		//	TokenFilterFactory tff=new TokenFilterFactory();
 		//  TokenFilterFactory tff2=TokenFilterFactory.getInstance();
 			
