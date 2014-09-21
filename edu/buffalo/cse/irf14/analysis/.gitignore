@@ -8,3 +8,7 @@
 /Tokenizer.class
 /TokenizerException.class
 /TokenFilterSymbol.class
+/TokenFilterAccents.class
+/TokenFilterDates.class
+/TokenFilterSpecialChars.class
+/TokenFilterNumbers.class

@@ -38,20 +38,47 @@ public class TokenFilterFactory {
 	public TokenFilter getFilterByType(TokenFilterType type, TokenStream stream) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
 		TokenFilter tf=null;
-		
-					
-		switch(type) {
-		
-		
-		case SYMBOL:
+		switch(type)
+		{
+			case SYMBOL:
 			{
-				TokenFilterSymbol tfs=new TokenFilterSymbol();
+					TokenFilterSymbol tfs=new TokenFilterSymbol(stream);
+					while(stream.hasNext())
+					{
+						tf=tfs.symbolProcessing(stream);
+					}
+					break;
+					
+			}
+			case ACCENT:
+			{
+					TokenFilterAccents tfa=new TokenFilterAccents(stream);
+					tf=tfa.accentsProcessing(stream);
+					break;
+			}
+			case SPECIALCHARS:
+			{
+					TokenFilterSpecialChars tfsp=new TokenFilterSpecialChars(stream);
+					tf=tfsp.specialCharsProcessing(stream);
+					break;
+			}
 			
-			tf=tfs.symbolProcessing(stream);
-		
-			break;
+			case DATE:
+			{
+				TokenFilterDates tfd=new TokenFilterDates(stream);
+				while(stream.hasNext())
+				{
+					tf=tfd.datesProcessing(stream);
+				}
+				break;
+			}
 			
-		}
+			case NUMERIC:
+			{
+					TokenFilterNumbers tfn=new TokenFilterNumbers(stream);
+					tf=tfn.NumericProcessing(stream);
+					break;
+			}
 			
 		default:
 			break;

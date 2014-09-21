@@ -5,6 +5,7 @@ package edu.buffalo.cse.irf14.analysis;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.ListIterator;
 
 /**
  * @author nikhillo
@@ -14,20 +15,16 @@ import java.util.Iterator;
  */
 public class TokenStream implements Iterator<Token>{
 	ArrayList<Token> streamoftokens= new ArrayList<Token>();
+	private ListIterator<Token> itr;
 	
-	public void  setTokenstream(ArrayList<Token> listoftokens) {
+	public void setTokenstream(ArrayList<Token> listoftokens)
+	{
 		for(Token t: listoftokens)
 		{
-			/*if(t.getTermBuffer().length==0)
-			{
-			continue;
-			}
-			else
-			{
-		streamoftokens.add(t);
-			}*/
-		streamoftokens.add(t);
+			streamoftokens.add(t);
+			
 		}
+		itr=this.streamoftokens.listIterator();
 		
 	}
 	public ArrayList<Token> getTokenstream()
@@ -45,8 +42,9 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	@Override
 	public boolean hasNext() {
-		// TODO YOU MUST IMPLEMENT THIS
-		return false;
+		
+		if(itr.hasNext())	return true;
+		else				return false;
 	}
 
 	/**
@@ -58,8 +56,13 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	@Override
 	public Token next() {
-		// TODO YOU MUST IMPLEMENT THIS
-		return null;
+		
+		if(itr.hasNext())
+		{
+			Token token = itr.next();
+			return token;
+		}
+		else return null;
 	}
 	
 	/**
@@ -70,8 +73,10 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	@Override
 	public void remove() {
-		// TODO YOU MUST IMPLEMENT THIS
-		
+		if(getCurrent()!=null){
+		itr.remove();
+		}
+		//NO-OP
 	}
 	
 	/**
@@ -81,6 +86,9 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void reset() {
 		//TODO : YOU MUST IMPLEMENT THIS
+		
+		itr=this.streamoftokens.listIterator();
+		
 	}
 	
 	/**
@@ -105,8 +113,20 @@ public class TokenStream implements Iterator<Token>{
 	 * has been reached or the current Token was removed
 	 */
 	public Token getCurrent() {
-		//TODO: YOU MUST IMPLEMENT THIS
-		return null;
+		int x= itr.previousIndex();
+        if(x!=-1)
+            	return this.streamoftokens.get(x);
+        else    return null;
 	}
+	
+	/**To get Next term values which can be used in Token Filters like
+	 *  Dates and Capitalization
+	 */
+	 public String getNextTokenValue(){
+		 int x=itr.nextIndex();
+		 if(x!=-1)
+			 return this.streamoftokens.get(x).getTermText();
+		 else return null;
+	 }
 	
 }

@@ -100,14 +100,16 @@ public class Parser {
 			     
 			     String text = totallines[count+1].replaceAll("^\\s+", ""); //Removing Leading White Spaces
 			
+			     String[] dateContent = text.split("-");
+			     
 			     int commas=0;
-			     for(int i = 0; i < text.length(); i++)
+			     for(int i = 0; i < dateContent[0].length(); i++)
 			     {
-			    	 if(text.charAt(i) == ',') commas++;
+			    	 if(dateContent[0].charAt(i) == ',') commas++;
 			     }
 			
 			     String place=null;
-			     String[] placeDate = text.split(",");
+			     String[] placeDate = dateContent[0].split(",");
 			     if(commas==2) {
 			    	 place=placeDate[0]+","+placeDate[1];
 			    	 System.out.println("PLACE="+place);}
@@ -119,8 +121,7 @@ public class Parser {
 			     if(commas==1) intermDateCont=placeDate[1];
 			     else          intermDateCont=placeDate[2];
 			
-			     String[] dateContent = intermDateCont.split("-");
-			     System.out.println("DATE="+dateContent[0]);
+			     System.out.println("DATE="+intermDateCont);
 			     System.out.print("CONTENT="+dateContent[1]);
 			     String content=dateContent[1];
 			     for (int i = count+2; i < totallines.length; i++) {
@@ -135,7 +136,7 @@ public class Parser {
 			     docs.setField(FieldNames.AUTHOR, author);
 			     docs.setField(FieldNames.AUTHORORG, authorOrg);
 			     docs.setField(FieldNames.PLACE, place.trim());
-			     docs.setField(FieldNames.NEWSDATE, dateContent[0].trim());
+			     docs.setField(FieldNames.NEWSDATE, intermDateCont.trim());
 			     docs.setField(FieldNames.CONTENT, content);
 			
 			

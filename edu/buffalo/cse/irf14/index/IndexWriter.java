@@ -34,7 +34,6 @@ public class IndexWriter {
 	 * @throws IndexerException : In case any error occurs
 	 */
 	public void addDocument(Document d) throws IndexerException {
-		//TODO : YOU MUST IMPLEMENT THIS
 		
 		/*String[] xyz=d.getField(FieldNames.FILEID);
 		//System.out.println(xyz[0]);
@@ -58,16 +57,30 @@ public class IndexWriter {
 		
 		try {
 			TokenStream tokenStream=tokenizer.consume(content[0]);
-			TokenFilterFactory tfff=TokenFilterFactory.getInstance();
-			TokenFilter tf=tfff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);
-			
-		//	TokenFilterFactory tff=new TokenFilterFactory();
-		//  TokenFilterFactory tff2=TokenFilterFactory.getInstance();
-			
-		} catch (TokenizerException e) {
+			TokenFilterFactory tff=TokenFilterFactory.getInstance();
+			TokenFilter tfs=tff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);
+			TokenStream ts2=tfs.getStream();
+			ts2.reset();
+			int i=1;
+			while(ts2.hasNext())
+			{
+				System.out.println("Token "+i+"::"+ts2.next().getTermText());
+				i=i+1;
+			}
+			ts2.reset();
+
+			/*TokenFilter tfd=tff.getFilterByType(TokenFilterType.DATE, tfs.getStream());
+			TokenStream ts3=tfd.getStream();
+			ts3.reset();
+			while(ts3.hasNext())
+			{
+				System.out.print(ts3.next().getTermText()+" ");
+			}
+			*/
+			} catch (TokenizerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+			}
 	}
 	
 	/**

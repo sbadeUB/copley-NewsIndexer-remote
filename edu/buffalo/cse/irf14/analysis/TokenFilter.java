@@ -12,18 +12,30 @@ package edu.buffalo.cse.irf14.analysis;
  *
  */
 public abstract class TokenFilter implements Analyzer {
+	
 	/**
 	 * Default constructor, creates an instance over the given
 	 * TokenStream
 	 * @param stream : The given TokenStream instance
 	 */
-	public TokenFilter(TokenStream stream) {
-		//TODO : YOU MUST IMPLEMENT THIS METHOD
-	}
-	//public TokenFilter TokenFilterSymbol(TokenStream ts)
-//	{
-		//TokenFilter tfs=null;
-		//return tfs;
 	
-	//}
+	private TokenStream tokenStream=null;
+	public TokenFilter(TokenStream tokenStream) {
+		this.tokenStream=tokenStream;
+	}
+	
+	public boolean increment() throws TokenizerException
+	{
+		boolean bool=false;
+		
+		return bool;
+	}
+	
+	public TokenStream getStream()
+	{
+		
+		
+		return this.tokenStream;
+	}
+	
 }
