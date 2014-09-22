@@ -53,12 +53,14 @@ public class TokenFilterFactory {
 			case ACCENT:
 			{
 					TokenFilterAccents tfa=new TokenFilterAccents(stream);
+					while(stream.hasNext())
 					tf=tfa.accentsProcessing(stream);
 					break;
 			}
 			case SPECIALCHARS:
 			{
 					TokenFilterSpecialChars tfsp=new TokenFilterSpecialChars(stream);
+					while(stream.hasNext())
 					tf=tfsp.specialCharsProcessing(stream);
 					break;
 			}
@@ -76,8 +78,37 @@ public class TokenFilterFactory {
 			case NUMERIC:
 			{
 					TokenFilterNumbers tfn=new TokenFilterNumbers(stream);
+					while(stream.hasNext())
 					tf=tfn.NumericProcessing(stream);
 					break;
+			}
+			case CAPITALIZATION:
+			{
+				TokenFilterCapitalization tfc=new TokenFilterCapitalization(stream);
+				while(stream.hasNext())
+				{
+					tf=tfc.capitalizationProcessing(stream);
+				}
+				break;
+			}
+			
+			case STOPWORD:
+			{
+				TokenFilterStopWords tfst=new TokenFilterStopWords(stream);
+				while(stream.hasNext())
+				{
+					tf=tfst.stopWordProcessing(stream);
+				}
+				break;
+			}
+			case STEMMER:
+			{
+				TokenFilterStemmer tfste=new TokenFilterStemmer(stream);
+				while(stream.hasNext())
+				{
+					tf=tfste.stemmerProcessing(stream);
+				}
+				break;
 			}
 			
 		default:

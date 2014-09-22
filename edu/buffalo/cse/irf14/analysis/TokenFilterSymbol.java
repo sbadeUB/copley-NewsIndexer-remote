@@ -68,10 +68,8 @@ public TokenFilter symbolProcessing(TokenStream ts)
 		{          }                                 //To retain B-52 or 23-52 or 52-B
 			
 		
-		str=str.trim();
+	str=str.trim();
 		
-		
-		//str=str.replaceAll("[^\\w]+"," ");
 	if(!str.isEmpty())
 	{
 		ts.getCurrent().setTermText(str);

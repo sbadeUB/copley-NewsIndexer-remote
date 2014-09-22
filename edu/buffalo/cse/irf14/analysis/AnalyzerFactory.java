@@ -22,8 +22,8 @@ public class AnalyzerFactory {
 	 * @return An instance of the factory
 	 */
 	public static AnalyzerFactory getInstance() {
-		//TODO: YOU NEED TO IMPLEMENT THIS METHOD
-		return null;
+		AnalyzerFactory af=new AnalyzerFactory();
+		return af;
 	}
 	
 	/**
@@ -37,8 +37,48 @@ public class AnalyzerFactory {
 	 * @return The built {@link Analyzer} instance for an indexable {@link FieldNames}
 	 * null otherwise
 	 */
-	public Analyzer getAnalyzerForField(FieldNames name, TokenStream stream) {
-		//TODO : YOU NEED TO IMPLEMENT THIS METHOD
-		return null;
+	public Analyzer getAnalyzerForField(FieldNames name, TokenStream stream)
+	{
+		TokenFilterGetter tf=null;
+		switch(name)
+		{
+			case AUTHOR:
+			{
+					
+					break;
+					
+			}
+			
+			case PLACE:
+			{
+					
+					break;
+					
+			}
+			
+			case CATEGORY:
+			{
+					break;
+			}
+			
+			case CONTENT:
+			{
+					
+					break;
+			}
+			
+			case TITLE:
+			{
+				
+				break;
+			}
+			
+		
+			default:
+			{
+				break;
+			}
 	}
+		return null;
+}
 }

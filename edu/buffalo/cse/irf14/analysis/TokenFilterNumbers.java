@@ -1,7 +1,5 @@
 package edu.buffalo.cse.irf14.analysis;
 
-import java.util.ArrayList;
-
 
 /**
  * Factory class for instantiating a given TokenFilter
@@ -16,71 +14,35 @@ public  class TokenFilterNumbers extends TokenFilter implements Analyzer
 	}
 public TokenFilter NumericProcessing(TokenStream ts)
 {
+	
 	TokenFilter tfs=null;
-	ArrayList<Token> tremoval= new ArrayList<Token>();
-	String[] strArray=null;
-	for(Token t:ts.streamoftokens)
+	String str=null;
+	if(ts.hasNext())
 	{
-		String str=t.getTermText();
-		if(str.endsWith(".")||str.endsWith("!")||str.endsWith("?"))
-		{
-			str=str.substring(0, str.length()-1); //This will remove . or ! or ? that are at the end only
-		} 
+		//"^\\d{4}-\\d{4}$"
+		str=ts.next().getTermText();
 		
-		str = str.replace("n\'t", " not"); //Common Contractions and expansions for each
-		str = str.replace("\'ve", " have");
-		str = str.replace("\'d", " would");
-		str = str.replace("\'ll", " will");
-		str = str.replace("\'m", " am");
-		str = str.replace("\'am", "dam");
-		str = str.replace("\'re", " are");
-		str = str.replace("y\'", "you ");
-		str = str.replace("Y\'", "You ");
-		str = str.replace("\'em", "them");
-		
-		str = str.replace("\'s", "");     //This will remove apostrophes with only 's or s' or '
-		str = str.replace("s\'", "");
-		str = str.replace("\'", " ");
-		
-		
-		
-		
-		if(str.matches("^[[a-zA-Z]+[-][a-zA-Z]+]+$"))//To return week-day to week day
-		{
-			strArray=str.split("-");
-			str="";
-			for(int i=0;i<strArray.length;i++)
-			str=str+" "+strArray[i];
-			str=str.trim();
-		}
-		else if(str.matches("^[[a-zA-Z]+[-][0-9]+]+$") || str.matches("^[[0-9]+[-][0-9]+]+$") || str.matches("^[[0-9]+[-][a-zA-Z]+]+$"))
-		{          }                                 //To retain B-52 or 23-52 or 52-B
-			
+	if(!str.contains("[A-Z][a-z]") && !str.matches("^(2[0-3]|1[0-9]|0[0-9]):[0-5][0-9]:[0-5][0-9]([A-Za-z]*)$") && !str.matches("^\\d{8}$") && !str.matches("^\\d{8}-\\d{8}$")) 
+	{
+		str=str.replaceAll("[0-9]","");
+	}
 		
 		str=str.trim();
 		
-		
-		//str=str.replaceAll("[^\\w]+"," ");
-	
-	t.setTermText(str);
-	tremoval.add(t);
+		if(!str.isEmpty())
+		{
+			ts.getCurrent().setTermText(str);
+			ts.getCurrent().setTermBuffer(str.toCharArray());
+		}
+		else
+		{
+			ts.remove();
+		}
 	}
-	TokenStream tss=new TokenStream();
-	tss.setTokenstream(tremoval);
-	tfs =new TokenFilterSymbol(tss);
+		tfs =new TokenFilterNumbers(ts);
+		return tfs;
 	
-	return tfs;
 }
 
-	public TokenStream getStream()
-	{
-		
-		//writing code
-	return null;
-	}
-	public  boolean increment()
-	{
-	return false;
-	}
 	
 }

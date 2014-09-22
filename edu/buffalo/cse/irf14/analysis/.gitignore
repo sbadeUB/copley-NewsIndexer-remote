@@ -12,3 +12,7 @@
 /TokenFilterDates.class
 /TokenFilterSpecialChars.class
 /TokenFilterNumbers.class
+/TokenFilterCapitalization.class
+/TokenFilterStemmer.class
+/TokenFilterStopWords.class
+/TokenFilterGetter.class

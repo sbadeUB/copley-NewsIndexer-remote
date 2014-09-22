@@ -3,6 +3,7 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
 import edu.buffalo.cse.irf14.analysis.TokenFilter;
 import edu.buffalo.cse.irf14.analysis.TokenFilterFactory;
 import edu.buffalo.cse.irf14.analysis.TokenFilterType;
@@ -57,26 +58,41 @@ public class IndexWriter {
 		
 		try {
 			TokenStream tokenStream=tokenizer.consume(content[0]);
-			TokenFilterFactory tff=TokenFilterFactory.getInstance();
+			
+			AnalyzerFactory af=AnalyzerFactory.getInstance();
+			af.getAnalyzerForField(FieldNames.CONTENT, tokenStream);
+			/*TokenFilterFactory tff=TokenFilterFactory.getInstance();
+			TokenFilter tfs=tff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);
 			TokenFilter tfs=tff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);
 			TokenStream ts2=tfs.getStream();
 			ts2.reset();
-			int i=1;
-			while(ts2.hasNext())
+			
+			TokenFilter tfd=tff.getFilterByType(TokenFilterType.DATE, tokenStream);
+			TokenStream ts3=tfd.getStream();
+			ts3.reset();
+			
+			while(ts3.hasNext())
 			{
-				System.out.println("Token "+i+"::"+ts2.next().getTermText());
-				i=i+1;
+				System.out.println(ts3.next().getTermText()+" ");
 			}
-			ts2.reset();
-
-			/*TokenFilter tfd=tff.getFilterByType(TokenFilterType.DATE, tfs.getStream());
+			ts3.reset();
+			
+			TokenFilter tfn=tff.getFilterByType(TokenFilterType.NUMERIC, tfd.getStream());
+			TokenStream ts4=tfn.getStream();
+			ts4.reset();
+			while(ts4.hasNext())
+			{
+				System.out.println(ts4.next().getTermText()+" ");
+			}
+			
+			TokenFilter tfd=tff.getFilterByType(TokenFilterType.STEMMER, tokenStream);
 			TokenStream ts3=tfd.getStream();
 			ts3.reset();
 			while(ts3.hasNext())
 			{
-				System.out.print(ts3.next().getTermText()+" ");
-			}
-			*/
+				System.out.println(ts3.next().getTermText()+" ");
+			}*/
+			
 			} catch (TokenizerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
