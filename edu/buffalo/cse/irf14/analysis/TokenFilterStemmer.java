@@ -1,5 +1,7 @@
 package edu.buffalo.cse.irf14.analysis;
 
+import java.util.regex.Pattern;
+
 
 /**
  * Factory class for instantiating a given TokenFilter
@@ -31,9 +33,10 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 		
 			w=str.toCharArray();
 			int j=str.length();
-			
-		if(!str.matches("[0-9$&+,:;=?@#|'<>.-^*()%!//[A-Za-z]]"))
-		{
+			String regex="[a-z]+";
+			if(Pattern.matches(regex, str))
+			{
+		
 			for(int c=0;c<j;c++)
 			{
 				this.add(w[c]);
@@ -41,6 +44,7 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 			this.stem();
 			str= this.toString();
 		}
+	}
 	str=str.trim();
 	
 		if(!str.isEmpty())
@@ -54,7 +58,7 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 		}
 	
 	
-	}
+
 	tfs =new TokenFilterStemmer(ts);
 	return tfs;
 }
