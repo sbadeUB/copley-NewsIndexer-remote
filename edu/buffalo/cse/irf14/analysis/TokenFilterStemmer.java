@@ -32,8 +32,10 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 			w=str.toCharArray();
 			int j=str.length();
 			
-		if(!str.matches("[0-9$&+,:;=?@#|'<>.-^*()%!//[A-Za-z]]"))
-		{
+		String regex="[a-z]+";
+-			if(Pattern.matches(regex, str))
+-			{
+-		
 			for(int c=0;c<j;c++)
 			{
 				this.add(w[c]);
