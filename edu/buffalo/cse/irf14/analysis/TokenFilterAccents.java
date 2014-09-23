@@ -24,7 +24,7 @@ public TokenFilter accentsProcessing(TokenStream ts)
 	{
 		str=ts.next().getTermText();
 		char[] accentbuffer= null;
-		String replce=null;
+		
 		
 		Hashtable<String, String> ht=new Hashtable<String, String>();
 		
@@ -109,23 +109,26 @@ public TokenFilter accentsProcessing(TokenStream ts)
 			String sr=String.valueOf(c);
 			if(ht.containsKey(sr))
 			{
-				repString stir=ht.get(sr);
+				String stir=ht.get(sr);
 					 for(int k=0;k<stir.length();k++)
 					 {
 			c=stir.charAt(k);
 			accentbuffer[i]=c;
 			i++;
+			          }
 			}
 			else
+			
 			i++;
-				
-		}
+			
+		
 		
 		str=str.trim();
 	}
 	
+	
+}
 	tfs =new TokenFilterAccents(ts);
 	return tfs;
 }
-
 }

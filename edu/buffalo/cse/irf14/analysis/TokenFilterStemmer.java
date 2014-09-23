@@ -1,5 +1,7 @@
 package edu.buffalo.cse.irf14.analysis;
 
+import java.util.regex.Pattern;
+
 
 /**
  * Factory class for instantiating a given TokenFilter
@@ -33,13 +35,12 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 			int j=str.length();
 			
 		String regex="[a-z]+";
--			if(Pattern.matches(regex, str))
--			{
--		
-			for(int c=0;c<j;c++)
-			{
+          	if(Pattern.matches(regex,str))
+          			{
+			   for(int c=0;c<j;c++)
+			    {
 				this.add(w[c]);
-			}
+			    }
 			this.stem();
 			str= this.toString();
 		}
@@ -56,12 +57,12 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 		}
 	
 	
-	}
+	
+	
+}
 	tfs =new TokenFilterStemmer(ts);
 	return tfs;
 }
-
-
 
 /**
  * Add a character to the word being stemmed.  When you are finished
