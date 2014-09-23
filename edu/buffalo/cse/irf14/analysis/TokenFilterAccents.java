@@ -109,17 +109,12 @@ public TokenFilter accentsProcessing(TokenStream ts)
 			String sr=String.valueOf(c);
 			if(ht.containsKey(sr))
 			{
-				replce=ht.get(sr);
-				String str2=null;
-				int l=replce.length();
-				for(int j=0;j<l;j++)
-				{
-					str2=str2+replce.charAt(j);
-				}
-				
-				accentbuffer[i]=c;
-				i++;
-				System.out.println(accentbuffer);
+				repString stir=ht.get(sr);
+					 for(int k=0;k<stir.length();k++)
+					 {
+			c=stir.charAt(k);
+			accentbuffer[i]=c;
+			i++;
 			}
 			else
 			i++;
