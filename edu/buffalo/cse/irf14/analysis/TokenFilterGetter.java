@@ -30,17 +30,5 @@ public abstract class TokenFilterGetter implements Analyzer{
 		return tf;
 	}*/
 	
-	public TokenFilter ProcessTokenOnFilterTypes(TokenStream ts)
-	{
-		TokenFilter tf=null;
-		TokenFilterFactory tff=TokenFilterFactory.getInstance();
-		if(ts.hasNext())
-		{
-			  tf=tff.getFilterByType(TokenFilterType.SYMBOL, ts);
-			  tf=tff.getFilterByType(TokenFilterType.STOPWORD, ts);
-		}
-		return tf;
-	}
-	
 	
 }
