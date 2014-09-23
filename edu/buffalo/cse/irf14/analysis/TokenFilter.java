@@ -24,9 +24,16 @@ public abstract class TokenFilter implements Analyzer {
 		this.tokenStream=tokenStream;
 	}
 	
+	@SuppressWarnings("null")
 	public boolean increment() throws TokenizerException
 	{
+		TokenFilterGetter tfg=null;
+		TokenFilter tf=null;
 		boolean bool=false;
+		while(this.tokenStream.hasNext())
+		{
+			tf=tfg.ProcessTokenOnFilterTypes(this.tokenStream);
+		}
 		
 		return bool;
 	}

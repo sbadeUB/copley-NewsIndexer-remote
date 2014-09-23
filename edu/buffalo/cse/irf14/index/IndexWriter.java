@@ -3,6 +3,7 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import edu.buffalo.cse.irf14.analysis.Analyzer;
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
 import edu.buffalo.cse.irf14.analysis.TokenFilter;
 import edu.buffalo.cse.irf14.analysis.TokenFilterFactory;
@@ -60,9 +61,13 @@ public class IndexWriter {
 			TokenStream tokenStream=tokenizer.consume(content[0]);
 			
 			AnalyzerFactory af=AnalyzerFactory.getInstance();
-			af.getAnalyzerForField(FieldNames.CONTENT, tokenStream);
+			Analyzer as=af.getAnalyzerForField(FieldNames.CONTENT, tokenStream);
+			while(as.increment())
+			{
+				
+			}
 			/*TokenFilterFactory tff=TokenFilterFactory.getInstance();
-			TokenFilter tfs=tff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);
+			/*TokenFilter tfs=tff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);
 			TokenFilter tfs=tff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);
 			TokenStream ts2=tfs.getStream();
 			ts2.reset();
@@ -84,8 +89,8 @@ public class IndexWriter {
 			{
 				System.out.println(ts4.next().getTermText()+" ");
 			}
-			
-			TokenFilter tfd=tff.getFilterByType(TokenFilterType.STEMMER, tokenStream);
+			*/
+			/*TokenFilter tfd=tff.getFilterByType(TokenFilterType.STEMMER, tokenStream);
 			TokenStream ts3=tfd.getStream();
 			ts3.reset();
 			while(ts3.hasNext())
