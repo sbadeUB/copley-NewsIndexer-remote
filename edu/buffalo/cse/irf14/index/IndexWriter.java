@@ -91,9 +91,9 @@ public class IndexWriter {
 			while(ts3.hasNext())
 			{
 				System.out.println(ts3.next().getTermText()+" ");
-			}
+			}*/
 			
-			} */catch (TokenizerException e) {
+			} catch (TokenizerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			}
