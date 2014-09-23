@@ -18,6 +18,17 @@ public abstract class TokenFilterGetter implements Analyzer{
 	
 	public TokenFilterGetter() {
 	}
+	/*public TokenFilter ProcessTokenonFilterTypes(TokenStream ts)
+	{
+		TokenFilter tf= null;
+		TokenFilterFactory tff=TokenFilterFactory.getInstance();
+		if(ts.hasNext())
+		{
+			tf=tff.getFilterByType(TokenFilterType.SYMBOL, ts);
+			tf=tff.getFilterByType(TokenFilterType.STOPWORD, ts);
+		}
+		return tf;
+	}*/
 	
 	
 }
