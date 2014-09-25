@@ -53,7 +53,8 @@ public class Parser {
 				 }
 				 inf.close();
 				 String[] totallines=wholetextString.split("\n");
-			     String title=totallines[1]; 
+			     String title=totallines[1].trim(); 
+			    
 			     System.out.print("TITLE="+title);	
 			     String authorInfo=null;//Checking for Author Info
 			     int authorExists=0;
@@ -95,7 +96,7 @@ public class Parser {
 			     }
 			     else{
 			    	 author="";
-			    	 authorOrg="";
+			    	 authorOrg=null;
 			     }
 			     
 			     String text = totallines[count+1].replaceAll("^\\s+", ""); //Removing Leading White Spaces
@@ -132,13 +133,21 @@ public class Parser {
 			
 			     docs.setField(FieldNames.FILEID, file.getName());
 			     docs.setField(FieldNames.CATEGORY, category.getName());
+			     if(title!=null && title!="")
 			     docs.setField(FieldNames.TITLE, title);
+			     if(author!=null && author!="")
 			     docs.setField(FieldNames.AUTHOR, author);
+			     if(authorOrg!=null && authorOrg!="")
 			     docs.setField(FieldNames.AUTHORORG, authorOrg);
+			     if(place!=null && place!="")
 			     docs.setField(FieldNames.PLACE, place.trim());
+			     if(intermDateCont!=null && intermDateCont!="")
 			     docs.setField(FieldNames.NEWSDATE, intermDateCont.trim());
+			     if(content!=null && content!="")
 			     docs.setField(FieldNames.CONTENT, content);
-			
+			/*System.out.println(docs.getField(FieldNames.TITLE));
+			System.out.println(docs.getField(FieldNames.TITLE)[0]);
+			*/
 			
 			
             } catch (IOException e) {
