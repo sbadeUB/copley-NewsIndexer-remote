@@ -16,3 +16,6 @@
 /TokenFilterStemmer.class
 /TokenFilterStopWords.class
 /TokenFilterGetter.class
+/AnalyzerForTerm.class
+/AnalyzerForContent.class
+/AnalyzerForAuthor.class

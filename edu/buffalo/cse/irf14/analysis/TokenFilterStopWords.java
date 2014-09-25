@@ -22,7 +22,7 @@ public TokenFilter stopWordProcessing(TokenStream ts)
 	String str=null;
 	if(ts.hasNext())
 	{
-		str=ts.next().getTermText();
+		str=ts.getCurrent().getTermText();
 		
 		String[] stopwords={"a","able","about","across","after","all","almost","also","am",
 				"among","an","and","any","are","as","at","be","because","been","but","by","can","cannot","could",
@@ -57,6 +57,16 @@ public TokenFilter stopWordProcessing(TokenStream ts)
 		else
 		{
 			ts.remove();
+			TokenFilter.IsTokenRemoved=true;
+			/*try {
+				tfs =new TokenFilterSymbol(ts);
+				@SuppressWarnings("unused")
+				boolean ac=tfs.increment();
+			} catch (TokenizerException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Some errors occured");
+			e.printStackTrace(); }*/
+		
 		}
 	
 	}

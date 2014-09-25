@@ -20,6 +20,7 @@ public interface Analyzer {
 	 * false if no more unprocessed tokens exist 
 	 * @throws TokenizerException : If any exception occurs during the operation
 	 */
+
 	public abstract boolean increment() throws TokenizerException;
 	
 	/**
@@ -27,4 +28,6 @@ public interface Analyzer {
 	 * @return The underlying stream
 	 */
 	public abstract TokenStream getStream();
+	
+
 }

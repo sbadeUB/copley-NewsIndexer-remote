@@ -24,7 +24,7 @@ public TokenFilter symbolProcessing(TokenStream ts)
 	boolean setPunctuation=true;
 	if(ts.hasNext())
 	{
-		String str=ts.next().getTermText();
+		String str=ts.getCurrent().getTermText();
 		while(setPunctuation)
 		{
 			if(str.endsWith(".")||str.endsWith("!")||str.endsWith("?"))
@@ -78,6 +78,15 @@ public TokenFilter symbolProcessing(TokenStream ts)
 	else
 	{
 		ts.remove();
+		TokenFilter.IsTokenRemoved=true;
+		/*try {
+			tfs =new TokenFilterSymbol(ts);
+			boolean ac=tfs.increment();
+		} catch (TokenizerException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Some errors occured");
+			e.printStackTrace();
+		}*/
 	}
 	
 	}

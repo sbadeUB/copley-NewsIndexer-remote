@@ -39,7 +39,7 @@ public class AnalyzerFactory {
 	 */
 	public Analyzer getAnalyzerForField(FieldNames name, TokenStream stream)
 	{
-		TokenFilterGetter tf=null;
+		Analyzer af=null;
 		switch(name)
 		{
 			case AUTHOR:
@@ -63,7 +63,10 @@ public class AnalyzerFactory {
 			
 			case CONTENT:
 			{
-					
+				int i=1;
+			AnalyzerForContent afc=new AnalyzerForContent(stream);
+			TokenFilter.AnalyzerType=i;
+			af=(Analyzer)afc;
 					break;
 			}
 			
@@ -79,6 +82,6 @@ public class AnalyzerFactory {
 				break;
 			}
 	}
-		return null;
+		return af;
 }
 }

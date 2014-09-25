@@ -43,10 +43,7 @@ public class TokenFilterFactory {
 			case SYMBOL:
 			{
 					TokenFilterSymbol tfs=new TokenFilterSymbol(stream);
-					while(stream.hasNext())
-					{
-						tf=tfs.symbolProcessing(stream);
-					}
+					tf=tfs.symbolProcessing(stream);
 					break;
 					
 			}
@@ -68,17 +65,16 @@ public class TokenFilterFactory {
 			case DATE:
 			{
 				TokenFilterDates tfd=new TokenFilterDates(stream);
-				while(stream.hasNext())
-				{
+				
 					tf=tfd.datesProcessing(stream);
-				}
+				
 				break;
 			}
 			
 			case NUMERIC:
 			{
 					TokenFilterNumbers tfn=new TokenFilterNumbers(stream);
-					while(stream.hasNext())
+					
 					tf=tfn.NumericProcessing(stream);
 					break;
 			}
@@ -95,10 +91,7 @@ public class TokenFilterFactory {
 			case STOPWORD:
 			{
 				TokenFilterStopWords tfst=new TokenFilterStopWords(stream);
-				while(stream.hasNext())
-				{
-					tf=tfst.stopWordProcessing(stream);
-				}
+				tf=tfst.stopWordProcessing(stream);
 				break;
 			}
 			case STEMMER:

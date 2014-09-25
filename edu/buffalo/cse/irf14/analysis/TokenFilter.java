@@ -18,17 +18,41 @@ public abstract class TokenFilter implements Analyzer {
 	 * TokenStream
 	 * @param stream : The given TokenStream instance
 	 */
-	
+	public static int AnalyzerType=1;
+	public static boolean IsTokenRemoved=false;
 	private TokenStream tokenStream=null;
 	public TokenFilter(TokenStream tokenStream) {
 		this.tokenStream=tokenStream;
+		
 	}
 	
 	public boolean increment() throws TokenizerException
 	{
-		boolean bool=false;
+		boolean bool=true;
+		TokenStream ts=this.getStream();
+		while(ts.hasNext())
+		{
+			ts.next();
+			IsTokenRemoved=false;
+			switch(AnalyzerType)
+			{
+				case 1:
+				{
+					AnalyzerForContent AFC=new AnalyzerForContent(ts);
+					System.out.println("Token IN:"+ts.getCurrent().getTermText());
+					ts=AFC.ProcessTokenonFilterTypes(ts);
+					
+					break;
+				}
+				case 2:
+				case 3:
+				case 4:
+				default:
+				
+			}
+		}
 		
-		return bool;
+		return false;
 	}
 	
 	public TokenStream getStream()

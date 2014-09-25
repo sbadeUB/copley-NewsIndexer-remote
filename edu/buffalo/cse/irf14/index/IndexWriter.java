@@ -3,6 +3,7 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import edu.buffalo.cse.irf14.analysis.Analyzer;
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
 import edu.buffalo.cse.irf14.analysis.TokenFilter;
 import edu.buffalo.cse.irf14.analysis.TokenFilterFactory;
@@ -53,14 +54,31 @@ public class IndexWriter {
 		String[] place=d.getField(FieldNames.PLACE);
 		String[] newsDate=d.getField(FieldNames.NEWSDATE);*/
 		String[] content=d.getField(FieldNames.CONTENT);
+
+		
+		//Analyzer auth=af.getAnalyzerForField(FieldNames.AUTHOR, stream)
+		
 		
 		Tokenizer tokenizer=new Tokenizer();
 		
 		try {
 			TokenStream tokenStream=tokenizer.consume(content[0]);
-			
+			int i=0;
 			AnalyzerFactory af=AnalyzerFactory.getInstance();
-			af.getAnalyzerForField(FieldNames.CONTENT, tokenStream);
+			//AnalyzerFactory af=AnalyzerFactory.getInstance();
+			Analyzer a=af.getAnalyzerForField(FieldNames.CONTENT, tokenStream);
+			while(a.increment())
+			{
+			
+			}
+			tokenStream=a.getStream();
+			tokenStream.reset();
+			while(tokenStream.hasNext())
+			{
+				System.out.println(tokenStream.next().getTermText());
+				i++;
+			}
+			//System.out.println("final tokens :"+i);
 			/*TokenFilterFactory tff=TokenFilterFactory.getInstance();
 			TokenFilter tfs=tff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);
 			TokenFilter tfs=tff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);

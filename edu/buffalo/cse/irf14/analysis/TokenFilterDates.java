@@ -49,7 +49,7 @@ public TokenFilter datesProcessing(TokenStream ts)
 	
 	if(ts.hasNext())
 	{
-		String strOrig=ts.next().getTermText(); //---String str declaration already here so removed one that came after--//
+		String strOrig=ts.getCurrent().getTermText(); //---String str declaration already here so removed one that came after--//
 		String[] testarray={}; //Dummy testarray
 		String str=""; 
 		//System.out.println("Original Token:"+":"+strOrig);
@@ -78,6 +78,7 @@ public TokenFilter datesProcessing(TokenStream ts)
 					if(ts.hasNext())
 					{
 						ts.remove();
+						TokenFilter.IsTokenRemoved=true;
 						ts.next();
 						MasterArray=decomposeMasterArray(MasterArray);
 						str2=ts.getNextTokenValue();
@@ -155,6 +156,7 @@ public TokenFilter datesProcessing(TokenStream ts)
 						if(ts.hasNext())
 						{
 							ts.remove();//Date encountered so deleted 
+							TokenFilter.IsTokenRemoved=true;
 							ts.next();
 							str2=ts.getNextTokenValue();
 							str2=TokenCleaning(str2);
@@ -300,6 +302,7 @@ public TokenFilter datesProcessing(TokenStream ts)
 								else
 								{
 									ts.remove();
+									TokenFilter.IsTokenRemoved=true;
 								}
 								ts.next();//To forward really to next token
 								ts.remove();//Removed the next token
