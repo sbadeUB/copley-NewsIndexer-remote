@@ -3,6 +3,11 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,9 +15,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
-import com.sun.xml.internal.fastinfoset.util.StringArray;
 
 import edu.buffalo.cse.irf14.analysis.Analyzer;
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
@@ -32,7 +34,7 @@ import edu.buffalo.cse.irf14.document.FieldNames;
  */
 public class IndexWriter {
 	
-
+	public String indexDir=null;
 	public static ArrayList<String> TermList=new ArrayList<String>();
 	public static ArrayList<HashMap<String, Integer>> TermPostingslist = new ArrayList<HashMap<String,Integer>>();
 	/**
@@ -40,7 +42,7 @@ public class IndexWriter {
 	 * @param indexDir : The root directory to be sued for indexing
 	 */
 	public IndexWriter(String indexDir) {
-		//TODO : YOU MUST IMPLEMENT THIS
+		this.indexDir=indexDir;
 	}
 	
 	/**
@@ -59,7 +61,6 @@ public class IndexWriter {
 		
 		try {
 			TokenStream tokenStream=tokenizer.consume(content[0]);
-			int i=0;
 			AnalyzerFactory af=AnalyzerFactory.getInstance();
 			Analyzer a=af.getAnalyzerForField(FieldNames.CONTENT, tokenStream);
 			while(a.increment())
@@ -68,33 +69,6 @@ public class IndexWriter {
 			}
 			tokenStream=a.getStream();
 			tokenStream.reset();
-			
-		/*	String[] totalwords= new String[500];
-			int k=0;
-			
-			for(Token t:tokenStream.getTokenstream())
-			{
-				totalwords[k]=t.getTermText();
-				k++;
-			}
-			Set<String> uniquewords = new HashSet<String>(Arrays.asList(totalwords));
-			//if(uniquewords.equals(null))
-				uniquewords.remove(null);
-		for(String s:uniquewords)
-		{
-			int count=0;
-			for(Token t:tokenStream.getTokenstream())
-			{
-				if(s.equals(t.getTermText()))
-				{
-                       count++; 
-			     }
-			}
-				temp.put(d.getField(FieldNames.FILEID)[0], count);
-				retlist.add(temp);
-				System.out.println("term "+s+" count"+count);
-				System.out.println("list count"+retlist.size());
-		}*/
 			Map<String,Integer> tm = new TreeMap<String,Integer>();
 			for(Token t:tokenStream.getTokenstream())
 			{
@@ -122,7 +96,6 @@ public class IndexWriter {
 					int index=TermList.indexOf(entry.getKey());
 					temp=TermPostingslist.get(index);
 					temp.put(d.getField(FieldNames.FILEID)[0], entry.getValue());
-					TermPostingslist.add(index, temp);
 				}
 				else
 				{
@@ -133,51 +106,70 @@ public class IndexWriter {
 				}
 	        }
 			
-			
-			
-			
-			
-			
-			
-			//System.out.println("final tokens :"+i);
-			/*TokenFilterFactory tff=TokenFilterFactory.getInstance();
-			TokenFilter tfs=tff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);
-			TokenFilter tfs=tff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);
-			TokenStream ts2=tfs.getStream();
-			ts2.reset();
-			
-			TokenFilter tfd=tff.getFilterByType(TokenFilterType.DATE, tokenStream);
-			TokenStream ts3=tfd.getStream();
-			ts3.reset();
-			
-			while(ts3.hasNext())
+			System.out.println("HI");
+			for(String m:TermList)
 			{
-				System.out.println(ts3.next().getTermText()+" ");
-			}
-			ts3.reset();
-			
-			TokenFilter tfn=tff.getFilterByType(TokenFilterType.NUMERIC, tfd.getStream());
-			TokenStream ts4=tfn.getStream();
-			ts4.reset();
-			while(ts4.hasNext())
-			{
-				System.out.println(ts4.next().getTermText()+" ");
+				System.out.println("term:"+m);
 			}
 			
-			TokenFilter tfd=tff.getFilterByType(TokenFilterType.STEMMER, tokenStream);
-			TokenStream ts3=tfd.getStream();
-			ts3.reset();
-			while(ts3.hasNext())
-			{
-				System.out.println(ts3.next().getTermText()+" ");
-			}*/
-			
+			writePostingsToFile(indexDir+"//PostingsDemo.txt",TermPostingslist);
+			writeTermsToFile(indexDir+"//TermsDemo.txt",TermList);
 			
 		}catch (TokenizerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			}
 	}
+	
+	/**
+	 * Method to write Postings index to File if a limit in HashMap or ArrayList is Reached.
+	 * @throws FileHandlingException : In case any error occurs
+	 */
+	public boolean writePostingsToFile(String InputFileName,ArrayList<HashMap<String, Integer>> PostingsList)
+	{
+		boolean status=false;
+		try{
+	        File InputFile=new File(InputFileName);
+	        FileOutputStream fos=new FileOutputStream(InputFile);
+	        ObjectOutputStream oos=new ObjectOutputStream(fos);
+	        System.out.println("Trying to write Posting to file!");
+	            oos.writeObject(PostingsList);
+	        System.out.println("Postings written to file!");
+	            oos.flush();
+	            oos.close();
+	            fos.close();
+	            status=true;
+	        }catch(Exception e){
+	        	System.out.println("Error while writing Postings to file in Index Writer:"+e.getMessage());
+	        }
+		
+		return status;
+	}
+	
+	/**
+	 * Method to write Terms index to File if a limit in HashMap or ArrayList is Reached.
+	 * @throws FileHandlingException : In case any error occurs
+	 */
+	public boolean writeTermsToFile(String InputFileName,ArrayList<String> TermsList)
+	{
+		boolean status=false;
+		try{
+	        File InputFile=new File(InputFileName);
+	        FileOutputStream fos=new FileOutputStream(InputFile);
+	        ObjectOutputStream oos=new ObjectOutputStream(fos);
+	        System.out.println("Trying to write Terms to file!");
+	            oos.writeObject(TermsList);
+	        System.out.println("Terms written to file!");
+	            oos.flush();
+	            oos.close();
+	            fos.close();
+	            status=true;
+	        }catch(Exception e){
+	        	System.out.println("Error while writing Terms to file in Index Writer:"+e.getMessage());
+	        }
+		return status;
+	}
+	
 	
 	/**
 	 * Method that indicates that all open resources must be closed
