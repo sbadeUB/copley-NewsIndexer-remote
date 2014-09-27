@@ -3,8 +3,20 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
+import com.sun.xml.internal.fastinfoset.util.StringArray;
+
 import edu.buffalo.cse.irf14.analysis.Analyzer;
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
+import edu.buffalo.cse.irf14.analysis.Token;
 import edu.buffalo.cse.irf14.analysis.TokenFilter;
 import edu.buffalo.cse.irf14.analysis.TokenFilterFactory;
 import edu.buffalo.cse.irf14.analysis.TokenFilterType;
@@ -19,6 +31,10 @@ import edu.buffalo.cse.irf14.document.FieldNames;
  * Class responsible for writing indexes to disk
  */
 public class IndexWriter {
+	
+
+	public static ArrayList<String> TermList=new ArrayList<String>();
+	public static ArrayList<HashMap<String, Integer>> TermPostingslist = new ArrayList<HashMap<String,Integer>>();
 	/**
 	 * Default constructor
 	 * @param indexDir : The root directory to be sued for indexing
@@ -37,35 +53,14 @@ public class IndexWriter {
 	 */
 	public void addDocument(Document d) throws IndexerException {
 		
-		/*String[] xyz=d.getField(FieldNames.FILEID);
-		//System.out.println(xyz[0]);
-		d.getField(FieldNames.FILEID);
-		d.getField(FieldNames.CATEGORY);
-		d.getField(FieldNames.TITLE);
-		d.getField(FieldNames.AUTHOR);
-		d.getField(FieldNames.AUTHORORG);
-		d.getField(FieldNames.PLACE);
-		d.getField(FieldNames.NEWSDATE);*/
-		/*String[] fileId=d.getField(FieldNames.FILEID);
-		String[] category=d.getField(FieldNames.CATEGORY);
-		String[] title=d.getField(FieldNames.TITLE);
-		String[] author=d.getField(FieldNames.AUTHOR);
-		String[] authororg=d.getField(FieldNames.AUTHORORG);
-		String[] place=d.getField(FieldNames.PLACE);
-		String[] newsDate=d.getField(FieldNames.NEWSDATE);*/
+		
 		String[] content=d.getField(FieldNames.CONTENT);
-
-		
-		//Analyzer auth=af.getAnalyzerForField(FieldNames.AUTHOR, stream)
-		
-		
 		Tokenizer tokenizer=new Tokenizer();
 		
 		try {
 			TokenStream tokenStream=tokenizer.consume(content[0]);
 			int i=0;
 			AnalyzerFactory af=AnalyzerFactory.getInstance();
-			//AnalyzerFactory af=AnalyzerFactory.getInstance();
 			Analyzer a=af.getAnalyzerForField(FieldNames.CONTENT, tokenStream);
 			while(a.increment())
 			{
@@ -73,11 +68,77 @@ public class IndexWriter {
 			}
 			tokenStream=a.getStream();
 			tokenStream.reset();
-			while(tokenStream.hasNext())
+			
+		/*	String[] totalwords= new String[500];
+			int k=0;
+			
+			for(Token t:tokenStream.getTokenstream())
 			{
-				System.out.println(tokenStream.next().getTermText());
-				i++;
+				totalwords[k]=t.getTermText();
+				k++;
 			}
+			Set<String> uniquewords = new HashSet<String>(Arrays.asList(totalwords));
+			//if(uniquewords.equals(null))
+				uniquewords.remove(null);
+		for(String s:uniquewords)
+		{
+			int count=0;
+			for(Token t:tokenStream.getTokenstream())
+			{
+				if(s.equals(t.getTermText()))
+				{
+                       count++; 
+			     }
+			}
+				temp.put(d.getField(FieldNames.FILEID)[0], count);
+				retlist.add(temp);
+				System.out.println("term "+s+" count"+count);
+				System.out.println("list count"+retlist.size());
+		}*/
+			Map<String,Integer> tm = new TreeMap<String,Integer>();
+			for(Token t:tokenStream.getTokenstream())
+			{
+				String nextElement=t.getTermText();
+				if(tm.size()>0 && tm.containsKey(nextElement))
+				{
+                 int val = 0;
+                 if(tm.get(nextElement)!= null)
+                 {
+                  val = (Integer) tm.get(nextElement);
+                  val = val+1;
+                 }
+                tm.put(nextElement, val);
+				}
+				else
+				{
+					tm.put(nextElement, 1);
+				}
+			}
+			for(Map.Entry<String,Integer> entry : tm.entrySet()) 
+			{
+				HashMap<String, Integer> temp = new HashMap<String, Integer>();
+				if(TermList.contains(entry.getKey()))
+				{
+					int index=TermList.indexOf(entry.getKey());
+					temp=TermPostingslist.get(index);
+					temp.put(d.getField(FieldNames.FILEID)[0], entry.getValue());
+					TermPostingslist.add(index, temp);
+				}
+				else
+				{
+					TermList.add(entry.getKey());
+					temp.put(d.getField(FieldNames.FILEID)[0], entry.getValue());
+					System.out.println(entry.getKey() + " : " + entry.getValue());
+					TermPostingslist.add(temp);
+				}
+	        }
+			
+			
+			
+			
+			
+			
+			
 			//System.out.println("final tokens :"+i);
 			/*TokenFilterFactory tff=TokenFilterFactory.getInstance();
 			TokenFilter tfs=tff.getFilterByType(TokenFilterType.SYMBOL, tokenStream);
@@ -111,7 +172,8 @@ public class IndexWriter {
 				System.out.println(ts3.next().getTermText()+" ");
 			}*/
 			
-			} catch (TokenizerException e) {
+			
+		}catch (TokenizerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			}
