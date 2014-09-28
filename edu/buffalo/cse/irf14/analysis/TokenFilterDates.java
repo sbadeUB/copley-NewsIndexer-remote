@@ -576,6 +576,11 @@ public TokenFilter datesProcessing(TokenStream ts)
 								year=1900;//Default set as No Year is Found
 							}
 						}
+						else if(setMonth==true)
+						{
+							setYear=true;
+							year=1900;//Default set as No Year is Found
+						}
 						
 							
 						
@@ -768,6 +773,19 @@ public TokenFilter datesProcessing(TokenStream ts)
 									setDay=true;
 									day=01;
 								}
+								setYear=true;
+								year=1900;
+							}
+						}
+						else
+						{
+							if(setDay==false)
+							{
+								setDay=true;
+								day=01;
+							}
+							if(setYear==false)
+							{
 								setYear=true;
 								year=1900;
 							}
@@ -972,6 +990,16 @@ public String[] checkIfYearsRange(String str)
 		else
 			MasterArray[2]=str.substring(0,2)+str.substring(5);
 	}
+	else if(str.matches("^\\d{4}/\\d{4}$") || str.matches("^\\d{4}/\\d{2}$"))
+	{ 
+		MasterArray[0]="1"; //--Found--//
+		System.out.println("its a yyyy-yyyy/yy hit!!");
+		MasterArray[1]=str.substring(0,4);
+		if(str.length()>8)
+			MasterArray[2]=str.substring(5);
+		else
+			MasterArray[2]=str.substring(0,2)+str.substring(5);
+	}
 	else
 		MasterArray[0]="0";
 	return MasterArray;
@@ -1034,5 +1062,4 @@ public String AddPrefixZero(String str)
 }
 
 }
-
 

@@ -15,13 +15,13 @@ public class TokenFilterStopWords extends TokenFilter implements Analyzer
 	public TokenFilterStopWords(TokenStream tokenStream)
 	{
 		super(tokenStream);
+		TokenFilter.filterType=TokenFilterType.STOPWORD;
 	}
 public TokenFilter stopWordProcessing(TokenStream ts)
 {
 	TokenFilter tfs=null;
 	String str=null;
-	if(ts.hasNext())
-	{
+
 		str=ts.getCurrent().getTermText();
 		
 		String[] stopwords={"a","able","about","across","after","all","almost","also","am",
@@ -58,18 +58,9 @@ public TokenFilter stopWordProcessing(TokenStream ts)
 		{
 			ts.remove();
 			TokenFilter.IsTokenRemoved=true;
-			/*try {
-				tfs =new TokenFilterSymbol(ts);
-				@SuppressWarnings("unused")
-				boolean ac=tfs.increment();
-			} catch (TokenizerException e) {
-			// TODO Auto-generated catch block
-			System.out.println("Some errors occured");
-			e.printStackTrace(); }*/
-		
 		}
 	
-	}
+	
 	tfs =new TokenFilterStopWords(ts);
 	return tfs;
 }

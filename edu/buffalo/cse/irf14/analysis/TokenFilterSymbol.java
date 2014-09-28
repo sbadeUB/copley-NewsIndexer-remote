@@ -16,15 +16,14 @@ public  class TokenFilterSymbol extends TokenFilter implements Analyzer
 	public TokenFilterSymbol(TokenStream tokenStream)
 	{
 		super(tokenStream);
+		TokenFilter.filterType=TokenFilterType.SYMBOL;
 	}
 public TokenFilter symbolProcessing(TokenStream ts)
 {
 	TokenFilter tfs=null;
 	String[] strArray=null;
 	boolean setPunctuation=true;
-	if(ts.hasNext())
-	{
-		String str=ts.getCurrent().getTermText();
+	String str=ts.getCurrent().getTermText();
 		while(setPunctuation)
 		{
 			if(str.endsWith(".")||str.endsWith("!")||str.endsWith("?"))
@@ -89,7 +88,7 @@ public TokenFilter symbolProcessing(TokenStream ts)
 		}*/
 	}
 	
-	}
+	
 	
 	/*for(Token t :tss.getTokenstream())
 		System.out.println(t.getTermText());*/

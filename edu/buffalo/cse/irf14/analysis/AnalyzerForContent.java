@@ -24,21 +24,56 @@ public class AnalyzerForContent extends TokenFilter implements Analyzer{
 	{
 		TokenFilter tf=null;
 		TokenFilterFactory tff=TokenFilterFactory.getInstance();
-			tf=tff.getFilterByType(TokenFilterType.DATE, ts);
-			ts=tf.getStream();
-			if(IsTokenRemoved==false)
-			tf=tff.getFilterByType(TokenFilterType.NUMERIC, ts);
-			ts=tf.getStream();
-			if(IsTokenRemoved==false)		
-			tf=tff.getFilterByType(TokenFilterType.SYMBOL, ts);
-			ts=tf.getStream();
-			if(IsTokenRemoved==false)
-			tf=tff.getFilterByType(TokenFilterType.STOPWORD, ts);
-			ts=tf.getStream();
-			System.out.println("Token OUT:"+ts.getCurrent().getTermText());
-			return ts;
 		
+		TokenFilterAccents tfa=(TokenFilterAccents)tff.getFilterByType(TokenFilterType.ACCENT, ts);
+		tf=tfa.accentsProcessing(ts);
+		ts=tf.getStream();
+		    if(IsTokenRemoved==false)
+	      	{
+			TokenFilterDates tfd=(TokenFilterDates)tff.getFilterByType(TokenFilterType.DATE, ts);		
+			tf=tfd.datesProcessing(ts);
+			ts=tf.getStream();
+	    	}
+			if(IsTokenRemoved==false)
+			{
+			TokenFilterNumbers tfn=(TokenFilterNumbers)tff.getFilterByType(TokenFilterType.NUMERIC, ts);
+			tf=tfn.NumericProcessing(ts);
+			ts=tf.getStream();
+			}
+			
+			if(IsTokenRemoved==false)
+			{
+			TokenFilterSymbol tfs=(TokenFilterSymbol)tff.getFilterByType(TokenFilterType.SYMBOL, ts);
+			tf=tfs.symbolProcessing(ts);
+			ts=tf.getStream();
+			}
+			if(IsTokenRemoved==false)
+			{
+			TokenFilterCapitalization tfc=(TokenFilterCapitalization)tff.getFilterByType(TokenFilterType.CAPITALIZATION, ts);
+			tf=tfc.capitalizationProcessing(ts);
+			ts=tf.getStream();
+			}
+			if(IsTokenRemoved==false)
+			{
+			TokenFilterSpecialChars tfsc=(TokenFilterSpecialChars)tff.getFilterByType(TokenFilterType.SPECIALCHARS, ts);
+			tf=tfsc.specialCharsProcessing(ts);
+			ts=tf.getStream();
+			}
+			if(IsTokenRemoved==false)
+			{
+			 TokenFilterStopWords tfst=(TokenFilterStopWords)tff.getFilterByType(TokenFilterType.STOPWORD, ts);
+			tf=tfst.stopWordProcessing(ts);
+			ts=tf.getStream();
+			}
+			if(IsTokenRemoved==false)
+			{
+			TokenFilterStemmer tfs=(TokenFilterStemmer)tff.getFilterByType(TokenFilterType.STEMMER, ts);
+			tf=tfs.stemmerProcessing(ts);
+			ts=tf.getStream();
+			}
+			if(ts.getCurrent()!=null)
+			System.out.println("Token OUT:"+ts.getCurrent().getTermText());
+			TokenFilter.AnalyzerType=1;
+			return ts;	
 	}
-	
-	
 }

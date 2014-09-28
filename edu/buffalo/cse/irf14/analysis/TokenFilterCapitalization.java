@@ -13,22 +13,25 @@ public  class TokenFilterCapitalization extends TokenFilter implements Analyzer
 	public TokenFilterCapitalization(TokenStream tokenStream)
 	{
 		super(tokenStream);
+		TokenFilter.filterType=TokenFilterType.CAPITALIZATION;
 	}
 public TokenFilter capitalizationProcessing(TokenStream ts)
 {
+	//TokenFilter.AnalyzerType=3;//for testing
 	TokenFilter tfs=null;
 	String str=null;
-	if(ts.hasNext())
-	{
-		str=ts.next().getTermText();
+
+		str=ts.getCurrent().getTermText();
 		String camel="[A-Z]([a-z$&+,:;=?@#|'<>.-^*()%!])+";//check next token
-		if(Pattern.matches(camel, str))
+		String camel2="[a-z]([A-Z])";
+		if(Pattern.matches(camel, str))// add this |Pattern.matches(camel2, str)
 		{
 		  System.out.println("Camel Cased:"+str);
 		  if(ts.hasNext() && !(str.endsWith(".") || str.endsWith("!")|| str.endsWith("?")))
 		  {
-			  String str2=ts.getNextTokenValue();                
-			  if(Pattern.matches(camel, str2))	
+			  String str2=ts.getNextTokenValue();          
+			 // boolean cam=Pattern.matches(camel2, str2);//for testing
+			  if(Pattern.matches(camel, str2)|Pattern.matches(camel2, str2))	
 			  {
 				  str=str+" "+str2;
 				  ts.next();
@@ -65,7 +68,7 @@ public TokenFilter capitalizationProcessing(TokenStream ts)
 		{
 			endFlag=false;
 		}
-	}
+	
 	
 	
 	str=str.trim();

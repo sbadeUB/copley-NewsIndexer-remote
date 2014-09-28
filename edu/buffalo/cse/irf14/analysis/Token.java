@@ -68,12 +68,7 @@ public class Token {
 	 * @param tokens The token array to be merged
 	 */
 	protected void merge(ArrayList<Token> mergertokens) {
-		//TODO : YOU MUST IMPLEMENT THIS METHOD
-		
-		//=new ArrayList<Token>();
-		//Token[] tokens= 
-		
-		
+		mergertokens.add(this);
 		
 	}
 	
@@ -91,7 +86,6 @@ public class Token {
 	 */
 	@Override
 	public String toString() {
-		//TODO: YOU MUST IMPLEMENT THIS METHOD
-		return termText;
+		return this.termText;
 	}
 }

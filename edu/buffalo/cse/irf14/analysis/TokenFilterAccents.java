@@ -15,14 +15,13 @@ public  class TokenFilterAccents extends TokenFilter implements Analyzer
 	public TokenFilterAccents(TokenStream tokenStream)
 	{
 		super(tokenStream);
+		TokenFilter.filterType=TokenFilterType.ACCENT;
 	}
 public TokenFilter accentsProcessing(TokenStream ts)
 {
 	TokenFilter tfs=null;
 	String str=null;
-	if(ts.hasNext())
-	{
-		str=ts.next().getTermText();
+		str=ts.getCurrent().getTermText();
 		char[] accentbuffer= null;
 		
 		
@@ -138,9 +137,6 @@ public TokenFilter accentsProcessing(TokenStream ts)
 		{
 			ts.remove();
 		}
-	
-	
-}
 	tfs =new TokenFilterAccents(ts);
 	return tfs;
 }

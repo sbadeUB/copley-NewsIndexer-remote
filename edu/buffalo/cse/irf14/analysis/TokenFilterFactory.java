@@ -37,70 +37,61 @@ public class TokenFilterFactory {
 	 */
 	public TokenFilter getFilterByType(TokenFilterType type, TokenStream stream) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
+		TokenFilter.AnalyzerType=-1;//Single TokenFilter Instances
 		TokenFilter tf=null;
 		switch(type)
 		{
 			case SYMBOL:
 			{
 					TokenFilterSymbol tfs=new TokenFilterSymbol(stream);
-					tf=tfs.symbolProcessing(stream);
+					tf=(TokenFilterSymbol)tfs;
 					break;
+					
 					
 			}
 			case ACCENT:
 			{
 					TokenFilterAccents tfa=new TokenFilterAccents(stream);
-					while(stream.hasNext())
-					tf=tfa.accentsProcessing(stream);
+					tf=(TokenFilterAccents)tfa;
 					break;
 			}
 			case SPECIALCHARS:
 			{
 					TokenFilterSpecialChars tfsp=new TokenFilterSpecialChars(stream);
-					while(stream.hasNext())
-					tf=tfsp.specialCharsProcessing(stream);
+					tf=(TokenFilterSpecialChars)tfsp;
 					break;
 			}
 			
 			case DATE:
 			{
 				TokenFilterDates tfd=new TokenFilterDates(stream);
-				
-					tf=tfd.datesProcessing(stream);
-				
+				tf=(TokenFilterDates)tfd;
 				break;
 			}
 			
 			case NUMERIC:
 			{
 					TokenFilterNumbers tfn=new TokenFilterNumbers(stream);
-					
-					tf=tfn.NumericProcessing(stream);
+					tf=(TokenFilterNumbers)tfn;
 					break;
 			}
 			case CAPITALIZATION:
 			{
 				TokenFilterCapitalization tfc=new TokenFilterCapitalization(stream);
-				while(stream.hasNext())
-				{
-					tf=tfc.capitalizationProcessing(stream);
-				}
+					tf=(TokenFilterCapitalization)tfc;
 				break;
 			}
 			
 			case STOPWORD:
 			{
 				TokenFilterStopWords tfst=new TokenFilterStopWords(stream);
-				tf=tfst.stopWordProcessing(stream);
+				tf=(TokenFilterStopWords)tfst;
 				break;
 			}
 			case STEMMER:
 			{
 				TokenFilterStemmer tfste=new TokenFilterStemmer(stream);
-				while(stream.hasNext())
-				{
-					tf=tfste.stemmerProcessing(stream);
-				}
+				tf=(TokenFilterStemmer)tfste;
 				break;
 			}
 			

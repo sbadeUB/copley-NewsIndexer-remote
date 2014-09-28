@@ -16,6 +16,7 @@ public  class TokenFilterStemmer extends TokenFilter implements Analyzer
 	public TokenFilterStemmer(TokenStream tokenStream)
 	{
 		super(tokenStream);
+		TokenFilter.filterType=TokenFilterType.STEMMER;
 		b = new char[INC];
 	    i = 0;
 	    i_end = 0;
@@ -24,9 +25,8 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 {
 	TokenFilter tfs=null;
 	String str=null;
-	if(ts.hasNext())
-	{
-		str=ts.next().getTermText();
+
+		str=ts.getCurrent().getTermText();
 		
 		
 		 char[] w = new char[501];
@@ -59,7 +59,7 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 	
 	
 	
-}
+
 	tfs =new TokenFilterStemmer(ts);
 	return tfs;
 }

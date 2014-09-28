@@ -74,7 +74,8 @@ public class TokenStream implements Iterator<Token>{
 	@Override
 	public void remove() {
 		if(getCurrent()!=null){
-		itr.remove();
+			Token x=getCurrent();
+		this.itr.remove();
 		}
 		//NO-OP
 	}
@@ -85,7 +86,6 @@ public class TokenStream implements Iterator<Token>{
 	 * reset() must always return true.
 	 */
 	public void reset() {
-		//TODO : YOU MUST IMPLEMENT THIS
 		
 		itr=this.streamoftokens.listIterator();
 		
@@ -101,7 +101,15 @@ public class TokenStream implements Iterator<Token>{
 	 * @param stream : The stream to be appended
 	 */
 	public void append(TokenStream stream) {
-		//TODO : YOU MUST IMPLEMENT THIS
+		while(this.itr.hasNext())
+		{
+			this.itr.next();
+		}
+		while(stream.hasNext())
+		{
+			Token t=stream.next();
+			this.itr.add(t);
+		}
 	}
 	
 	/**

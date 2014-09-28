@@ -44,16 +44,21 @@ public class AnalyzerFactory {
 		{
 			case AUTHOR:
 			{
-					
+				int i=2;
+				AnalyzerForAuthor afa=new AnalyzerForAuthor(stream);
+				TokenFilter.AnalyzerType=i;
+				af=(Analyzer)afa;
 					break;
 					
 			}
 			
 			case PLACE:
 			{
-					
-					break;
-					
+				int i=4;
+				AnalyzerForPlace afc=new AnalyzerForPlace(stream);
+				TokenFilter.AnalyzerType=i;
+				af=(Analyzer)afc;
+				break;
 			}
 			
 			case CATEGORY:
@@ -72,7 +77,18 @@ public class AnalyzerFactory {
 			
 			case TITLE:
 			{
-				
+				int i=1;
+				AnalyzerForContent afa=new AnalyzerForContent(stream);
+				TokenFilter.AnalyzerType=i;
+				af=(Analyzer)afa;
+				break;
+			}
+			case NEWSDATE:
+			{
+				int i=3;
+				AnalyzerForNewsDate afd=new AnalyzerForNewsDate(stream);
+				TokenFilter.AnalyzerType=i;
+				af=(Analyzer)afd;
 				break;
 			}
 			

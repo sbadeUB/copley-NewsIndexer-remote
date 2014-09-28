@@ -1,4 +1,4 @@
-/**
+/**`
  * 
  */
 package edu.buffalo.cse.irf14.analysis.test;
@@ -19,7 +19,7 @@ public class NumberRuleTest extends TFRuleBaseTest {
 	@Test
 	public void testRule() {
 			try {
-					assertArrayEquals(
+				    assertArrayEquals(
 							new String[] { "The", "App", "Store", "offered", "more", "than", "apps", "by", "Apple", "and", "third", "parties." },
 							runTest(TokenFilterType.NUMERIC, "The App Store offered more than 775,000 apps by Apple and third parties."));
 					assertArrayEquals(
@@ -35,3 +35,4 @@ public class NumberRuleTest extends TFRuleBaseTest {
 	}
 
 }
+  
