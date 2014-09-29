@@ -18,13 +18,13 @@ public TokenFilter NumericProcessing(TokenStream ts)
 	
 	TokenFilter tfs=null;
 	String str=null;
-		//"^\\d{4}-\\d{4}$"
 		str=ts.getCurrent().getTermText();
 		
 	if(!str.matches("^[a-zA-Z.]*$") && !str.matches("^(2[0-3]|1[0-9]|0[0-9]):[0-5][0-9]:[0-5][0-9]([A-Za-z]*)$") && !str.matches("^\\d{8}$") && !str.matches("^\\d{8}-\\d{8}$")) 
 	{
 		str=str.replaceAll("[0-9]","");
 		str=str.replace(".", "");
+		str=str.replace(",", "");
 	}
 		
 		str=str.trim();

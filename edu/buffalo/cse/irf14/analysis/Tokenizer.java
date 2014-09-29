@@ -45,64 +45,46 @@ public class Tokenizer {
 	 * tokenization
 	 */
 	public TokenStream consume(String str) throws TokenizerException {
-	      ArrayList<Token> al = new ArrayList<Token>();
-		if(this.delim=="and")
+		  ArrayList<Token> al = new ArrayList<Token>();
+		  
+		if((str!=null)&&(!str.isEmpty()))
 		{
+	    
+			String[] result=null;
 			str.trim();
 			 str = str.replaceAll("\"", ""); //To Remove Double Quotes
-			 String[] result = str.split(this.delim);
+			 if(delim==" ") 
+			 {
+				 str=str.trim();
+			      str = str.replaceAll("\"", ""); //To Remove Double Quotes
+			      result= str.split("\\s+"); //To Remove Space and Split with space
+			 }
+			 else
+				 {
+				 	result = str.split(this.delim);
+				 }
 			 int len=result.length;
 
 		      Token[] token=new Token[len];
 		      for (int x=0; x<result.length; x++)
 		      {
 		    	 token[x]=new Token();
-		         token[x].setTermText(result[x]);
+		    	 if(result[x].trim()!="")
+		    	 {
+		         token[x].setTermText(result[x].trim());
 		         token[x].setTermBuffer(result[x].toCharArray());//Add Other Info If needed after words
 		         al.add(token[x]);
+		    	 }
 		      }
-			 
-		}
-		else if(this.delim==",")
-		{
-			str.trim();
-			 str = str.replaceAll("\"", ""); //To Remove Double Quotes
-			 String[] result = str.split(this.delim);
-			 int len=result.length;
-
-		      Token[] token=new Token[len];
-		      for (int x=0; x<result.length; x++)
-		      {
-		    	 token[x]=new Token();
-		         token[x].setTermText(result[x]);
-		         token[x].setTermBuffer(result[x].toCharArray());//Add Other Info If needed after words
-		         al.add(token[x]);
-		      }
-		}
+		TokenStream ts=new TokenStream();
+	      ts.setTokenstream(al);
+	      return ts;	
+	      
+	}
 		else
 		{
-	      str=str.trim();
-	      str = str.replaceAll("\"", ""); //To Remove Double Quotes
-	      String[] result = str.split("\\s+"); //To Remove Space and Split with space
-	      
-	      int len=result.length;
-
-	      Token[] token=new Token[len];
-	      for (int x=0; x<result.length; x++)
-	      {
-	    	 result[x]=result[x].replaceAll(","," ").trim();
-	    	 token[x]=new Token();
-	         token[x].setTermText(result[x]);
-	         token[x].setTermBuffer(result[x].toCharArray());//Add Other Info If needed after words
-	         token[x].merge(al);
-	        
-	      }
-		}	
-	      
-	      
-	      
-	      TokenStream ts=new TokenStream();
-	      ts.setTokenstream(al);
-	      return ts;
+			throw new TokenizerException();
+		}
+		
 	}
 }

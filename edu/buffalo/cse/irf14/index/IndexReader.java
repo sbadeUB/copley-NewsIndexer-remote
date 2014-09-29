@@ -221,7 +221,6 @@ public class IndexReader {
 			 int i=0;
 			 for(Map.Entry<String,Integer> entry : sortedMapAsc.entrySet())
 			{
-					//System.out.println(entry.getKey() + " " + entry.getValue());
 					TopStrings.add(entry.getKey());
 					i++;
 					if(i==k) break;
@@ -345,7 +344,6 @@ public class IndexReader {
 							TermPosition=i;
 						}
 						String HashString=br.readLine();
-						System.out.println(HashString);
 						String[] TrmPstngSplit=HashString.split(":");
 						TrmPstngSplit[0].trim();
 						TrmPstngSplit[1].trim();

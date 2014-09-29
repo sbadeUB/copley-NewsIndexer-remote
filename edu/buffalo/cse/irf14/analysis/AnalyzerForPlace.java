@@ -9,10 +9,22 @@ public class AnalyzerForPlace extends TokenFilter implements Analyzer {
 	{
 		TokenFilter tfforplace= null;
 	TokenFilterFactory tff=TokenFilterFactory.getInstance();
+	
+	TokenFilterNumbers tffn=(TokenFilterNumbers)tff.getFilterByType(TokenFilterType.NUMERIC, ts);
+	tfforplace=tffn.NumericProcessing(ts);
+	if(tfforplace!=null)
+	ts=tfforplace.getStream();
+	
+	
 	TokenFilterSymbol tffo=(TokenFilterSymbol)tff.getFilterByType(TokenFilterType.SYMBOL, ts);
 	tfforplace=tffo.symbolProcessing(ts);
+	if(tfforplace!=null)
 	ts=tfforplace.getStream();
-	System.out.println("TOKEN OUT:"+ts.getCurrent().getTermText());
+	
+	TokenFilterSpecialChars tffsc=(TokenFilterSpecialChars)tff.getFilterByType(TokenFilterType.SPECIALCHARS, ts);
+	tfforplace=tffsc.specialCharsProcessing(ts);
+	if(tfforplace!=null)
+	ts=tfforplace.getStream();
 	TokenFilter.AnalyzerType=4;
 	return ts;
 	}

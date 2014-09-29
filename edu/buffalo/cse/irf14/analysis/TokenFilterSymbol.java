@@ -33,7 +33,7 @@ public TokenFilter symbolProcessing(TokenStream ts)
 			else setPunctuation=false;
 		}
 		
-		str = str.replace("\'s$", "");     //This will remove apostrophes with only 's or s' or '
+		if(str.endsWith("'s")) str=str.substring(0,str.length()-2);
 		str = str.replace("s\'$", "s");
 		
 		
@@ -78,21 +78,7 @@ public TokenFilter symbolProcessing(TokenStream ts)
 	{
 		ts.remove();
 		TokenFilter.IsTokenRemoved=true;
-		/*try {
-			tfs =new TokenFilterSymbol(ts);
-			boolean ac=tfs.increment();
-		} catch (TokenizerException e) {
-			// TODO Auto-generated catch block
-			System.out.println("Some errors occured");
-			e.printStackTrace();
-		}*/
 	}
-	
-	
-	
-	/*for(Token t :tss.getTokenstream())
-		System.out.println(t.getTermText());*/
-	//ts.reset();
 	tfs =new TokenFilterSymbol(ts);
 	
 	return tfs;

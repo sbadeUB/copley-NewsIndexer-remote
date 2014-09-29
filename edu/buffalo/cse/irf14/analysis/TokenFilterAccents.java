@@ -121,11 +121,6 @@ public TokenFilter accentsProcessing(TokenStream ts)
 			i++;
 		
 	}
-		/*String accentbufferstring="";
-		for(char c:accentbuffer)
-		{
-			accentbufferstring.con
-		}*/
 		str=String.valueOf(accentbuffer);
 		str=str.trim();
 		if(!str.isEmpty())

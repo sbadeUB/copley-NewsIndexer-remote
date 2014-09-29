@@ -21,7 +21,6 @@ public TokenFilter specialCharsProcessing(TokenStream ts)
 		String regex="[0-9]{1}\\/[0-9]{2}\\/[0-9]{2}";
 		if(!str.matches(regex))
 		{
-			//String numsplchr="[A-Z]([a-z$&+,:;=?@#|'<>.-^*()%!])+";
 			if(str.matches("^[[a-zA-Z]+[-][a-zA-Z]+]+$"))
 			{
 				str=str.replaceAll("[^a-zA-Z0-9\\?\\!\\.]+","");			

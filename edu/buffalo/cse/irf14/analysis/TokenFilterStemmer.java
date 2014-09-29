@@ -22,7 +22,7 @@ public  class TokenFilterStemmer extends TokenFilter implements Analyzer
 	    i_end = 0;
 	}
 public TokenFilter stemmerProcessing(TokenStream ts)
-{
+{   //PORTER STEMMING ALGORITHM//
 	TokenFilter tfs=null;
 	String str=null;
 

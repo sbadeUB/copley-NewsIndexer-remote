@@ -6,6 +6,7 @@ package edu.buffalo.cse.irf14.analysis;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 /**
  * @author nikhillo
@@ -16,6 +17,7 @@ import java.util.ListIterator;
 public class TokenStream implements Iterator<Token>{
 	ArrayList<Token> streamoftokens= new ArrayList<Token>();
 	private ListIterator<Token> itr;
+	public static int isLastElement;
 	
 	public void setTokenstream(ArrayList<Token> listoftokens)
 	{
@@ -24,6 +26,7 @@ public class TokenStream implements Iterator<Token>{
 			streamoftokens.add(t);
 			
 		}
+		isLastElement=streamoftokens.size();
 		itr=this.streamoftokens.listIterator();
 		
 	}
@@ -57,12 +60,17 @@ public class TokenStream implements Iterator<Token>{
 	@Override
 	public Token next() {
 		
-		if(itr.hasNext())
+		if(hasNext())
 		{
+//			isLastElement=isLastElement-1;
 			Token token = itr.next();
 			return token;
 		}
-		else return null;
+		else 
+			{
+	//			isLastElement=isLastElement-1;
+				return null;
+			}
 	}
 	
 	/**
@@ -74,8 +82,8 @@ public class TokenStream implements Iterator<Token>{
 	@Override
 	public void remove() {
 		if(getCurrent()!=null){
-			Token x=getCurrent();
 		this.itr.remove();
+	//	isLastElement=isLastElement-1;
 		}
 		//NO-OP
 	}
@@ -87,6 +95,7 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void reset() {
 		
+	//	isLastElement=this.streamoftokens.size();
 		itr=this.streamoftokens.listIterator();
 		
 	}
@@ -121,9 +130,9 @@ public class TokenStream implements Iterator<Token>{
 	 * has been reached or the current Token was removed
 	 */
 	public Token getCurrent() {
+	//	if(isLastElement<0) return null;
 		int x= itr.previousIndex();
-        if(x!=-1)
-            	return this.streamoftokens.get(x);
+		if(x!=-1)  return this.streamoftokens.get(x);
         else    return null;
 	}
 	

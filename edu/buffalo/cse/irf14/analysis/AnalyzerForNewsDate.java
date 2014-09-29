@@ -12,8 +12,8 @@ public class AnalyzerForNewsDate extends TokenFilter implements Analyzer {
 	TokenFilterFactory tff=TokenFilterFactory.getInstance();
 	TokenFilterDates tffo=(TokenFilterDates)tff.getFilterByType(TokenFilterType.DATE, ts);
 	tf=tffo.datesProcessing(ts);
+	if(tf!=null)
 	ts=tf.getStream();
-	System.out.println("TOKEN OUT:"+ts.getCurrent().getTermText());
 	TokenFilter.AnalyzerType=3;
 	return ts;
 	}

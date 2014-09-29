@@ -56,9 +56,7 @@ public class Runner {
 				for (String f : files) {
 					try {
 						d = Parser.parse(dir.getAbsolutePath() + File.separator +f);
-						System.out.println("Document Prepared!");
 						writer.addDocument(d);
-						System.out.println("Document Fedded into System!");
 					} catch (ParserException e) {
 						System.out.println("Sorry,Error Occurred due to invalid file");
 						e.printStackTrace();

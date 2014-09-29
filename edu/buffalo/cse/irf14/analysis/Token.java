@@ -67,9 +67,19 @@ public class Token {
 	 * Also the token order must be maintained.
 	 * @param tokens The token array to be merged
 	 */
-	protected void merge(ArrayList<Token> mergertokens) {
-		mergertokens.add(this);
+	protected void merge(Token...tokens) {
 		
+		if(tokens!=null)
+		{
+			
+		
+		for(int i=0;i<tokens.length;i++)
+		{
+		
+			this.termText=this.termText+" "+tokens[i].termText;
+			this.termBuffer=this.termText.toCharArray();
+		}
+		}
 	}
 	
 	/**

@@ -12,14 +12,8 @@ public class AnalyzerForAuthor extends TokenFilter implements Analyzer {
 	TokenFilterFactory tff=TokenFilterFactory.getInstance();
 	TokenFilterAccents tfa=(TokenFilterAccents)tff.getFilterByType(TokenFilterType.ACCENT, ts);
 	tfforauth=tfa.accentsProcessing(ts);
+	if(tfforauth!=null)
 	ts=tfforauth.getStream();
-	/*if(IsTokenRemoved==false)
-	{
-		TokenFilterCapitalization tfc=(TokenFilterCapitalization)tff.getFilterByType(TokenFilterType.CAPITALIZATION, ts);
-		 tfforauth=tfc.capitalizationProcessing(ts);
-	ts=tfforauth.getStream();
-	}*/
-	System.out.println("TOKEN OUT:"+ts.getCurrent().getTermText());
 	TokenFilter.AnalyzerType=2;
 	return ts;
 		

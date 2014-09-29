@@ -56,8 +56,11 @@ public TokenFilter stopWordProcessing(TokenStream ts)
 		}
 		else
 		{
+			if(ts.getCurrent()!=null)
+			{
 			ts.remove();
 			TokenFilter.IsTokenRemoved=true;
+			}
 		}
 	
 	

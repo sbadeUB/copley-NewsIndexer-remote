@@ -84,28 +84,28 @@ public abstract class TokenFilter implements Analyzer {
 				case 1:
 				{
 					AnalyzerForContent AFC=new AnalyzerForContent(ts);
-					System.out.println("Token IN:"+ts.getCurrent().getTermText());
+					//System.out.println("Token IN:"+ts.getCurrent().getTermText());
 					ts=AFC.ProcessTokenonFilterTypes(ts);
 					break;
 				}
 				case 2:
 				{
 					AnalyzerForAuthor AFA=new AnalyzerForAuthor(ts);
-					System.out.println("Token IN:"+ts.getCurrent().getTermText());
+					//System.out.println("Token IN:"+ts.getCurrent().getTermText());
 					ts=AFA.ProcessTokenonFilterTypes(ts);
 					break;
 				}
 				case 3:
 				{
 					AnalyzerForNewsDate AFA=new AnalyzerForNewsDate(ts);
-					System.out.println("Token IN:"+ts.getCurrent().getTermText());
+					//System.out.println("Token IN:"+ts.getCurrent().getTermText());
 					ts=AFA.ProcessTokenonFilterTypes(ts);
 					break;
 				}
 				case 4:
 				{
 					AnalyzerForPlace AFP=new AnalyzerForPlace(ts);
-					System.out.println("Token IN:"+ts.getCurrent().getTermText());
+					//System.out.println("Token IN:"+ts.getCurrent().getTermText());
 					ts=AFP.ProcessTokenonFilterTypes(ts);
 					break;
 				}
