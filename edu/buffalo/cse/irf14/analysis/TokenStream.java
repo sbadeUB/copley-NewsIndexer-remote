@@ -16,7 +16,9 @@ import java.util.ListIterator;
 public class TokenStream implements Iterator<Token>{
 	ArrayList<Token> streamoftokens= new ArrayList<Token>();
 	private ListIterator<Token> itr;
-	public static int isLastElement;
+	public static boolean isLastTokenRemoved;
+	public static int PreviousTokenindex;
+	public static int iterPosMoved;
 	
 	public void setTokenstream(ArrayList<Token> listoftokens)
 	{
@@ -25,8 +27,9 @@ public class TokenStream implements Iterator<Token>{
 			streamoftokens.add(t);
 			
 		}
-		isLastElement=streamoftokens.size();
 		itr=this.streamoftokens.listIterator();
+		isLastTokenRemoved=false;
+		PreviousTokenindex=-1;
 		
 	}
 	public ArrayList<Token> getTokenstream()
@@ -61,13 +64,14 @@ public class TokenStream implements Iterator<Token>{
 		
 		if(hasNext())
 		{
-//			isLastElement=isLastElement-1;
 			Token token = itr.next();
+			isLastTokenRemoved=false;
+			PreviousTokenindex=PreviousTokenindex+1;
 			return token;
 		}
 		else 
 			{
-	//			isLastElement=isLastElement-1;
+				PreviousTokenindex=PreviousTokenindex+1;
 				return null;
 			}
 	}
@@ -80,11 +84,14 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	@Override
 	public void remove() {
-		try{
-		if(getCurrent()!=null){
-		this.itr.remove();
-	//	isLastElement=isLastElement-1;
-		}
+		try
+		{
+			if(getCurrent()!=null)
+			{
+				this.itr.remove();
+				isLastTokenRemoved=true;
+				PreviousTokenindex=PreviousTokenindex-1;
+			}
 		}catch(Exception e)
 		{
 			System.out.println("Exception thrown!"+e.getMessage());
@@ -99,8 +106,9 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void reset() {
 		
-	//	isLastElement=this.streamoftokens.size();
 		itr=this.streamoftokens.listIterator();
+		isLastTokenRemoved=false;
+		PreviousTokenindex=-1;
 		
 	}
 	
@@ -113,16 +121,31 @@ public class TokenStream implements Iterator<Token>{
 	 * the end of the stream.
 	 * @param stream : The stream to be appended
 	 */
-	public void append(TokenStream stream) {
-		while(this.itr.hasNext())
+	public void append(TokenStream stream)
+	{
+		if(stream!=null)
 		{
-			this.itr.next();
+			iterPosMoved=0;
+			while(this.itr.hasNext())
+			{
+				this.itr.next();
+				iterPosMoved=iterPosMoved+1;
+			}
+		
+			stream.reset();
+			while(stream.hasNext())
+			{
+				Token t=stream.next();
+				this.itr.add(t);
+				iterPosMoved=iterPosMoved+1;
+			}
+			while(iterPosMoved>0)
+			{
+				this.itr.previous();
+				iterPosMoved=iterPosMoved-1;
+			}
 		}
-		while(stream.hasNext())
-		{
-			Token t=stream.next();
-			this.itr.add(t);
-		}
+		
 	}
 	
 	/**
@@ -134,7 +157,8 @@ public class TokenStream implements Iterator<Token>{
 	 * has been reached or the current Token was removed
 	 */
 	public Token getCurrent() {
-	//	if(isLastElement<0) return null;
+		if(isLastTokenRemoved) return null;
+		else if(PreviousTokenindex>=this.streamoftokens.size()) return null;
 		int x= itr.previousIndex();
 		if(x!=-1)  return this.streamoftokens.get(x);
         else    return null;

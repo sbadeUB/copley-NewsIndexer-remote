@@ -44,13 +44,13 @@ public class IndexReader {
 		File dir=new File(indexDir);
 		this.indexDir=dir.getAbsolutePath();
 		if(type==IndexType.TERM)
-			this.indexType=dir.getAbsolutePath() + File.separator +"Term";
+			this.indexType=dir.getAbsolutePath() + File.separator +"TERM";
 		if(type==IndexType.AUTHOR)
-			this.indexType=dir.getAbsolutePath() + File.separator +"Author";
+			this.indexType=dir.getAbsolutePath() + File.separator +"AUTHOR";
 		if(type==IndexType.PLACE)
-			this.indexType=dir.getAbsolutePath() + File.separator +"PlacePostings";
+			this.indexType=dir.getAbsolutePath() + File.separator +"PLACE";
 		if(type==IndexType.CATEGORY)
-			this.indexType=dir.getAbsolutePath() + File.separator +"CategoryPostings";
+			this.indexType=dir.getAbsolutePath() + File.separator +"CATEGORY";
 	}
 	
 	/**
