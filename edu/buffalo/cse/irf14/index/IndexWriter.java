@@ -199,15 +199,59 @@ public class IndexWriter {
 				writeToDisk(4000,DocCount,"AUTHOR");
 				//writeToDisk(500,DocID,"CATEGORY");
 				writeToDisk(3000,DocCount,"PLACE");//Place
+				if(DocID%1300==0)
+				{
+					ArrayList<String> arrayOut=new ArrayList<String>();
+					
+					writeToDisk(1,DocCount,"TERM");//Term
+					writeToDisk(2,DocCount,"AUTHOR");//Author
+					//writeToDisk(500,DocID,"CATEGORY");//CATEGORY
+					writeToDisk(2,DocCount,"PLACE");//Place
+					
+					for(int i=0;i<CategoryPostingslist.size();i++)
+					{
+					TreeMap<String, Integer> t = new TreeMap<String, Integer>();
+					t=CategoryPostingslist.get(i);
+					String str=i+":";
+					for(Map.Entry<String,Integer> entry : t.entrySet())
+					{
+						str=str+entry.getKey()+" "+entry.getValue()+"-";
+					}
+					arrayOut.add(str);
+					}
+			
+					
+					int c=0;
+					for(String m:CategoryList)
+					{
+					CategoryList.set(c,CategoryList.get(c)+" "+c);
+					
+					c=c+1;
+					}
+					
+					File indexDir = new File(this.indexDir+ File.separator+ "CATEGORY");
+					
+					if (!indexDir.exists())
+					{
+						if (indexDir.mkdir())
+						{
+							
+						} else
+						{
+						}
+					}
+					writePostingsToFile(indexDir.getAbsolutePath() + File.separator +"Postings",arrayOut);
+					 writeTermsDictToFile(indexDir.getAbsolutePath() + File.separator +"Dictionary","CATEGORY");
+				}
 				
 				
-			
-			
-			
-
+				
+				
+				
 			dir=new File(this.indexDir);
-			writeDocDictToFile2(dir.getAbsolutePath() + File.separator +"DocumentDictionary");
 			
+			
+			writeDocDictToFile2(dir.getAbsolutePath() + File.separator +"DocumentDictionary");
 			
 		}catch (TokenizerException e) {
 			// TODO Auto-generated catch block
@@ -305,7 +349,7 @@ public class IndexWriter {
 		 writeTermsDictToFile(indexDir.getAbsolutePath() + File.separator +"Dictionary"+n,IndexType);
 		 if(IndexType=="TERM") 
 			 {
-			 
+				System.out.println("done");
 			 TermPostingslist=postingnew;
 			 TermList=listnew;
 			 }
@@ -322,6 +366,7 @@ public class IndexWriter {
 		 
 		}
 		return true;
+	
 	}
 	
 	
@@ -453,6 +498,11 @@ public class IndexWriter {
             else if(IndexType=="PLACE")
             {
             for(String s:PlaceList)
+            out.println(s);
+            }
+            else if(IndexType=="CATEGORY")
+            {
+            for(String s:CategoryList)
             out.println(s);
             }
         }

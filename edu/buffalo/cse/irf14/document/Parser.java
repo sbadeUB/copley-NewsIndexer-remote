@@ -37,8 +37,6 @@ public class Parser {
 					if(file.exists())
 					{
 						category=new File(file.getParent());
-						System.out.println("FILEID="+file.getName());
-						System.out.println("CATEGORY="+category.getName());
 						//--Code Goes Here---//
 						 try {
 							 inf=new FileReader(file);
@@ -59,8 +57,7 @@ public class Parser {
 							 else
 							 {
 						     title=totallines[0].substring(5);
-							 }
-						     System.out.println("TITLE="+title);	
+							 }	
 						     String authorInfo=null;//Checking for Author Info
 						     int authorExists=0;
 						     if(totallines[2].isEmpty()){
@@ -91,13 +88,11 @@ public class Parser {
 						    	 String authorRefine[]=authorTrimd.split(",");
 						    	 authorRefine[0]=authorRefine[0].replaceAll("(?i)by","").trim();
 						    	 author=authorRefine[0];
-						    	 System.out.println("AUTHOR="+author);
 						    	 if(authorRefine.length>1)
 						    	 {
 						    		 if(!authorRefine[1].isEmpty())
 							    	 {
 							    		 authorOrg=authorRefine[1].trim();
-							    		 System.out.println("AUTHORORG="+authorOrg);
 							    	 }
 						    	 }
 						    	 else authorOrg="";
@@ -129,15 +124,11 @@ public class Parser {
 									     if(commas==1) {
 									    	 place=placeDate[0];
 									    	 content=placeDate[1];
-									    	 System.out.println("PLACE="+place);
-									    	 System.out.println("CONTENT="+content);
 									    	 }
 									     else{
 									    	 place=placeDate[0];
 									    	 for(int i=1;i<placeDate.length;i++)
 									    	 content=content+placeDate[1];
-									    	 System.out.println("PLACE="+place);
-									    	 System.out.println("CONTENT="+content);
 										 }
 									     
 								     }
@@ -147,24 +138,19 @@ public class Parser {
 						    			
 								     if(commas==2) {
 								    	 place=placeDate[0]+","+placeDate[1];
-								    	 System.out.println("PLACE="+place);}
+								    	 }
 								     else{
 								    	 place=placeDate[0];
-								    	 System.out.println("PLACE="+place);
 									 }
 								     
 								     if(commas==1) intermDateCont=placeDate[1];
 								     else          intermDateCont=placeDate[2];
-								
-								     System.out.println("DATE="+intermDateCont);
-								     System.out.print("CONTENT="+dateContent[1]);
 								     content=dateContent[1];
 						    	 }
 						    		 
 						    	 for (int i = count+2; i < totallines.length; i++)
 						    	 {
 						    		 content=content+totallines[i];
-							    	 System.out.print(" "+totallines[i]);
 						    	 }
 						     }
 						    	 
@@ -189,10 +175,6 @@ public class Parser {
 						     docs.setField(FieldNames.NEWSDATE, intermDateCont.trim());
 						     if(content!=null && content!="")
 						     docs.setField(FieldNames.CONTENT, content);
-						/*System.out.println(docs.getField(FieldNames.TITLE));
-						System.out.println(docs.getField(FieldNames.TITLE)[0]);
-						*/
-						
 			            } catch (IOException e) {
 							System.out.println("Sorry!an IO error is occured");
 							e.printStackTrace();

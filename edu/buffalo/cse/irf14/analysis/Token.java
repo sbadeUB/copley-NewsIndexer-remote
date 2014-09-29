@@ -3,7 +3,6 @@
  */
 package edu.buffalo.cse.irf14.analysis;
 
-import java.util.ArrayList;
 
 /**
  * @author nikhillo

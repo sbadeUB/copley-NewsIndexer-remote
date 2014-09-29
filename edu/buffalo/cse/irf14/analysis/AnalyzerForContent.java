@@ -79,8 +79,6 @@ public class AnalyzerForContent extends TokenFilter implements Analyzer{
 			if(tf!=null)
 			ts=tf.getStream();
 			}
-			/*if(ts.getCurrent()!=null)
-			System.out.println("Token OUT:"+ts.getCurrent().getTermText());*/
 			TokenFilter.AnalyzerType=1;
 			return ts;	
 	}
