@@ -21,7 +21,7 @@ public TokenFilter stopWordProcessing(TokenStream ts)
 {
 	TokenFilter tfs=null;
 	String str=null;
-
+try{
 		str=ts.getCurrent().getTermText();
 		
 		String[] stopwords={"a","able","about","across","after","all","almost","also","am",
@@ -62,7 +62,10 @@ public TokenFilter stopWordProcessing(TokenStream ts)
 			TokenFilter.IsTokenRemoved=true;
 			}
 		}
-	
+}catch(Exception e)
+{
+	System.out.println("Exception thrown in stopwords invalid file!"+e.getMessage());
+}
 	
 	tfs =new TokenFilterStopWords(ts);
 	return tfs;

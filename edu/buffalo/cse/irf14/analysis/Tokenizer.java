@@ -44,9 +44,13 @@ public class Tokenizer {
 	 * @throws TokenizerException : In case any exception occurs during
 	 * tokenization
 	 */
-	public TokenStream consume(String str) throws TokenizerException {
+	public TokenStream consume(String str) throws TokenizerException
+	{
 		  ArrayList<Token> al = new ArrayList<Token>();
+		  TokenStream ts=new TokenStream();
 		  
+	try
+	{	
 		if((str!=null)&&(!str.isEmpty()))
 		{
 	    
@@ -76,15 +80,19 @@ public class Tokenizer {
 		         al.add(token[x]);
 		    	 }
 		      }
-		TokenStream ts=new TokenStream();
 	      ts.setTokenstream(al);
-	      return ts;	
+	     	
 	      
 	}
 		else
 		{
 			throw new TokenizerException();
 		}
+	}
+	finally
+	{
 		
+	}
+	 return ts;
 	}
 }

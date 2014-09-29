@@ -4,7 +4,6 @@
 package edu.buffalo.cse.irf14.index;
 
 import java.io.File;
-
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+
 import edu.buffalo.cse.irf14.analysis.Analyzer;
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
 import edu.buffalo.cse.irf14.analysis.Token;
@@ -68,12 +68,12 @@ public class IndexWriter {
 		String[] newsdate=d.getField(FieldNames.NEWSDATE);
 		String[] fileid=d.getField(FieldNames.FILEID);
 		String[] category=d.getField(FieldNames.CATEGORY);
+		System.out.println(fileid[0]);
 		
 		//--Doc ID conversion--//
 		DocCount++;
 		DocumentIDsList.put(fileid[0], DocCount);
 		int DocID=DocumentIDsList.get(fileid[0]);
-		File dir = null;
 		TokenStream streamForPlace=null;
 		TokenStream streamForTitle=null;
 		TokenStream streamForAuthor=null;
@@ -202,57 +202,7 @@ public class IndexWriter {
 			 if(streamForDate!=null)
 			 MakeHashmaps(streamForDate, DocID, 3);
 		
-			
-			///----After Some Limit-----//
-			
-				writeToDisk(9000,DocCount,"TERM");
-				writeToDisk(4000,DocCount,"AUTHOR");
-				//writeToDisk(500,DocID,"CATEGORY");
-				writeToDisk(3000,DocCount,"PLACE");//Place
 				
-				if(DocID%1000==0)
-				{
-				ArrayList<String> arrayOut=new ArrayList<String>();
-				for(int i=0;i<CategoryPostingslist.size();i++)
-				{
-				TreeMap<String, Integer> t = new TreeMap<String, Integer>();
-				t=CategoryPostingslist.get(i);
-				String str=i+":";
-				for(Map.Entry<String,Integer> entry : t.entrySet())
-				{
-					str=str+entry.getKey()+" "+"-";
-				}
-				arrayOut.add(str);
-				}
-				
-				int c=0;
-				for(String m:CategoryList)
-				{
-				CategoryList.set(c,CategoryList.get(c)+" "+c);
-				
-				c=c+1;
-				}
-				
-				File indexDir = new File(this.indexDir+ File.separator+ "CATEGORY");
-				
-				if (!indexDir.exists())
-				{
-					if (indexDir.mkdir())
-					{
-						
-					} else
-					{
-					}
-				}
-				writePostingsToFile(indexDir.getAbsolutePath() + File.separator +"Postings",arrayOut);
-				writeTermsDictToFile(indexDir.getAbsolutePath() + File.separator +"Dictionary","CATEGORY");
-				}
-				
-				if(DocID%9000==0)
-				{
-				dir=new File(this.indexDir);
-				writeDocDictToFile2(dir.getAbsolutePath() + File.separator +"DocumentDictionary");
-				}
 			
 		}catch (TokenizerException e) {
 			// TODO Auto-generated catch block
@@ -261,12 +211,11 @@ public class IndexWriter {
 			}
 	}
 	
-	public boolean writeToDisk(int mod,int DocID,String IndexType)
+	@SuppressWarnings("unused")
+	public boolean writeToDisk(int DocID,String IndexType)
 	{
 		ArrayList<String> arrayOut=new ArrayList<String>();
 		
-		if(DocID%mod==0)
-		{
 			//int n=DocID/mod;
 			if(IndexType=="TERM")
 			{
@@ -363,7 +312,7 @@ public class IndexWriter {
 		 PlacePostingslist.clear();
 		 PlaceList.clear();
 		 }
-		}
+		
 		
 		return true;
 	
@@ -567,7 +516,51 @@ public class IndexWriter {
 	 * and cleaned and that the entire indexing operation has been completed.
 	 * @throws IndexerException : In case any error occurs
 	 */
+	@SuppressWarnings("unused")
 	public void close() throws IndexerException {
-		//TODO
+		
+
+		writeToDisk(DocCount,"TERM");
+		writeToDisk(DocCount,"AUTHOR");
+		writeToDisk(DocCount,"PLACE");
+		
+		ArrayList<String> arrayOut=new ArrayList<String>();
+		for(int i=0;i<CategoryPostingslist.size();i++)
+		{
+		TreeMap<String, Integer> t = new TreeMap<String, Integer>();
+		t=CategoryPostingslist.get(i);
+		String str=i+":";
+		for(Map.Entry<String,Integer> entry : t.entrySet())
+		{
+			str=str+entry.getKey()+" "+"-";
+		}
+		arrayOut.add(str);
+		}
+		
+		int c=0;
+		for(String m:CategoryList)
+		{
+		CategoryList.set(c,CategoryList.get(c)+" "+c);
+		c=c+1;
+		}
+		
+		File indexDir = new File(this.indexDir+ File.separator+ "CATEGORY");
+		
+		if (!indexDir.exists())
+		{
+			if (indexDir.mkdir())
+			{
+				
+			} else
+			{
+			}
+		}
+		writePostingsToFile(indexDir.getAbsolutePath() + File.separator +"Postings",arrayOut);
+		writeTermsDictToFile(indexDir.getAbsolutePath() + File.separator +"Dictionary","CATEGORY");
+		CategoryList.clear();
+		CategoryPostingslist.clear();
+		
+		File dir=new File(this.indexDir);
+		writeDocDictToFile2(dir.getAbsolutePath() + File.separator +"DocumentDictionary");
 	}
 }

@@ -30,6 +30,7 @@ public abstract class TokenFilter implements Analyzer {
 	public boolean increment() throws TokenizerException
 	{
 		TokenStream ts=this.getStream();
+	try{
 		while(ts.hasNext())
 		{
 			ts.next();
@@ -114,7 +115,11 @@ public abstract class TokenFilter implements Analyzer {
 				
 			}
 		}
-		
+	}
+	catch(Exception e)
+	{
+		System.out.println("Exception thrown in increment!"+e.getMessage());
+	}
 		return false;
 	}
 	

@@ -6,7 +6,6 @@ package edu.buffalo.cse.irf14.analysis;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
-import java.util.NoSuchElementException;
 
 /**
  * @author nikhillo
@@ -81,9 +80,14 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	@Override
 	public void remove() {
+		try{
 		if(getCurrent()!=null){
 		this.itr.remove();
 	//	isLastElement=isLastElement-1;
+		}
+		}catch(Exception e)
+		{
+			System.out.println("Exception thrown!"+e.getMessage());
 		}
 		//NO-OP
 	}

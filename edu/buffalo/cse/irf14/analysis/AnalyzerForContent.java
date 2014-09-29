@@ -24,7 +24,8 @@ public class AnalyzerForContent extends TokenFilter implements Analyzer{
 	{
 		TokenFilter tf=null;
 		TokenFilterFactory tff=TokenFilterFactory.getInstance();
-		
+	try
+	{
 		TokenFilterAccents tfa=(TokenFilterAccents)tff.getFilterByType(TokenFilterType.ACCENT, ts);
 		tf=tfa.accentsProcessing(ts);
 		if(tf!=null)			
@@ -80,6 +81,10 @@ public class AnalyzerForContent extends TokenFilter implements Analyzer{
 			ts=tf.getStream();
 			}
 			TokenFilter.AnalyzerType=1;
+	}catch(Exception e)
+	{
+		System.out.println("Exception thrown analyzer for Content!"+e.getMessage());
+	}
 			return ts;	
 	}
 }
