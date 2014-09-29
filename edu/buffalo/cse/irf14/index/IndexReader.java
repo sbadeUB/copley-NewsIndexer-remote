@@ -123,6 +123,7 @@ public class IndexReader {
 		File dictionaryFile=new File(indexType+ File.separator +"Dictionary");
 		int TermPosition=-1;
 		HashMap<String, Integer> Posting=new HashMap<String, Integer>();
+		Map<String,Integer> finalPosting = new TreeMap<String, Integer>();
 		BufferedReader br;
 		try
 		{
@@ -162,15 +163,44 @@ public class IndexReader {
 					String[] DocFreqSplit=PstngSplit[i].split(" ");
 					Posting.put(DocFreqSplit[0], Integer.parseInt(DocFreqSplit[1]));
 				}
-				
-				
-				
 			}
 			else
 			{
 				br.close();
 				return null;
 			}
+			
+			File documentdictionaryFile=new File(indexDir+ File.separator +"DocumentDictionary");
+			try{
+	            
+	            FileInputStream fis=new FileInputStream(documentdictionaryFile);
+	            ObjectInputStream ois=new ObjectInputStream(fis);
+
+	            @SuppressWarnings("unchecked")
+				TreeMap<String,Integer> mapInFile=(TreeMap<String,Integer>)ois.readObject();
+	           // totalValueTerms=mapInFile.size();
+	            for(Map.Entry<String,Integer> entry : mapInFile.entrySet())
+				{
+					for(Map.Entry<String,Integer> entry2 : Posting.entrySet())
+					{
+						String w=entry.getKey();
+						int x=entry.getValue();
+						int y=Integer.parseInt(entry2.getKey());
+						int z=entry2.getValue();
+						if(x==y)
+						{
+							finalPosting.put(w, z);
+							break;
+						}
+					}
+				}
+	            
+	            
+	            ois.close();
+	            fis.close();
+	            //print All data in MAP
+	           
+	        }catch(Exception e){}	
 			
 			br.close();
 		} catch (FileNotFoundException e) {
@@ -181,7 +211,7 @@ public class IndexReader {
 			e.printStackTrace();
 		}
 		
-		return Posting;
+		return finalPosting;
 	}
 	
 	/**
@@ -193,72 +223,76 @@ public class IndexReader {
 	 */
 	public List<String> getTopK(int k) 
 	{
-		File postingsFile=new File(indexType+ File.separator +"Postings");
-		Map<String, Integer> CountPosting=new HashMap<String, Integer>();
-		List<String> TopStrings=new ArrayList<String>();
-		BufferedReader br;
-		try
+		if(k>=1)
 		{
-			br = new BufferedReader(new FileReader(postingsFile));
-			
-			for(String line; (line = br.readLine()) != null;) 
+			File postingsFile=new File(indexType+ File.separator +"Postings");
+			Map<String, Integer> CountPosting=new HashMap<String, Integer>();
+			List<String> TopStrings=new ArrayList<String>();
+			BufferedReader br;
+			try
 			{
-				String[] TrmPstngSplit=line.split(":");
-				TrmPstngSplit[0].trim();
-				TrmPstngSplit[1].trim();
-				TrmPstngSplit[1]=TrmPstngSplit[1].substring(0,TrmPstngSplit[1].length()-1);
-				String[] PstngSplit=TrmPstngSplit[1].split("-");
-				int count=0;
-				for(int i=0;i<PstngSplit.length;i++)
+				br = new BufferedReader(new FileReader(postingsFile));
+				
+				for(String line; (line = br.readLine()) != null;) 
 				{
-					PstngSplit[i].trim();
-					String[] DocFreqSplit=PstngSplit[i].split(" ");
-					count=count+Integer.parseInt(DocFreqSplit[1]);
-				}
-				CountPosting.put(TrmPstngSplit[0],count);
-			}
-			 Map<String, Integer> sortedMapAsc = sortByComparator(CountPosting);
-			 int i=0;
-			 for(Map.Entry<String,Integer> entry : sortedMapAsc.entrySet())
-			{
-					TopStrings.add(entry.getKey());
-					i++;
-					if(i==k) break;
-			}
-			 
-			 File dictionaryFile=new File(indexType+ File.separator +"Dictionary");
-			 br.close();
-			 br = new BufferedReader(new FileReader(dictionaryFile));
-			 int l=0;
-			 for(String line; (line = br.readLine()) != null;) 
-			{
-				 	if(l==k) break;
-					String[] KeyIndexSplit=line.split(" ");
-					if(KeyIndexSplit.length==2)
+					String[] TrmPstngSplit=line.split(":");
+					TrmPstngSplit[0].trim();
+					TrmPstngSplit[1].trim();
+					TrmPstngSplit[1]=TrmPstngSplit[1].substring(0,TrmPstngSplit[1].length()-1);
+					String[] PstngSplit=TrmPstngSplit[1].split("-");
+					int count=0;
+					for(int i=0;i<PstngSplit.length;i++)
 					{
-						for(int i1=0;i1<TopStrings.size();i1++)
+						PstngSplit[i].trim();
+						String[] DocFreqSplit=PstngSplit[i].split(" ");
+						count=count+Integer.parseInt(DocFreqSplit[1]);
+					}
+					CountPosting.put(TrmPstngSplit[0],count);
+				}
+				 Map<String, Integer> sortedMapAsc = sortByComparator(CountPosting);
+				 int i=0;
+				 for(Map.Entry<String,Integer> entry : sortedMapAsc.entrySet())
+				{
+						TopStrings.add(entry.getKey());
+						i++;
+						if(i==k) break;
+				}
+				 
+				 File dictionaryFile=new File(indexType+ File.separator +"Dictionary");
+				 br.close();
+				 br = new BufferedReader(new FileReader(dictionaryFile));
+				 int l=0;
+				 for(String line; (line = br.readLine()) != null;) 
+				{
+					 	if(l==k) break;
+						String[] KeyIndexSplit=line.split(" ");
+						if(KeyIndexSplit.length==2)
 						{
-							if(KeyIndexSplit[1].trim().equals(TopStrings.get(i1)))
+							for(int i1=0;i1<TopStrings.size();i1++)
 							{
-								TopStrings.remove(i1);
-								TopStrings.add(i1, KeyIndexSplit[0]);
-								l++;
-								break;
+								if(KeyIndexSplit[1].trim().equals(TopStrings.get(i1)))
+								{
+									TopStrings.remove(i1);
+									TopStrings.add(i1, KeyIndexSplit[0]);
+									l++;
+									break;
+								}
+								
 							}
-							
 						}
 					}
-				}
-			br.close();
-		} catch (FileNotFoundException e) {
-			System.out.println("Sorry,File Not Found!"+e.getMessage());
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.out.println("Sorry,an IO Error Occures!"+e.getMessage());
-			e.printStackTrace();
-		}
+				br.close();
+			} catch (FileNotFoundException e) {
+				System.out.println("Sorry,File Not Found!"+e.getMessage());
+				e.printStackTrace();
+			} catch (IOException e) {
+				System.out.println("Sorry,an IO Error Occures!"+e.getMessage());
+				e.printStackTrace();
+			}
 		
-		return TopStrings;
+			return TopStrings;
+		}
+		else return null;
 		
 	}
 	
@@ -305,6 +339,7 @@ public class IndexReader {
 		File dictionaryFile=new File(indexType+ File.separator +"Dictionary");
 		Integer[] termPositions=new Integer[terms.length];
 		ArrayList<HashMap<String, Integer>> TermPostingslist=new ArrayList<HashMap<String, Integer>>();
+		TreeMap<String, Integer> finalposting=new TreeMap<String, Integer>();
 		HashMap<String, Integer> basemap=null;
 		BufferedReader br;
 		try
@@ -335,13 +370,15 @@ public class IndexReader {
 					File postingsFile=new File(indexType+ File.separator +"Postings");
 					br.close();
 					br = new BufferedReader(new FileReader(postingsFile));
-					int TermPosition=0;
+					
 					for(Integer j:wordList)
 					{
-						for(int i=TermPosition;i<j;i++) 
+						br = new BufferedReader(new FileReader(postingsFile));
+						int i=0;
+						while(i<j)
 						{
 							br.readLine();
-							TermPosition=i;
+							i=i+1;
 						}
 						String HashString=br.readLine();
 						String[] TrmPstngSplit=HashString.split(":");
@@ -350,26 +387,25 @@ public class IndexReader {
 						TrmPstngSplit[1]=TrmPstngSplit[1].substring(0,TrmPstngSplit[1].length()-1);
 						String[] PstngSplit=TrmPstngSplit[1].split("-");
 						HashMap<String, Integer> Posting=new HashMap<String, Integer>();
-						for(int i=0;i<PstngSplit.length;i++)
+						for(int i1=0;i1<PstngSplit.length;i1++)
 						{
-							PstngSplit[i].trim();
-							String[] DocFreqSplit=PstngSplit[i].split(" ");
+							PstngSplit[i1].trim();
+							String[] DocFreqSplit=PstngSplit[i1].split(" ");
 							Posting.put(DocFreqSplit[0], Integer.parseInt(DocFreqSplit[1]));
 						}
 						TermPostingslist.add(Posting);
-						TermPosition=TermPosition+2;
+						br.close();
 					}
 					
-					//Set<String> union = new HashSet<String>(h1.keySet());  
-					//union.addAll(h2.keySet()); 
+					
 					 basemap = TermPostingslist.get(0);
 					int len = TermPostingslist.size();
 					String key;
 					int value;
-					for(int i=1;i<len;i++)
+					for(int i1=1;i1<len;i1++)
 					{
-						basemap.keySet().retainAll(TermPostingslist.get(i).keySet());
-						for (Entry<String, Integer> entry : TermPostingslist.get(i).entrySet())
+						basemap.keySet().retainAll(TermPostingslist.get(i1).keySet());
+						for (Entry<String, Integer> entry : TermPostingslist.get(i1).entrySet())
 						{
 							key = entry.getKey();
 							value = entry.getValue();
@@ -378,6 +414,45 @@ public class IndexReader {
 								basemap.put(key, basemap.get(key) + value);
 							}
 						}
+					}
+					
+					if(!basemap.isEmpty())
+					{
+						File documentdictionaryFile=new File(indexDir+ File.separator +"DocumentDictionary");
+						try{
+				            
+				            FileInputStream fis=new FileInputStream(documentdictionaryFile);
+				            ObjectInputStream ois=new ObjectInputStream(fis);
+
+				            @SuppressWarnings("unchecked")
+							TreeMap<String,Integer> mapInFile=(TreeMap<String,Integer>)ois.readObject();
+				           // totalValueTerms=mapInFile.size();
+				            for(Map.Entry<String,Integer> entry : mapInFile.entrySet())
+							{
+								for(Map.Entry<String,Integer> entry2 : basemap.entrySet())
+								{
+									String w=entry.getKey();
+									int x=entry.getValue();
+									int y=Integer.parseInt(entry2.getKey());
+									int z=entry2.getValue();
+									if(x==y)
+									{
+										finalposting.put(w, z);
+										break;
+									}
+								}
+							}
+				            ois.close();
+				            fis.close();
+				            //print All data in MAP
+				           
+				        }catch(Exception e){}	
+						
+					
+					}
+					else
+					{
+						return null;
 					}
 						
 				}
@@ -396,6 +471,6 @@ public class IndexReader {
 			e.printStackTrace();
 		}
 		
-		return basemap;
+		return finalposting;
 	}
 }

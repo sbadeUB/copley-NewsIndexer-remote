@@ -85,20 +85,30 @@ public class IndexWriter {
 			cat=category[0];
 			//DocumentIDsList.put(fileid[0], DocCount);
 			int catset=0;
-			for(int i=0;i<CategoryList.size();i++)
+			if(CategoryList.size()!=0)
 			{
-				TreeMap<String, Integer> temp = new TreeMap<String, Integer>();
-			
-				if(cat==CategoryList.get(i))
+				for(int i=0;i<CategoryList.size();i++)
 				{
-					temp=CategoryPostingslist.get(i);
-					temp.put(String.valueOf(DocID), 1);
-					catset=1;
-					break;
+					TreeMap<String, Integer> temp = new TreeMap<String, Integer>();
+					String k=CategoryList.get(i).toString().trim();
+					if(cat.equals(k))
+					{
+						temp=CategoryPostingslist.get(i);
+						temp.put(String.valueOf(DocID), 1);
+						catset=1;
+						break;
+					}
+					
 				}
-				
+				if(catset==0)
+				{
+					CategoryList.add(cat);
+					TreeMap<String, Integer> temp = new TreeMap<String, Integer>();
+					temp.put(String.valueOf(DocID), 1);
+					CategoryPostingslist.add(temp);
+				}
 			}
-			if(catset==0)
+			else
 			{
 				CategoryList.add(cat);
 				TreeMap<String, Integer> temp = new TreeMap<String, Integer>();
@@ -195,63 +205,54 @@ public class IndexWriter {
 			
 			///----After Some Limit-----//
 			
-				writeToDisk(1500,DocCount,"TERM");
+				writeToDisk(9000,DocCount,"TERM");
 				writeToDisk(4000,DocCount,"AUTHOR");
 				//writeToDisk(500,DocID,"CATEGORY");
 				writeToDisk(3000,DocCount,"PLACE");//Place
-				if(DocID%1300==0)
+				
+				if(DocID%1000==0)
 				{
-					ArrayList<String> arrayOut=new ArrayList<String>();
-					
-					writeToDisk(1,DocCount,"TERM");//Term
-					writeToDisk(2,DocCount,"AUTHOR");//Author
-					//writeToDisk(500,DocID,"CATEGORY");//CATEGORY
-					writeToDisk(2,DocCount,"PLACE");//Place
-					
-					for(int i=0;i<CategoryPostingslist.size();i++)
-					{
-					TreeMap<String, Integer> t = new TreeMap<String, Integer>();
-					t=CategoryPostingslist.get(i);
-					String str=i+":";
-					for(Map.Entry<String,Integer> entry : t.entrySet())
-					{
-						str=str+entry.getKey()+" "+entry.getValue()+"-";
-					}
-					arrayOut.add(str);
-					}
-			
-					
-					int c=0;
-					for(String m:CategoryList)
-					{
-					CategoryList.set(c,CategoryList.get(c)+" "+c);
-					
-					c=c+1;
-					}
-					
-					File indexDir = new File(this.indexDir+ File.separator+ "CATEGORY");
-					
-					if (!indexDir.exists())
-					{
-						if (indexDir.mkdir())
-						{
-							
-						} else
-						{
-						}
-					}
-					writePostingsToFile(indexDir.getAbsolutePath() + File.separator +"Postings",arrayOut);
-					 writeTermsDictToFile(indexDir.getAbsolutePath() + File.separator +"Dictionary","CATEGORY");
+				ArrayList<String> arrayOut=new ArrayList<String>();
+				for(int i=0;i<CategoryPostingslist.size();i++)
+				{
+				TreeMap<String, Integer> t = new TreeMap<String, Integer>();
+				t=CategoryPostingslist.get(i);
+				String str=i+":";
+				for(Map.Entry<String,Integer> entry : t.entrySet())
+				{
+					str=str+entry.getKey()+" "+"-";
+				}
+				arrayOut.add(str);
 				}
 				
+				int c=0;
+				for(String m:CategoryList)
+				{
+				CategoryList.set(c,CategoryList.get(c)+" "+c);
 				
+				c=c+1;
+				}
 				
+				File indexDir = new File(this.indexDir+ File.separator+ "CATEGORY");
 				
+				if (!indexDir.exists())
+				{
+					if (indexDir.mkdir())
+					{
+						
+					} else
+					{
+					}
+				}
+				writePostingsToFile(indexDir.getAbsolutePath() + File.separator +"Postings",arrayOut);
+				writeTermsDictToFile(indexDir.getAbsolutePath() + File.separator +"Dictionary","CATEGORY");
+				}
 				
-			dir=new File(this.indexDir);
-			
-			
-			writeDocDictToFile2(dir.getAbsolutePath() + File.separator +"DocumentDictionary");
+				if(DocID%9000==0)
+				{
+				dir=new File(this.indexDir);
+				writeDocDictToFile2(dir.getAbsolutePath() + File.separator +"DocumentDictionary");
+				}
 			
 		}catch (TokenizerException e) {
 			// TODO Auto-generated catch block
@@ -263,11 +264,10 @@ public class IndexWriter {
 	public boolean writeToDisk(int mod,int DocID,String IndexType)
 	{
 		ArrayList<String> arrayOut=new ArrayList<String>();
-		ArrayList<HashMap<String, Integer>> postingnew=new ArrayList<HashMap<String,Integer>>();
-		ArrayList<String> listnew=new ArrayList<String>();
+		
 		if(DocID%mod==0)
 		{
-			int n=DocID/mod;
+			//int n=DocID/mod;
 			if(IndexType=="TERM")
 			{
 				for(int i=0;i<TermPostingslist.size();i++)
@@ -345,26 +345,26 @@ public class IndexWriter {
 				
 			}
 		}
-		writePostingsToFile(indexDir.getAbsolutePath() + File.separator +"Postings"+n,arrayOut);
-		 writeTermsDictToFile(indexDir.getAbsolutePath() + File.separator +"Dictionary"+n,IndexType);
+		writePostingsToFile(indexDir.getAbsolutePath() + File.separator +"Postings",arrayOut);
+		 writeTermsDictToFile(indexDir.getAbsolutePath() + File.separator +"Dictionary",IndexType);
 		 if(IndexType=="TERM") 
-			 {
-				System.out.println("done");
-			 TermPostingslist=postingnew;
-			 TermList=listnew;
-			 }
+		 {
+			System.out.println("done");
+			TermList.clear();
+			TermPostingslist.clear();
+		 }
 		 else if(IndexType=="AUTHOR") 
 		 {
-		 AuthorPostingslist=postingnew;
-		 AuthorList=listnew;
+		 AuthorPostingslist.clear();
+		 AuthorList.clear();
 		 }
 		 else if(IndexType=="PLACE") 
 		 {
-		 PlacePostingslist=postingnew;
-		 PlaceList=listnew;
+		 PlacePostingslist.clear();
+		 PlaceList.clear();
 		 }
-		 
 		}
+		
 		return true;
 	
 	}
