@@ -8,7 +8,7 @@ public class AnalyzerForNewsDate extends TokenFilter implements Analyzer {
 	}
 	public TokenStream ProcessTokenonFilterTypes(TokenStream ts)
 	{
-		TokenFilter tf= null;
+	TokenFilter tf= null;
 	TokenFilterFactory tff=TokenFilterFactory.getInstance();
 	TokenFilterDates tffo=(TokenFilterDates)tff.getFilterByType(TokenFilterType.DATE, ts);
 	tf=tffo.datesProcessing(ts);

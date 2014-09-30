@@ -49,7 +49,7 @@ public abstract class TokenFilter implements Analyzer {
 					TokenFilterAccents tfs=(TokenFilterAccents)this;
 					tfs.accentsProcessing(ts);
 					}
-       					if(filterType.equals(TokenFilterType.CAPITALIZATION))
+       				if(filterType.equals(TokenFilterType.CAPITALIZATION))
 					{
 					TokenFilterCapitalization tfs=(TokenFilterCapitalization)this;
 					tfs.capitalizationProcessing(ts);

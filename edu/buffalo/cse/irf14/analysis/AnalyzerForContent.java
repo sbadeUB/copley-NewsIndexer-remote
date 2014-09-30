@@ -30,14 +30,14 @@ public class AnalyzerForContent extends TokenFilter implements Analyzer{
 		tf=tfa.accentsProcessing(ts);
 		if(tf!=null)			
 		ts=tf.getStream();
-		    if(IsTokenRemoved==false)
+		    if(IsTokenRemoved==false && ts.getCurrent()!=null)
 	      	{
 			TokenFilterDates tfd=(TokenFilterDates)tff.getFilterByType(TokenFilterType.DATE, ts);		
 			tf=tfd.datesProcessing(ts);
 			if(tf!=null)
 			ts=tf.getStream();
 	    	}
-			if(IsTokenRemoved==false)
+			if(IsTokenRemoved==false && ts.getCurrent()!=null)
 			{
 			TokenFilterNumbers tfn=(TokenFilterNumbers)tff.getFilterByType(TokenFilterType.NUMERIC, ts);
 			tf=tfn.NumericProcessing(ts);
@@ -45,35 +45,35 @@ public class AnalyzerForContent extends TokenFilter implements Analyzer{
 			ts=tf.getStream();
 			}
 			
-			if(IsTokenRemoved==false)
+			if(IsTokenRemoved==false && ts.getCurrent()!=null)
 			{
 			TokenFilterSymbol tfs=(TokenFilterSymbol)tff.getFilterByType(TokenFilterType.SYMBOL, ts);
 			tf=tfs.symbolProcessing(ts);
 			if(tf!=null)
 			ts=tf.getStream();
 			}
-			if(IsTokenRemoved==false)
+			if(IsTokenRemoved==false && ts.getCurrent()!=null)
 			{
 			TokenFilterCapitalization tfc=(TokenFilterCapitalization)tff.getFilterByType(TokenFilterType.CAPITALIZATION, ts);
 			tf=tfc.capitalizationProcessing(ts);
 			if(tf!=null)
 			ts=tf.getStream();
 			}
-			if(IsTokenRemoved==false)
+			if(IsTokenRemoved==false && ts.getCurrent()!=null)
 			{
 			TokenFilterSpecialChars tfsc=(TokenFilterSpecialChars)tff.getFilterByType(TokenFilterType.SPECIALCHARS, ts);
 			tf=tfsc.specialCharsProcessing(ts);
 			if(tf!=null)
 			ts=tf.getStream();
 			}
-			if(IsTokenRemoved==false)
+			if(IsTokenRemoved==false && ts.getCurrent()!=null)
 			{
 			 TokenFilterStopWords tfst=(TokenFilterStopWords)tff.getFilterByType(TokenFilterType.STOPWORD, ts);
 			tf=tfst.stopWordProcessing(ts);
 			if(tf!=null)
 			ts=tf.getStream();
 			}
-			if(IsTokenRemoved==false)
+			if(IsTokenRemoved==false && ts.getCurrent()!=null)
 			{
 			TokenFilterStemmer tfs=(TokenFilterStemmer)tff.getFilterByType(TokenFilterType.STEMMER, ts);
 			tf=tfs.stemmerProcessing(ts);
@@ -84,6 +84,7 @@ public class AnalyzerForContent extends TokenFilter implements Analyzer{
 	}catch(Exception e)
 	{
 		System.out.println("Exception thrown analyzer for Content!"+e.getMessage());
+		e.printStackTrace();
 	}
 			return ts;	
 	}

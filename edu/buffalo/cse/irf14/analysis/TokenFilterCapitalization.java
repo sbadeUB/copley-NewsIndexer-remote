@@ -19,11 +19,9 @@ public TokenFilter capitalizationProcessing(TokenStream ts)
 {
 	TokenFilter tfs=null;
 	String str=null;
-
-		str=ts.getCurrent().getTermText();
-
-		
-
+		try
+		{
+			str=ts.getCurrent().getTermText();
 			String capital="[A-Z]+";
 			if(Pattern.matches(capital, str))
 			{
@@ -37,12 +35,25 @@ public TokenFilter capitalizationProcessing(TokenStream ts)
 				{
 				  if(ts.hasNext() && !(str.endsWith(".") || str.endsWith("!")|| str.endsWith("?")))
 				  {
-					  String str2=ts.getNextTokenValue();          
+					  String str2=ts.getNextTokenValue();
+					  int length=str2.length();
 					  if(Pattern.matches(camel, str2)|Pattern.matches(camel2, str2))	
 					  {
+						  str2=str2.trim();
+						  if(str2.endsWith(".")||str2.endsWith("!")||str2.endsWith("?"))
+							{
+								str2=str2.substring(0, length-1); //This will remove . or ! or ? that are at the end only
+							}
+						  if(str.endsWith("'s")) str=str.substring(0,str.length()-2);
+						  str2 = str2.replace("s\'$", "s");
+						  str2 = str2.replace("\'$", "");
+						  
 						  str=str+" "+str2;
+						  ts.getCurrent().setTermText(str);
+						  ts.getCurrent().setTermBuffer(str.toCharArray());
 						  ts.next();
 						  ts.remove();
+						  IsTokenRemoved=true;
 					  }
 				  }
 				  if(endFlag==true) str=str.toLowerCase();
@@ -68,7 +79,7 @@ public TokenFilter capitalizationProcessing(TokenStream ts)
 	
 	str=str.trim();
 	
-	if(!str.isEmpty())
+	if(!str.isEmpty() && ts.getCurrent()!=null)
 	{
 		ts.getCurrent().setTermText(str);
 		ts.getCurrent().setTermBuffer(str.toCharArray());
@@ -77,6 +88,12 @@ public TokenFilter capitalizationProcessing(TokenStream ts)
 	{
 		ts.remove();
 	}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Thrown in TokenFilter Capitals!"+e.getMessage());
+			e.printStackTrace();
+		}
 	
 	tfs =new TokenFilterCapitalization(ts);
 	return tfs;
