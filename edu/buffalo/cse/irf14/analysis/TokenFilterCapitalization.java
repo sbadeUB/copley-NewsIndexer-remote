@@ -44,7 +44,7 @@ public TokenFilter capitalizationProcessing(TokenStream ts)
 							{
 								str2=str2.substring(0, length-1); //This will remove . or ! or ? that are at the end only
 							}
-						  if(str.endsWith("'s")) str=str.substring(0,str.length()-2);
+						  if(str2.endsWith("'s")) str2=str2.substring(0,str2.length()-2);
 						  str2 = str2.replace("s\'$", "s");
 						  str2 = str2.replace("\'$", "");
 						  
@@ -53,7 +53,9 @@ public TokenFilter capitalizationProcessing(TokenStream ts)
 						  ts.getCurrent().setTermBuffer(str.toCharArray());
 						  ts.next();
 						  ts.remove();
-						  IsTokenRemoved=true;
+						  ts.previous();
+						 // IsTokenRemoved=true;
+						
 					  }
 				  }
 				  if(endFlag==true) str=str.toLowerCase();

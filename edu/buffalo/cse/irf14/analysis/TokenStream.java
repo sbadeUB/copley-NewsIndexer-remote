@@ -173,5 +173,23 @@ public class TokenStream implements Iterator<Token>{
 			 return this.streamoftokens.get(x).getTermText();
 		 else return null;
 	 }
+	 
+	 /**To move to previous term which can be used in Token Filters like
+		 *  Dates and Capitalization
+		 */
+		 public Token previous()
+		 {
+			 if(itr.hasPrevious()) 
+			{
+				 Token tkn=this.itr.previous();
+				isLastTokenRemoved=false;
+				PreviousTokenindex=PreviousTokenindex-1;
+				this.previous();
+				this.next();
+				return tkn;
+			}
+			 else return null;
+			
+		 }
 	
 }

@@ -31,8 +31,8 @@ public TokenFilter specialCharsProcessing(TokenStream ts)
 				str="";
 				for(int i=0;i<sdc.length;i++)
 				{
-					sdc[i]=sdc[i].replaceAll("[^a-zA-Z0-9\\?\\!\\.\\-]+","");//Look it will remove spaces
-					str=str+" "+sdc[i];
+					sdc[i]=sdc[i].replaceAll("[^a-zA-Z0-9\\?\\!\\.\\-\\s]+","");//Look it will remove spaces
+					str=str+sdc[i]+" ";
 				}
 				str=str.trim();
 				
