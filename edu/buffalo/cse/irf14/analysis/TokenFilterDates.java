@@ -19,9 +19,13 @@ import java.util.Locale;
  */
 public  class TokenFilterDates extends TokenFilter implements Analyzer
 {
+	boolean isDotRemoved=false;
+	boolean isCommaRemoved=false;
+	char SpeclCharRemoved;
 	public TokenFilterDates(TokenStream tokenStream)
 	{
 		super(tokenStream);
+		filterType=TokenFilterType.DATE;
 	}
 @SuppressWarnings("unused")
 public TokenFilter datesProcessing(TokenStream ts)
@@ -47,11 +51,11 @@ public TokenFilter datesProcessing(TokenStream ts)
 	int year2=-1;
 	boolean setAssigned=false;
 	
+	
 		String strOrig=ts.getCurrent().getTermText(); //---String str declaration already here so removed one that came after--//
 		String[] testarray={}; //Dummy testarray
 		String str=""; 
-		str=RemoveDotSuffix(strOrig);
-		str = str.replaceAll("[,]+$", "");
+		str=RemoveSuffixes(strOrig);
 		for(int i=1;i<=1;i++)
 		{
 			if(str.matches("(?i)(?:sunday|monday|tuesday|wednesday|thursday|friday|saturday)"))
@@ -252,7 +256,7 @@ public TokenFilter datesProcessing(TokenStream ts)
 						if(!str.matches("(AM|PM)$") && ts.hasNext())
 						{
 							String str2=ts.getNextTokenValue();   //--For the sake of checking if next token has AM/PM in it--//
-							str2=RemoveDotSuffix(str2);
+							str2=RemoveSuffixes(str2);
 							if(str2.equalsIgnoreCase("AM")||str2.equalsIgnoreCase("PM"))
 							{
 								setHours=true;
@@ -314,7 +318,7 @@ public TokenFilter datesProcessing(TokenStream ts)
 									else str=str+strarr1[xi-1];
 								}
 								//---------------------------------//
-								strOrig=str;
+								strOrig=str+SpeclCharRemoved;
 								strOrig=strOrig.trim();
 								if(!strOrig.isEmpty())
 								{
@@ -328,6 +332,7 @@ public TokenFilter datesProcessing(TokenStream ts)
 								}
 								ts.next();//To forward really to next token
 								ts.remove();//Removed the next token
+								ts.previous();
 								setAssigned=true;
 								break;
 							}
@@ -431,7 +436,7 @@ public TokenFilter datesProcessing(TokenStream ts)
 								else str=str+strarr1[xi-1];
 							}
 							//---------------------------------//
-							strOrig=str;
+							strOrig=str+SpeclCharRemoved;
 							setAssigned=true;
 							break;
 						}
@@ -529,7 +534,7 @@ public TokenFilter datesProcessing(TokenStream ts)
 						year=Integer.parseInt(MasterArray[1]);
 						year2=Integer.parseInt(MasterArray[2]);
 						str=year+"01"+"01-"+year2+"01"+"01";
-						strOrig=str;
+						strOrig=str+SpeclCharRemoved;
 						setAssigned=true;
 						break;
 						
@@ -705,6 +710,9 @@ public TokenFilter datesProcessing(TokenStream ts)
 								}
 								else
 								{
+									SpeclCharRemoved='\0';
+									isDotRemoved=false;
+									isCommaRemoved=false;
 									setDay=true;
 									day=01;
 									setMonth=true;
@@ -758,7 +766,6 @@ public TokenFilter datesProcessing(TokenStream ts)
 								ts.remove();
 								setDay=true;
 								day=Integer.parseInt(MasterArray[1]);
-								
 								ts.next();
 								
 								//break;
@@ -778,6 +785,9 @@ public TokenFilter datesProcessing(TokenStream ts)
 						}
 						if(ts.hasNext() && setDay==true)
 						{
+							SpeclCharRemoved='\0';
+							isCommaRemoved=false;
+							isDotRemoved=false;
 							String str2=ts.getNextTokenValue();
 							str2=TokenCleaning(str2);
 							MasterArray=decomposeMasterArray(MasterArray);
@@ -827,6 +837,11 @@ public TokenFilter datesProcessing(TokenStream ts)
 		{
 			month=month+1;
 			strOrig=formDate(year,month,day);
+			if(isDotRemoved||isCommaRemoved)
+				strOrig=strOrig+String.valueOf(SpeclCharRemoved);
+			SpeclCharRemoved='\0';
+			isDotRemoved=false;
+			isCommaRemoved=false;
 			setAssigned=true;
 		}
 		
@@ -839,6 +854,9 @@ public TokenFilter datesProcessing(TokenStream ts)
 			{
 				ts.getCurrent().setTermText(strOrig);
 				ts.getCurrent().setTermBuffer(strOrig.toCharArray());
+				SpeclCharRemoved='\0';
+				isDotRemoved=false;
+				isCommaRemoved=false;
 			}
 			else
 			{
@@ -847,14 +865,15 @@ public TokenFilter datesProcessing(TokenStream ts)
 		}
 		else
 		{
+			
 			ts.getCurrent().setTermText(strOrig);
 			ts.getCurrent().setTermBuffer(strOrig.toCharArray());
-		
-	
-	
-	//ts.reset();
+			SpeclCharRemoved='\0';
+			isDotRemoved=false;
+			isCommaRemoved=false;
+		}
+		//ts.reset();
 	tfs =new TokenFilterDates(ts);
-	}
 	return tfs;
 }
 
@@ -873,7 +892,7 @@ public String[] checkIfDateOrYear(String str,TokenStream ts)
 	{
 		MasterArray[0]="1"; //--Found and Day--//
 		String str2=ts.getNextTokenValue();
-		str2=RemoveDotSuffix(str2);
+		str2=RemoveSuffixes(str2);
 		if(str2.equalsIgnoreCase("BC")||str2.equalsIgnoreCase("AD"))
 		{
 			MasterArray[0]="2"; //--Found and BC/AD Year--//
@@ -918,13 +937,14 @@ public String[] checkIfYear(String str,TokenStream ts)
 	{
 		//Checking next token
 		String str2=ts.getNextTokenValue();
-		str2=RemoveDotSuffix(str2);
+		str2=RemoveSuffixes(str2);
 		if(str2.equalsIgnoreCase("BC")||str2.equalsIgnoreCase("AD")){
 			MasterArray[0]="1";
 			if(str2.equalsIgnoreCase("BC")) str="-"+str; 
 			MasterArray[1]=str;
 			ts.next();
 			ts.remove();
+			ts.previous();
 			MasterArray[2]="1";
 		}
 	}
@@ -1045,7 +1065,7 @@ public String formDate(int year,int month,int day)
 
 public String TokenCleaning(String str)
 {
-	str=RemoveDotSuffix(str);
+	str=RemoveSuffixes(str);
 	if(str.matches(".*\\d.*"))
 	{
 		str = str.replaceAll("[st|nd|rd|th|fth|,]+$", ""); //To remove st,nd,rd,th
@@ -1053,11 +1073,19 @@ public String TokenCleaning(String str)
 	}
 	return str;
 }
-public String RemoveDotSuffix(String str)
+public String RemoveSuffixes(String str)
 {
 	if(str.endsWith(".")) 
 	{
 		str=str.substring(0,str.length()-1);
+		isDotRemoved=true;
+		SpeclCharRemoved='.';
+	}
+	if(str.endsWith(",")) 
+	{
+		str=str.substring(0,str.length()-1);
+		isCommaRemoved=true;
+		SpeclCharRemoved=',';
 	}
 	return str;
 }

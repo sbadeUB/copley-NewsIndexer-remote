@@ -21,42 +21,61 @@ public TokenFilter capitalizationProcessing(TokenStream ts)
 	String str=null;
 		try
 		{
-			str=ts.getCurrent().getTermText();
-			String capital="[A-Z]+";
+			str=ts.getCurrent().getTermText().trim();
+			int j=0;
+			/*String capital="[A-Z]+";
 			if(Pattern.matches(capital, str))
 			{
-                            //do nothing
+                  j=str.length()-1;
+			}*/
+			
+			char[] charArray=str.toCharArray();
+			//String specialChars = "/*!@#$%^&*()\"{}_[]|\\?/<>,.";
+			for(int i=0;i<str.length();i++)
+			{
+				if(Character.isLowerCase(charArray[i]))
+				{
+					break;
+				}
+				else j=j+1;
 			}
-			else
+			
+			if(j!=str.length())
 			{
 				String camel="[A-Z]([a-z$&+,:;=?@#|'<>.-^*()%!])+";//check next token
 				String camel2="[a-z]([A-Z])";
 				if(Pattern.matches(camel, str))// add this |Pattern.matches(camel2, str)
 				{
-				  if(ts.hasNext() && !(str.endsWith(".") || str.endsWith("!")|| str.endsWith("?")))
-				  {
-					  String str2=ts.getNextTokenValue();
-					  int length=str2.length();
-					  if(Pattern.matches(camel, str2)|Pattern.matches(camel2, str2))	
+					
+					  if(ts.hasNext() && !(str.endsWith(".") || str.endsWith("!")|| str.endsWith("?")))
 					  {
-						  str2=str2.trim();
-						  if(str2.endsWith(".")||str2.endsWith("!")||str2.endsWith("?"))
-							{
-								str2=str2.substring(0, length-1); //This will remove . or ! or ? that are at the end only
-							}
-						  if(str2.endsWith("'s")) str2=str2.substring(0,str2.length()-2);
-						  str2 = str2.replace("s\'$", "s");
-						  str2 = str2.replace("\'$", "");
-						  
-						  str=str+" "+str2;
-						  ts.getCurrent().setTermText(str);
-						  ts.getCurrent().setTermBuffer(str.toCharArray());
-						  ts.next();
-						  ts.remove();
-						  ts.previous();
-						 // IsTokenRemoved=true;
-						
-					  }
+						  String str2=ts.getNextTokenValue();
+						  boolean setPunctuation=true;
+						  if(Pattern.matches(camel, str2)|Pattern.matches(camel2, str2))	
+						  {
+							  str2=str2.trim();
+							  	while(setPunctuation)
+								{
+									if(str2.endsWith(".")||str2.endsWith("!")||str2.endsWith("?"))
+									{
+										str2=str2.substring(0,str2.length()-1); //This will remove . or ! or ? that are at the end only
+									}
+									else setPunctuation=false;
+								}
+							  if(str2.endsWith("'s")) str2=str2.substring(0,str2.length()-2);
+							  str2 = str2.replace("s\'$", "s");
+							  str2 = str2.replace("\'$", "");
+							  
+							  str=str+" "+str2;
+							  ts.getCurrent().setTermText(str);
+							  ts.getCurrent().setTermBuffer(str.toCharArray());
+							  ts.next();
+							  ts.remove();
+							  ts.previous();
+							 // IsTokenRemoved=true;
+							
+						  }
+						 
 				  }
 				  if(endFlag==true) str=str.toLowerCase();
 				    

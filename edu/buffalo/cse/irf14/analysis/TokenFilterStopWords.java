@@ -37,14 +37,15 @@ try{
 		str="";
 		for(String str2:divideWords)
 		{
-			if(Arrays.asList(stopwords).contains(str2))
+			String str3=str2.toLowerCase();
+			if(Arrays.asList(stopwords).contains(str3))
 			{
 				//DO nothing
 			}
 			else
 			{
 				//Add to string 'str'
-				str=str+str2;
+				str=str+str2+" ";
 			}
 		}
 			str=str.trim();

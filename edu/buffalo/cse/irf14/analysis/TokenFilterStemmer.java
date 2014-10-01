@@ -33,18 +33,23 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 		
 			w=str.toCharArray();
 			int j=str.length();
-			
-		String regex="[a-z]+";
-          	if(Pattern.matches(regex,str))
-          			{
+			String[] divideWords=str.split(" ");
+			str="";
+			for(String str2:divideWords)
+			{
+			String regex="[a-z]+";
+          	if(Pattern.matches(regex,str2))
+          	{
 			   for(int c=0;c<j;c++)
 			    {
 				this.add(w[c]);
 			    }
 			this.stem();
-			str= this.toString();
-		}
-	str=str.trim();
+			str2= this.toString();
+          	}
+			str=str+str2+" ";
+			}
+			str=str.trim();
 	
 		if(!str.isEmpty())
 		{
