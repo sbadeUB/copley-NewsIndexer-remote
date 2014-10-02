@@ -113,7 +113,6 @@ public TokenFilter capitalizationProcessing(TokenStream ts)
 		catch(Exception e)
 		{
 			System.out.println("Thrown in TokenFilter Capitals!"+e.getMessage());
-			e.printStackTrace();
 		}
 	
 	tfs =new TokenFilterCapitalization(ts);

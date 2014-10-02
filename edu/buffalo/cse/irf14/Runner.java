@@ -47,6 +47,8 @@ public class Runner {
 		File dir;
 		Document d = null;
 		IndexWriter writer = new IndexWriter(indexDir);
+		long start = System.currentTimeMillis();
+		
 		try {
 			for (String cat : catDirectories) {
 				dir = new File(ipDir+ File.separator+ cat);
@@ -67,6 +69,9 @@ public class Runner {
 			}
 			
 			writer.close();
+			// do operation to be timed here
+			long time = System.currentTimeMillis() - start;
+			System.out.println(time/1000 +"(in secs)");
 		
 		} catch (IndexerException e) {
 			// TODO Auto-generated catch block
