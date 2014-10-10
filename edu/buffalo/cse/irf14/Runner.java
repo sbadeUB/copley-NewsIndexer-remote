@@ -4,13 +4,19 @@
 package edu.buffalo.cse.irf14;
 
 import java.io.File;
+import java.io.PrintStream;
+import java.util.ArrayList;
 
+import edu.buffalo.cse.irf14.SearchRunner.ScoringModel;
 import edu.buffalo.cse.irf14.document.Document;
 import edu.buffalo.cse.irf14.document.Parser;
 import edu.buffalo.cse.irf14.document.ParserException;
+import edu.buffalo.cse.irf14.index.IndexReader;
+import edu.buffalo.cse.irf14.index.IndexType;
 import edu.buffalo.cse.irf14.index.IndexWriter;
 import edu.buffalo.cse.irf14.index.IndexerException;
 import edu.buffalo.cse.irf14.query.QueryParser;
+import edu.buffalo.cse.irf14.*;
 
 /**
  * @author nikhillo
@@ -80,8 +86,14 @@ public class Runner {
 			e.printStackTrace();
 		}*/
 		
-		QueryParser.parse("(blue AND black) AND Author:bruises", "OR");
-		
+		//QueryParser.parse("(blue AND black) AND Author:bruises", "OR");
+		/*String[] terms={"COMPUTER","SALE"};
+		IndexReader rdr=new IndexReader(indexDir, IndexType.TERM);*/
+		PrintStream s=null;
+		ScoringModel model=null;
+		SearchRunner run=new SearchRunner(indexDir,ipDir, 'Q',s);
+		run.query("{[Term:split AND [Term:stock OR Term:Computer]]}", model);
+		String rm="gjhckzjdv";
 	}
 	
 

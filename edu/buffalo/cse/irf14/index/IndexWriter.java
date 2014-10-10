@@ -40,6 +40,7 @@ public class IndexWriter {
 	public static ArrayList<HashMap<String, Integer>> AuthorPostingslist = new ArrayList<HashMap<String,Integer>>();
 	public static ArrayList<String> TermList=new ArrayList<String>();
 	public static ArrayList<HashMap<String, Integer>> TermPostingslist = new ArrayList<HashMap<String,Integer>>();
+	public static ArrayList<Integer> DocumentLengthList=new ArrayList<Integer>();
 	
 	/**
 	 * Default constructor
@@ -69,7 +70,7 @@ public class IndexWriter {
 		String[] fileid=d.getField(FieldNames.FILEID);
 		String[] category=d.getField(FieldNames.CATEGORY);
 		System.out.println(fileid[0]);
-		
+		int docLen=0;
 		//--Doc ID conversion--//
 		DocCount++;
 		DocumentIDsList.put(fileid[0], DocCount);
@@ -140,6 +141,12 @@ public class IndexWriter {
 				}
 				streamForPlace=analyzerForPlace.getStream();
 				streamForPlace.reset();
+				while(streamForPlace.hasNext())
+				{
+					streamForPlace.next();
+					docLen=docLen+1;
+				}
+				streamForPlace.reset();
 			}
 			
 			if(title!=null && (!title[0].trim().isEmpty()))
@@ -151,6 +158,12 @@ public class IndexWriter {
 					
 				}
 				streamForTitle=analyzerForTitle.getStream();
+				streamForTitle.reset();
+				while(streamForTitle.hasNext())
+				{
+					streamForTitle.next();
+					docLen=docLen+1;
+				}
 				streamForTitle.reset();
 			}
 			
@@ -165,6 +178,12 @@ public class IndexWriter {
 				}
 				streamForAuthor=analyzerForAuthor.getStream();
 				streamForAuthor.reset();
+				while(streamForAuthor.hasNext())
+				{
+					streamForAuthor.next();
+					docLen=docLen+1;
+				}
+				streamForAuthor.reset();
 			}
 			
 			if(content!=null)
@@ -177,6 +196,12 @@ public class IndexWriter {
 				}
 				streamForContent=a.getStream();
 				streamForContent.reset();
+				while(streamForContent.hasNext())
+				{
+					streamForContent.next();
+					docLen=docLen+1;
+				}
+				streamForContent.reset();
 			}
 			
 			if(newsdate!=null)
@@ -188,6 +213,12 @@ public class IndexWriter {
 				
 				}
 				streamForDate=a.getStream();
+				streamForDate.reset();
+				while(streamForDate.hasNext())
+				{
+					streamForDate.next();
+					docLen=docLen+1;
+				}
 				streamForDate.reset();
 			}
 		//----------------HashMap Writing Starts here----------------------------//
@@ -202,10 +233,10 @@ public class IndexWriter {
 			 if(streamForDate!=null)
 			 MakeHashmaps(streamForDate, DocID, 3);
 		
-				
+			 if(docLen!=0)
+				DocumentLengthList.add(docLen);
 			
 		}catch (TokenizerException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			System.out.println("tokenizer exception thrown"+e.getMessage());
 			}
@@ -472,10 +503,15 @@ public class IndexWriter {
 	{
 		boolean status=false;
 		PrintWriter out=null;
+		int i=0;
 		try {
             out = new PrintWriter( new FileWriter( InputFileName ) );
             for(Map.Entry<String,Integer> entry : DocumentIDsList.entrySet())
-            out.println(entry.getKey()+" "+entry.getValue());
+            {
+            	Integer n=DocumentLengthList.get(i);
+            	out.println(entry.getKey()+" "+entry.getValue()+" "+n.intValue());
+            	i=i+1;
+            }
         }
         catch ( IOException error ) {
 
@@ -562,5 +598,6 @@ public class IndexWriter {
 		
 		File dir=new File(this.indexDir);
 		writeDocDictToFile2(dir.getAbsolutePath() + File.separator +"DocumentDictionary");
+		writeDocDictToFile(dir.getAbsolutePath() + File.separator +"DocumentDictionary2");
 	}
 }
