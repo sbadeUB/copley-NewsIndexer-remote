@@ -92,7 +92,7 @@ public class Runner {
 		PrintStream s=null;
 		ScoringModel model=null;
 		SearchRunner run=new SearchRunner(indexDir,ipDir, 'Q',s);
-		run.query("{[Term:split AND [Term:stock OR Term:Computer]]}", model);
+		run.query("{[Term:stock AND [Term:time OR Term:split]]}", model);
 		String rm="gjhckzjdv";
 	}
 	

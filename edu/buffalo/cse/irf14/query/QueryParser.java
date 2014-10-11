@@ -5,6 +5,7 @@
 package edu.buffalo.cse.irf14.query;
 
 import java.util.Arrays;
+import java.util.Stack;
 
 /**
  * @author nikhillo
@@ -21,49 +22,77 @@ public class QueryParser
 	static int NestedNumber=-1;
 	static StringBuilder multiWord=new StringBuilder();
 	static String[] Categories={"Author","Category","Place"};
+	static Stack<Character> stack = new Stack<Character>();
 	
 	/**
 	 * MEthod to parse the given user query into a Query object
 	 * @param userQuery : The query to parse
 	 * @param defaultOperator : The default operator to use, one amongst (AND|OR)
+	 * @return 
 	 * @return Query object if successfully parsed, null otherwise
 	 */
-	public static void parse(String userQuery, String defaultOperator)
+	public static Query parse(String userQuery, String defaultOperator)
 	{
+		Query query=new Query();
 		String initUserQuery=userQuery;
-		String[] splitSpace=initUserQuery.split(" ");
-		if(splitSpace.length==1)
-		{
-			finalQuery=processOnSingleWord(splitSpace[0]);
-		}
-		else
-		{
-			multiWord.append('{');
-			for(int i=0;i<splitSpace.length;i++)
-			{
-				String str=splitSpace[i];
-				str.trim();
-				String[] splitColon=str.split(":");
-				if(Arrays.asList(Categories).contains(splitColon[0].trim()))
-				{
-					str=splitColon[1].trim();
-					i=processOnMultiwordParenthesis(splitSpace,splitColon[0].trim(),str,i);
-				}
-				
-				else if(!isCategoryFound)
-				{
-					i=processOnMultiwordParenthesis2(splitSpace,i,defaultOperator);
-				}
-				isCategoryFound=false;
-			}
-			//multiWord.trimToSize();
-			multiWord.append("}");
-			finalQuery=multiWord.toString();
-		}
+		Stack<Character> stack = new Stack<Character>();
+		boolean isBalanced=true;
+		/** 
+		 * Checking for balancing of Parenthesis
+		 */
+        for (int i = 0; i < userQuery.length(); i++) 
+        {
+            if(userQuery.charAt(i) == '(')   stack.push('(');
+            else if(userQuery.charAt(i) == ')')
+            {
+                if (stack.isEmpty()) isBalanced=false;
+                else stack.pop();
+            }
+        }
+        
+        if(!stack.isEmpty()) isBalanced=false;
+        
+        if(isBalanced)
+        {
+        	String[] splitSpace=initUserQuery.split(" ");
+    		if(splitSpace.length==1)
+    		{
+    			finalQuery=processOnSingleWord(splitSpace[0]);
+    		}
+    		else
+    		{
+    	        
+    			multiWord.append('{');
+    			for(int i=0;i<splitSpace.length;i++)
+    			{
+    				String str=splitSpace[i];
+    				str.trim();
+    				String[] splitColon=str.split(":");
+    				if(Arrays.asList(Categories).contains(splitColon[0].trim()))
+    				{
+    					str=splitColon[1].trim();
+    					i=processOnMultiwordParenthesis(splitSpace,splitColon[0].trim(),str,i);
+    				}
+    				
+    				else if(!isCategoryFound)
+    				{
+    					i=processOnMultiwordParenthesis2(splitSpace,i,defaultOperator);
+    				}
+    				isCategoryFound=false;
+    			}
+    			//multiWord.trimToSize();
+    			if(Character.isWhitespace(multiWord.charAt(multiWord.length() - 1)))
+    				multiWord.deleteCharAt(multiWord.length() - 1);
+    			multiWord.append("}");
+    			finalQuery=multiWord.toString();
+    		}
+    		
+    		System.out.println("Final String:"+finalQuery);
+	    	return query;
+        }
 		
-		System.out.println("Final String:"+finalQuery);
+        else return null;
 		
-		//return null;
 	}
 	
 	/**
@@ -83,6 +112,7 @@ public class QueryParser
 	{
 		if(str.contains("("))
 		{
+			stack.push('(');
 			if(!isCategoryAngledNOTFound)
 			multiWord.append("["+category+":"+str.substring(1)+" ");
 			else multiWord.append("[<"+category+":"+str.substring(1)+" ");
@@ -92,8 +122,8 @@ public class QueryParser
 				if(splitSpace[i].startsWith("("))
 				{
 					str=splitSpace[i].trim();
-					NestedNumber=NestedNumber+1;
 					i=processOnMultiwordParenthesis(splitSpace,category,str,i);
+					if(stack.isEmpty()) break;
 				}
 				else if(splitSpace[i].equals("AND") || splitSpace[i].equals("OR"))
 				{
@@ -130,16 +160,49 @@ public class QueryParser
 				}
 				i=i+1;
 			}
-			if(splitSpace[i].equals(")"))
+			if(!stack.isEmpty())
 			{
-				multiWord.append("] ");
-			}
-			else if(splitSpace[i].contains(")") && isCategoryAngledNOTFound)
-			{
-					multiWord.append("<"+category+":"+splitSpace[i].substring(0, splitSpace[i].length()-1)+">] ");
+				if(splitSpace[i].equals(")") )
+				{
+					stack.pop();
+					if(Character.isWhitespace(multiWord.charAt(multiWord.length() - 1)))
+					multiWord.deleteCharAt(multiWord.length() - 1);
+					multiWord.append("] ");
+				}
+				else if(splitSpace[i].contains(")"))
+				{
+					char[] array=splitSpace[i].toCharArray();
+					int countParenthesis=0;
+					for(int i1=0;i1<array.length;i1++)
+					{
+						if(array[i1]==')')
+						{
+							countParenthesis=countParenthesis+1;
+						}
+					}
+					if(isCategoryAngledNOTFound)
+						multiWord.append("<"+category+":"+splitSpace[i].substring(0, splitSpace[i].length()-countParenthesis)+">");
+					else
+						multiWord.append(category+":"+splitSpace[i].substring(0, splitSpace[i].length()-countParenthesis));
+					
+					if(countParenthesis==1)
+					{
+						multiWord.append("] ");
+						stack.pop();
+					}
+					else
+					{
+						for(int i1=1;i1<=countParenthesis-1;i1++)
+						{
+							multiWord.append("]");
+							stack.pop();
+						}
+						multiWord.append("] ");
+						stack.pop();
+					}
 					isCategoryAngledNOTFound=false;
+				}
 			}
-			else if(splitSpace[i].contains(")") && !isCategoryAngledNOTFound) multiWord.append(category+":"+splitSpace[i].substring(0, splitSpace[i].length()-1)+"] ");
 		}					
 		else if(!str.contains("("))
 		{
@@ -156,16 +219,18 @@ public class QueryParser
 	{
 	if(splitSpace[i].startsWith("("))
 	{
+		stack.push('(');
 		if(!isTermAngledNOTFound)
 			multiWord.append("["+"Term"+":"+splitSpace[i].substring(1)+" ");
 		else
 			multiWord.append("["+"<Term"+":"+splitSpace[i].substring(1)+" ");
 		i=i+1;
-		while(!splitSpace[i].endsWith(")"))
+		while(!splitSpace[i].contains(")"))
 		{
 			if(splitSpace[i].startsWith("("))
 			{
 				i=processOnMultiwordParenthesis2(splitSpace,i,defaultOperator);
+				if(stack.isEmpty()) break;
 			}
 			else if(splitSpace[i].equals("AND") || splitSpace[i].equals("OR"))
 			{
@@ -205,16 +270,49 @@ public class QueryParser
 			}
 			i=i+1;
 		}
-		if(splitSpace[i].equals(")"))
+		if(!stack.isEmpty())
 		{
-			multiWord.append("] ");
+			if(splitSpace[i].equals(")") )
+			{
+				stack.pop();
+				if(Character.isWhitespace(multiWord.charAt(multiWord.length() - 1)))
+				multiWord.deleteCharAt(multiWord.length() - 1);
+				multiWord.append("] ");
+			}
+			else if(splitSpace[i].contains(")"))
+			{
+				char[] array=splitSpace[i].toCharArray();
+				int countParenthesis=0;
+				for(int i1=0;i1<array.length;i1++)
+				{
+					if(array[i1]==')')
+					{
+						countParenthesis=countParenthesis+1;
+					}
+				}
+				if(isTermAngledNOTFound)
+					multiWord.append("<TERM:"+splitSpace[i].substring(0, splitSpace[i].length()-countParenthesis)+">");
+				else
+					multiWord.append("TERM:"+splitSpace[i].substring(0, splitSpace[i].length()-countParenthesis));
+				
+				if(countParenthesis==1)
+				{
+					multiWord.append("] ");
+					stack.pop();
+				}
+				else
+				{
+					for(int i1=1;i1<=countParenthesis-1;i1++)
+					{
+						multiWord.append("]");
+						stack.pop();
+					}
+					multiWord.append("] ");
+					stack.pop();
+				}
+				isTermAngledNOTFound=false;
+			}
 		}
-		else if(splitSpace[i].endsWith(")") && isTermAngledNOTFound)
-		{
-			multiWord.append("<TERM:"+splitSpace[i].substring(0, splitSpace[i].length()-1)+">] ");
-			isTermAngledNOTFound=false;
-		}
-		else if(splitSpace[i].endsWith(")") && !isTermAngledNOTFound) multiWord.append("TERM:"+splitSpace[i].substring(0, splitSpace[i].length()-1)+"] ");
 	}					
 	
 	else if(!splitSpace[i].startsWith("("))

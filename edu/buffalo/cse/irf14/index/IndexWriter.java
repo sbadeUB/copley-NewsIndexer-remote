@@ -349,6 +349,14 @@ public class IndexWriter {
 	
 	}
 	
+	public int containsWithIgnoreCase(ArrayList<String> Arraylist,String str){
+	    for(int i=0;i<Arraylist.size();i++)
+	    {
+	        if(str.equalsIgnoreCase(Arraylist.get(i)))
+	            return i;
+	    }
+	    return -1;
+	}
 	
 	public boolean MakeHashmaps(TokenStream ts,int DocID,int FieldType)
 	{
@@ -377,10 +385,10 @@ public class IndexWriter {
 			for(Map.Entry<String,Integer> entry : tm.entrySet()) 
 			{
 				HashMap<String, Integer> temp = new HashMap<String, Integer>();
-				if(AuthorList.contains(entry.getKey()))
+				int Pos=containsWithIgnoreCase(AuthorList, entry.getKey());
+				if(Pos != -1)
 				{
-					int index=AuthorList.indexOf(entry.getKey());
-					temp=AuthorPostingslist.get(index);
+					temp=AuthorPostingslist.get(Pos);
 					temp.put(String.valueOf(DocID), entry.getValue());
 				}
 				else
@@ -396,10 +404,10 @@ public class IndexWriter {
 			for(Map.Entry<String,Integer> entry : tm.entrySet()) 
 			{
 				HashMap<String, Integer> temp = new HashMap<String, Integer>();
-				if(PlaceList.contains(entry.getKey()))
+				int Pos=containsWithIgnoreCase(PlaceList, entry.getKey());
+				if(Pos != -1)
 				{
-					int index=PlaceList.indexOf(entry.getKey());
-					temp=PlacePostingslist.get(index);
+					temp=PlacePostingslist.get(Pos);
 					temp.put(String.valueOf(DocID), entry.getValue());
 				}
 				else
@@ -415,10 +423,10 @@ public class IndexWriter {
 			for(Map.Entry<String,Integer> entry : tm.entrySet()) 
 			{
 				HashMap<String, Integer> temp = new HashMap<String, Integer>();
-				if(TermList.contains(entry.getKey()))
+				int Pos=containsWithIgnoreCase(TermList, entry.getKey());
+				if(Pos != -1)
 				{
-					int index=TermList.indexOf(entry.getKey());
-					temp=TermPostingslist.get(index);
+					temp=TermPostingslist.get(Pos);
 					temp.put(String.valueOf(DocID), entry.getValue());
 				}
 				else
