@@ -92,7 +92,7 @@ public class Runner {
 		PrintStream s=null;
 		ScoringModel model=null;
 		SearchRunner run=new SearchRunner(indexDir,ipDir, 'Q',s);
-		run.query("{[Term:stock AND [Term:time OR Term:split]]}", model);
+		run.query("{Term:oil AND [Term:invest OR [[Term:lower OR Term:stake] AND Term:Analysts]]}", model);
 		String rm="gjhckzjdv";
 	}
 	

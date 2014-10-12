@@ -55,12 +55,6 @@ public class SearchRunner {
 	public void query(String userQuery, ScoringModel model) {
 		
 		//TODO: IMPLEMENT THIS METHOD
-	  
-		//String usergiven=userQuery.substring(1, userQuery.length()-1);
-	//	String strippedstring="";
-	//ArrayList<String> returneddocids=new ArrayList<String>();
-		//String indexDir = args[1];
-		//IndexReader rdr=new IndexReader(indexDir, IndexType.TERM);
 	String[] splitintospaces=userQuery.split(" ");
 	boolean started=false;
 	IndexType indextype;
@@ -105,12 +99,11 @@ public class SearchRunner {
 			while((s.contains("]"))) ///check loop interchange
 			{
 				s=s.substring(0, s.length()-1);
+				if(starts==1)
 				bracketstrt=false;
 				getresult=true;
 				ends++;
 				starts--;
-			/*	if(operatorset)
-					getdocsforoneoperator(operator, chainarraylist.get(0),chainarraylist.get(1));*/
 			}
 			}
 			if(s.contains("AND")||s.contains("OR")||s.contains("NOT"))
@@ -198,51 +191,31 @@ public class SearchRunner {
 				break;
 				
 	}
-	
-		
-		/*if(usergiven.contains("["))
-		{
-		String tobedonefirst=usergiven.substring(usergiven.indexOf("[")+1, usergiven.indexOf("]"));
-		returneddocids=getdocsforsingleoperator(tobedonefirst);
-		strippedstring=usergiven.substring(usergiven.indexOf("]")+1);
-		strippedstring=strippedstring.trim();
-		String[] connectors={"AND","OR","NOT"};
-		if(strippedstring.startsWith(connectors[0]))
-		{
-			strippedstring=strippedstring.substring(3);
-			strippedstring=strippedstring.trim();
-			returneddocids=getdocsforsingleoperator(strippedstring);
-		}
-			
-		}*/
-		//return chainarraylist;
 	}
 	public HashMap<String, TreeMap<String, Integer>> getdocsforoneoperator(String operator,HashMap<String, TreeMap<String, Integer>> first,HashMap<String, TreeMap<String, Integer>> second)
 	{
 		HashMap<String, TreeMap<String, Integer>> combine=new HashMap<String, TreeMap<String, Integer>>();
 		if(operator.equalsIgnoreCase("OR"))
 		{
-		
-/*		combine.addAll(first);
-		combine.addAll(second);*/
 			TreeMap<String, Integer> getterm=new TreeMap<String, Integer>();
-			String term1="";
-			String term2="";
+	          Set<String> term1=null;
+			Set<String> term2=null;
 			for(String s:first.keySet())
 			{
 				getterm=first.get(s);
-				term1=getterm.firstKey();/// check case of multiple terms
+				term1=getterm.keySet();/// check case of multiple terms
 				break;
 				
 			}
+			String[] term1array=term1.toArray(new String[term1.size()]);
 			for(String s:second.keySet())
 			{
 				getterm=second.get(s);
-				term2=getterm.firstKey();
+				term2=getterm.keySet();
 				break;
 				
 			}
-			
+			String[] term2array=term2.toArray(new String[term2.size()]);
 			for(String s :first.keySet())
 			{
 				if(second.containsKey(s))
@@ -267,7 +240,8 @@ public class SearchRunner {
 				{
 					TreeMap<String, Integer> copy=new TreeMap<String, Integer>();
 					copy=first.get(s);
-					copy.put(term2, 0);
+					for(String s1:term2array)
+					copy.put(s1, 0);
 					combine.put(s, copy);
 				}
 		}
@@ -277,22 +251,14 @@ public class SearchRunner {
 				{
 					TreeMap<String, Integer> copy=new TreeMap<String, Integer>();
 					copy=second.get(s);
-					copy.put(term1, 0);
+					for(String s1:term1array)
+					copy.put(s1, 0);
 					combine.put(s, copy);
 				}
 				
 			}
 				
 		}
-		/*if(operator.equalsIgnoreCase("AND"))
-		{
-		for(String s:first)
-			if(second.contains(s))
-			{
-				combine.add(s);
-			}
-	
-		}*/
 		if(operator.equalsIgnoreCase("ANDNOT"))
 		{
 			for(String s:second.keySet())
@@ -304,29 +270,14 @@ public class SearchRunner {
 			}
 		combine=first;
 		}
-		//return new ArrayList<String>(combine);
 		if(operator.equalsIgnoreCase("AND"))
 		{
-			/*for(String s:first)
-				if(second.contains(s))
-				{
-					combine.add(s);
-				}
-		
-			}*/
 		for(String s:first.keySet())
 			if(second.keySet().contains(s))
 			{
 				TreeMap<String, Integer> copy=new TreeMap<String, Integer>();
 				TreeMap<String, Integer> copy2=new TreeMap<String, Integer>();
 				TreeMap<String, Integer> combo=new TreeMap<String, Integer>();
-				/*copy=first.get(s);
-				 * 
-				copy.put(second.get(s).firstKey(),second.get(s).get(second.get(s).firstKey())); // check for adding  multiple items
-			
-				
-				
-				combine.put(s, copy);*/
 				copy=first.get(s);
 				copy2=second.get(s);
 				for(String s1:copy.keySet())
@@ -346,53 +297,6 @@ public class SearchRunner {
 	return combine;
 	
 	}
-/*	public ArrayList<String> getdocsforsingleoperator(String stringinbrackets)
-	{
-		String[] partition;
-		String[] terms=new String[2];
-		int i;
-		  ArrayList<String> docids=new ArrayList<String>();
-	if(stringinbrackets.contains("OR"))
-	{
-	partition=stringinbrackets.split("OR");
-	i=0;
-	for(String s:partition)
-	{
-		String[] splittedterms=s.split(":");
-		terms[i]=splittedterms[1].trim();
-		i++;
-	}
-	docids=	queryOR(IndexType.TERM, terms);
-	}
-	else if(stringinbrackets.contains("AND"))
-	{
-	partition=stringinbrackets.split("AND");
-	i=0;
-	for(String s:partition)
-	{
-		String[] splittedterms=s.split(":");
-		terms[i]=splittedterms[1].trim();
-		i++;
-	}
-	//docids=	queryAND(IndexType.TERM, terms);
-	}
-	else
-	{
-		partition=stringinbrackets.split(":");
-		
-		for(String s:partition)
-		{i=0;
-			String[] splittedterms=stringinbrackets.split(":");
-			terms[i]=splittedterms[1].trim();
-			i++;
-		//}
-		docids=	queryOR(IndexType.TERM, terms);
-	}
-	
-	String mme="gcvhjkj";
-	return docids;
-	}*/
-	
 	/**
 	 * Method to execute queries in E mode
 	 * @param queryFile : The file from which queries are to be read and executed
@@ -450,7 +354,6 @@ public class SearchRunner {
 		String indexdir=this.indexdir;
 		IndexReader rdr=new IndexReader(indexdir, type);
 		File dictionaryFile=new File(rdr.indexType+ File.separator +"Dictionary");
-		//Integer[] termPositions=new Integer[terms.length];
 		int termPosition=0;
 		ArrayList<HashMap<String, Integer>> TermPostingslist=new ArrayList<HashMap<String, Integer>>();
 		TreeMap<String, Integer> finalposting=new TreeMap<String, Integer>();
@@ -464,14 +367,9 @@ public class SearchRunner {
 				br = new BufferedReader(new FileReader(dictionaryFile));
 				for(String line; (line = br.readLine()) != null;) 
 				{
-					//if(l==1) break;
 					String[] KeyIndexSplit=line.split(" ");
 					if(KeyIndexSplit.length==2)
 					{
-						/*for(int i1=0;i1<terms.length;i1++)
-						{
-							if(terms[i1]!=null)
-							{*/
 							if(KeyIndexSplit[0].trim().equals(term))
 							{
 								termPosition=Integer.parseInt(KeyIndexSplit[1].trim());
@@ -479,29 +377,10 @@ public class SearchRunner {
 								break;
 							}	
 							}
-							/*else
-							{
-								l++;
-							}
-						}
-					}*/
 				}
-				/*if(l==terms.length)
-				{*/
-
-					/*List<Integer> wordList = Arrays.asList(termPositions);
-					if(wordList.size()>2)
-					{
-					Collections.sort(wordList);
-					}*/
-					File postingsFile=new File(rdr.indexType+ File.separator +"Postings");
+				File postingsFile=new File(rdr.indexType+ File.separator +"Postings");
 					br.close();
 					br = new BufferedReader(new FileReader(postingsFile));
-					/*for(Integer j:wordList)
-					{
-						if(j!=null)
-						{*/
-						//br = new BufferedReader(new FileReader(postingsFile));
 						int i=0;
 						while(i<termPosition)
 						{
@@ -530,42 +409,6 @@ public class SearchRunner {
 						    }
 							docidtermfreq.put(DocFreqSplit[0], Posting);
 						}
-						
-						
-				//	}
-					
-					
-				/*	 basemap = TermPostingslist.get(0);
-					int len = TermPostingslist.size();
-					for(int i1=0;i1<len;i1++)
-					{
-						//basemap.keySet().retainAll(TermPostingslist.get(i1).keySet());
-						//basemap.keySet().addAll(TermPostingslist.get(i1).keySet());
-						List<String> uniondocs=new ArrayList<String>();
-						uniondocs=TermPostingslist
-					//	union.putAll(TermPostingslist.get(i1).,Integer.parseInt("0"));
-					Set<String> temp=null;
-					temp=new HashSet<String>(TermPostingslist.get(i1).keySet());
-					for(String s:temp)
-					{
-						finale.add(s);
-					}
-					}	
-					HashSet<String> hs = new HashSet<String>();
-					hs.addAll(finale);
-					finale.clear();
-					finale.addAll(hs);
-					for(String s:finale)
-					{
-						for()
-					}
-				}
-				}
-				else
-				{
-					br.close();
-					return null;
-				}*/
 				br.close();
 						
 		} 
