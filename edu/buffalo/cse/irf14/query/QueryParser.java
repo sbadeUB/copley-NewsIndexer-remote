@@ -80,7 +80,6 @@ public class QueryParser
     				}
     				isCategoryFound=false;
     			}
-    			//multiWord.trimToSize();
     			if(Character.isWhitespace(multiWord.charAt(multiWord.length() - 1)))
     				multiWord.deleteCharAt(multiWord.length() - 1);
     			multiWord.append("}");

@@ -12,11 +12,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Map.Entry;
+
+import javax.print.Doc;
 
 import edu.buffalo.cse.irf14.index.IndexReader;
 import edu.buffalo.cse.irf14.index.IndexType;
@@ -37,14 +39,9 @@ public class SearchRunner {
 	 * @param mode : Mode, one of Q or E
 	 * @param stream: Stream to write output to
 	 */
-	public SearchRunner(String indexDir, String corpusDir, 
-			char mode, PrintStream stream) {
-		
-		
-		indexdir=indexDir;   //captal n smll
-		
-		
-		//TODO: IMPLEMENT THIS METHOD
+	public SearchRunner(String indexDir, String corpusDir,char mode, PrintStream stream)
+	{
+		indexdir=indexDir;   
 	}
 	
 	/**
@@ -52,9 +49,11 @@ public class SearchRunner {
 	 * @param userQuery : Query to be parsed and executed
 	 * @param model : Scoring Model to use for ranking results
 	 */
-	public void query(String userQuery, ScoringModel model) {
+	public void query(String userQuery, ScoringModel model)
+	{
 		
-		//TODO: IMPLEMENT THIS METHOD
+	//Write code to get ParsedQuery	from QueryParser and then convert into string form using Query
+	String parsedQuery=userQuery;
 	String[] splitintospaces=userQuery.split(" ");
 	boolean started=false;
 	IndexType indextype;
@@ -66,10 +65,12 @@ public class SearchRunner {
 	boolean priorityoperatorset=false;
 	boolean bracketstrt=false;
     boolean getresult=false;
-    boolean notset=false;
+    @SuppressWarnings("unused")
+	boolean notset=false;
     int count=0;
     int ends=0;
     int starts=0;
+    TreeMap<String,Integer> termDocCounts= new TreeMap<String, Integer>();
     ArrayList<HashMap<String, TreeMap<String, Integer>>> priorityarraylist=new ArrayList<HashMap<String, TreeMap<String, Integer>>>();
 	for(String s:splitintospaces )
 	{
@@ -147,7 +148,10 @@ public class SearchRunner {
 			{
 				indextype=IndexType.CATEGORY;
 			}
-			docids=queryOR(indextype, indexandtermsplit[1]);
+			
+			docids=getDOCIDs(indextype, indexandtermsplit[1]);
+			termDocCounts.put(indexandtermsplit[1], docids.size());
+			
 			if(bracketstrt|| getresult)
 			{
 				priorityarraylist.add(docids);
@@ -161,14 +165,14 @@ public class SearchRunner {
 				while(ends>0) ///ckeck whether using duplicate for count and ends ///// check for three terms
 				{
 					HashMap<String, TreeMap<String, Integer>> resolveddocids=getdocsforoneoperator(priorityoperator[count], priorityarraylist.get(count-1),priorityarraylist.get(count));
-			priorityarraylist.remove(count-1);
-			priorityarraylist.remove(count-1);
-			priorityarraylist.add(resolveddocids);
-			priorityoperatorset=false;
+					priorityarraylist.remove(count-1);
+					priorityarraylist.remove(count-1);
+					priorityarraylist.add(resolveddocids);
+					priorityoperatorset=false;
 			
-			if (!(starts>0))
-			count--;
-			ends--;
+					if (!(starts>0))
+						count--;
+					ends--;
 				}
 			}
 			if(count==0 && starts==0)
@@ -189,9 +193,266 @@ public class SearchRunner {
 			}
 			if(!started)
 				break;
+		}
+	HashMap<String, TreeMap<String, Integer>> FinalDocResultHashmap=new HashMap<String, TreeMap<String, Integer>>();
+	FinalDocResultHashmap=chainarraylist.get(0);
+	
+	TreeMap<String, Integer> TermTFCountPairMap=new TreeMap<String, Integer>();
+	TermTFCountPairMap=RetrieveTermsInQuery(parsedQuery);
+	ArrayList<String> TermsList=new ArrayList<String>();
+	for(String str:TermTFCountPairMap.keySet())
+	{
+		TermsList.add(str);
+	}
+	
+	
+	TreeMap<String, Double> IDFMap=new TreeMap<String, Double>();
+	IDFMap=calculateIDFScores(termDocCounts);
+
+	TreeMap<String,Double> WtqMap=new TreeMap<String, Double>();
+	WtqMap=calculateQueryTFIDFScore(TermTFCountPairMap,IDFMap);
+	
+	HashMap<String, TreeMap<String, Double>> WtdHashmap=new HashMap<String, TreeMap<String,Double>>();
+	WtdHashmap=calculateDocTFIDFScores(FinalDocResultHashmap, IDFMap);
+	
+	@SuppressWarnings("unused")
+	HashMap<String,Double> RelevanceScores=new HashMap<String, Double>();
+	RelevanceScores=CalculateFinalDocTFIDFRelevanceScores(TermsList,WtdHashmap,WtqMap);
+	
+	
+	
+	}
+	
+	
+	public HashMap<String,Double> CalculateFinalDocTFIDFRelevanceScores(ArrayList<String> TermsList,
+			HashMap<String, TreeMap<String, Double>> WtdHashmap,TreeMap<String,Double> WtqMap)
+	{
+		HashMap<String,Double> RelevanceScores=new HashMap<String, Double>();
+		String[] DocIDsList=WtdHashmap.keySet().toArray(new String[WtdHashmap.size()]);
+		double[] Scores=new double[DocIDsList.length];
+		double QueryLength=0.0;
+		for(Double d:WtqMap.values())
+		{
+			QueryLength=QueryLength+(d*d);
+		}
+		QueryLength=Math.sqrt(QueryLength);
+		for(Entry<String,TreeMap<String, Double>> EntryDoc:WtdHashmap.entrySet())
+		{
+			int d=-1;
+			for(int i=0; i<DocIDsList.length; i++) 
+			{
+				if(DocIDsList[i] == EntryDoc.getKey())
+				{
+					d=i;
+					break;
+				}
+			}
+			TreeMap<String, Double> temp=new TreeMap<String, Double>();
+			double DocumentLength=0.0;
+			for(String S:TermsList)
+			{
+				S.trim();
+				if(WtqMap.containsKey(S) && temp.containsKey(S))
+				{
+					Double Wtq=WtqMap.get(S); //STEP-1
+					Double Wtd=temp.get(S);
+					Scores[d]=Scores[d]+(Wtq*Wtd);//STEP-2
+					DocumentLength=DocumentLength+(Wtd*Wtd);
+				}
+			}
+			DocumentLength=Math.sqrt(DocumentLength);
+			Scores[d]=(Scores[d]/(QueryLength*DocumentLength));
+			RelevanceScores.put(EntryDoc.getKey(), Scores[d]);
+		}
+		return RelevanceScores;
+	}
+	
+	public TreeMap<String,Integer> RetrieveTermsInQuery(String parsedQuery)
+	{
+		ArrayList<String> TermsList=new ArrayList<String>();
+		/*
+		 * To Remove Special Chars and other Category names and Form list with Raw Terms
+		 */
+		String[] splitSpace=parsedQuery.split(" ");
+		for(String S:splitSpace)
+		{
+			if(S.contains(":"))
+			{
+				String[] splitColon=S.split(":");
+				boolean setBraces=true;
+				String str=splitColon[1];
 				
+				while(setBraces)
+				{
+					if(str.endsWith("]")||str.endsWith("}")||str.endsWith(">")||str.endsWith("\""))
+					{
+						str=str.substring(0, str.length()-1); //This will remove ] or } that are at the end 
+					}
+					else if(str.startsWith("\""))
+					{
+						str=str.substring(1, str.length());
+					}
+					else setBraces=false;
+				}
+				str=str.trim();
+				TermsList.add(str);
+			}
+		}
+		/*
+		 * To remove Duplicates and Get Count of Each Term in Query
+		 */
+		TreeMap<String,Integer> TermTFCountPairMap=new TreeMap<String, Integer>();
+		for(String S:TermsList)
+		{
+			int Count = Collections.frequency(TermsList, S);
+			int FinalCount=Count;
+			if(Count>1)
+			{
+				int first=TermsList.indexOf(S);
+				for(int i=first+1;i<TermsList.size();i++)
+				{
+					if(TermsList.get(i).equals(S))
+					{
+						Count=Count-1;
+						TermsList.remove(i);
+					}
+					if(Count==1) break;
+				}
+			 }
+			TermTFCountPairMap.put(S, FinalCount);
+		 }
+		
+		return TermTFCountPairMap;
 	}
+	
+
+	public double TFVariants(int Type,TreeMap<String, Integer> TermndFreqMap,int CurrentTermFreq)
+	{
+		double TF=0.0;
+		switch (Type) {
+		case 1://Natural
+		{
+			TF=CurrentTermFreq;
+			break;
+		}
+		case 2://Logarithmic
+		{
+			double y=(1+CurrentTermFreq);
+			TF=Math.log10(y);
+			break;
+		}
+		case 3://Augmented
+		{
+			Integer[] values=TermndFreqMap.values().toArray(new Integer[TermndFreqMap.size()]);
+			Arrays.sort(values);
+			int tfmax=values[values.length-1];
+			double y=((0.5*CurrentTermFreq)/tfmax);
+			TF=(0.5+y);
+			break;
+		}
+		case 4://boolean
+		{
+			if(CurrentTermFreq>0) TF=1;
+			else TF=0;
+			break;
+		}
+		case 5://Log Ave
+		{
+			int tfsum=0;
+			for(int i:TermndFreqMap.values())
+				tfsum=tfsum+i;
+			double x=1+(tfsum/TermndFreqMap.size());
+			x=Math.log10(x);
+			double y=(1+CurrentTermFreq);
+			y=Math.log10(y);
+			TF=(y/x);
+			break;
+		}
+		default:
+			break;
+		}
+		return TF;
 	}
+	
+	public TreeMap<String,Double> calculateQueryTFIDFScore(TreeMap<String, Integer> TermTFCountPairMap,TreeMap<String, Double> IDFMap)
+	{
+		TreeMap<String,Double> WtqMap=new TreeMap<String, Double>();
+		for(Entry<String, Integer> entryTermtfs:TermTFCountPairMap.entrySet())
+		{
+			String tempTerm=entryTermtfs.getKey();
+			if(IDFMap.containsKey(tempTerm))
+			{
+				double idft=IDFMap.get(tempTerm);
+				int temptf=entryTermtfs.getValue();
+				double y=(1+temptf);
+				double tft=Math.log10(y);
+				double Wtq=(idft*tft);
+				WtqMap.put(tempTerm, Wtq);
+			}
+		}
+		return WtqMap;
+	}
+	
+	public HashMap<String, TreeMap<String, Double>> calculateDocTFIDFScores(HashMap<String, TreeMap<String, Integer>> FinalDocResultHashmap,TreeMap<String, Double> IDFMap)
+	{
+		HashMap<String, TreeMap<String, Double>> WtdHashmap=new HashMap<String, TreeMap<String,Double>>();
+		for(Entry<String, TreeMap<String, Integer>> entry:FinalDocResultHashmap.entrySet())
+		{
+			String DocID=entry.getKey().trim();
+			TreeMap<String, Integer> temp=new TreeMap<String, Integer>();
+			temp=entry.getValue();
+			TreeMap<String,Double> newTemp=new TreeMap<String, Double>();
+			for(Entry<String, Integer> entryTermtfs:temp.entrySet())
+			{
+				String tempTerm=entryTermtfs.getKey();
+				if(IDFMap.containsKey(tempTerm))
+				{
+					double idft=IDFMap.get(tempTerm);
+					int temptf=entryTermtfs.getValue();
+					double y=(1+temptf);
+					double tft=Math.log10(y);
+					double Wtd=(idft*tft);
+					newTemp.put(tempTerm, Wtd);
+				}
+			}
+			WtdHashmap.put(DocID, newTemp);
+		}
+		
+		return WtdHashmap;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public TreeMap<String, Double> calculateIDFScores(TreeMap<String,Integer> termDocCounts)
+	{
+		TreeMap<String, Double> IDFMap=new TreeMap<String, Double>();
+		TreeMap<String,Integer> mapInFile=new TreeMap<String, Integer>();
+		FileInputStream fis=null;
+		ObjectInputStream ois=null;
+		int N=0;
+		File documentdictionaryFile=new File(this.indexdir+ File.separator +"DocumentDictionary");
+		try
+		{
+            fis=new FileInputStream(documentdictionaryFile);
+            ois=new ObjectInputStream(fis);
+			mapInFile=(TreeMap<String,Integer>)ois.readObject();
+			N=mapInFile.size();
+			ois.close();
+		    fis.close();
+		}
+		catch(Exception e){	}	
+		for(Entry<String, Integer> entry:termDocCounts.entrySet())
+		{
+			String Term=entry.getKey().trim();
+			int dft=entry.getValue();
+			double idft=(N/dft);
+			idft=Math.log10(idft);
+			IDFMap.put(Term, idft);
+		}
+		return IDFMap;
+	}
+	
+	
 	public HashMap<String, TreeMap<String, Integer>> getdocsforoneoperator(String operator,HashMap<String, TreeMap<String, Integer>> first,HashMap<String, TreeMap<String, Integer>> second)
 	{
 		HashMap<String, TreeMap<String, Integer>> combine=new HashMap<String, TreeMap<String, Integer>>();
@@ -349,16 +610,11 @@ public class SearchRunner {
 		//TODO: IMPLEMENT THIS METHOD IFF SPELLCHECK EXECUTED
 		return null;
 	}
-	@SuppressWarnings("null")
-	public HashMap<String,TreeMap<String, Integer>> queryOR(IndexType type,String term) {
+	public HashMap<String,TreeMap<String, Integer>> getDOCIDs(IndexType type,String term) {
 		String indexdir=this.indexdir;
 		IndexReader rdr=new IndexReader(indexdir, type);
 		File dictionaryFile=new File(rdr.indexType+ File.separator +"Dictionary");
 		int termPosition=0;
-		ArrayList<HashMap<String, Integer>> TermPostingslist=new ArrayList<HashMap<String, Integer>>();
-		TreeMap<String, Integer> finalposting=new TreeMap<String, Integer>();
-		HashMap<String, Integer> basemap=null;
-	    ArrayList<String> finale=new ArrayList<String>();
 		BufferedReader br;
 		HashMap<String,TreeMap<String, Integer>> docidtermfreq= new HashMap<String,TreeMap<String, Integer>>();
 		try
@@ -373,7 +629,7 @@ public class SearchRunner {
 							if(KeyIndexSplit[0].trim().equals(term))
 							{
 								termPosition=Integer.parseInt(KeyIndexSplit[1].trim());
-								l++;
+								l=l+1;
 								break;
 							}	
 							}
@@ -405,7 +661,7 @@ public class SearchRunner {
 							}
 							else
 							{
-							Posting.put(term, Integer.parseInt(DocFreqSplit[1]));
+								Posting.put(term, Integer.parseInt(DocFreqSplit[1]));
 						    }
 							docidtermfreq.put(DocFreqSplit[0], Posting);
 						}

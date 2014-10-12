@@ -198,8 +198,6 @@ public class IndexReader {
 	            
 	            ois.close();
 	            fis.close();
-	            //print All data in MAP
-	           
 	        }catch(Exception e){}	
 			
 			br.close();
@@ -299,7 +297,8 @@ public class IndexReader {
 	/**
 	 * Method to return SortedMap with Given UnsortedMap
 	 * @param unsortMap
-	 * @return
+	 * @return sortmap
+	 * Reference: http://www.mkyong.com/java/how-to-sort-a-map-in-java/
 	 */
 	private static Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap) {
 		 
