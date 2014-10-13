@@ -14,26 +14,31 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
-
-import javax.print.Doc;
 
 import edu.buffalo.cse.irf14.index.IndexReader;
 import edu.buffalo.cse.irf14.index.IndexType;
+import edu.buffalo.cse.irf14.query.Query;
+import edu.buffalo.cse.irf14.query.QueryParser;
 
 /**
  * Main class to run the searcher.
  * As before implement all TODO methods unless marked for bonus
- * @author nikhillo
+ * @author Ravi and Bade
  *
  */
-public class SearchRunner {
+public class SearchRunner
+{
 	public enum ScoringModel {TFIDF, OKAPI};
-	String indexdir="";
+	public String indexdir;
+	public String corpusDir;
+	public char mode;
+	public PrintStream stream;
+	
 	/**
-	 * Default (and only public) consructor
+	 * Default (and only public) constructor
 	 * @param indexDir : The directory where the index resides
 	 * @param corpusDir : Directory where the (flattened) corpus resides
 	 * @param mode : Mode, one of Q or E
@@ -41,7 +46,10 @@ public class SearchRunner {
 	 */
 	public SearchRunner(String indexDir, String corpusDir,char mode, PrintStream stream)
 	{
-		indexdir=indexDir;   
+		this.indexdir=indexDir;
+		this.corpusDir=corpusDir;
+		this.mode=mode;
+		this.stream=stream;
 	}
 	
 	/**
@@ -51,10 +59,10 @@ public class SearchRunner {
 	 */
 	public void query(String userQuery, ScoringModel model)
 	{
-		
-	//Write code to get ParsedQuery	from QueryParser and then convert into string form using Query
-	String parsedQuery=userQuery;
-	String[] splitintospaces=userQuery.split(" ");
+		System.out.println("In search Runner!");
+	Query query=QueryParser.parse(userQuery, "OR");
+	String parsedQuery=query.toString();
+	String[] splitintospaces=parsedQuery.split(" ");
 	boolean started=false;
 	IndexType indextype;
 	HashMap<String, TreeMap<String, Integer>> docids=new HashMap<String, TreeMap<String, Integer>>();
@@ -164,7 +172,7 @@ public class SearchRunner {
 			{
 				while(ends>0) ///ckeck whether using duplicate for count and ends ///// check for three terms
 				{
-					HashMap<String, TreeMap<String, Integer>> resolveddocids=getdocsforoneoperator(priorityoperator[count], priorityarraylist.get(count-1),priorityarraylist.get(count));
+					HashMap<String, TreeMap<String, Integer>> resolveddocids=getDocsForOneOperator(priorityoperator[count], priorityarraylist.get(count-1),priorityarraylist.get(count));
 					priorityarraylist.remove(count-1);
 					priorityarraylist.remove(count-1);
 					priorityarraylist.add(resolveddocids);
@@ -186,7 +194,7 @@ public class SearchRunner {
 			}
 			if(operatorset && !(bracketstrt))
 			{
-				HashMap<String, TreeMap<String, Integer>> resolveddocids=getdocsforoneoperator(operator, chainarraylist.get(0),chainarraylist.get(1));
+				HashMap<String, TreeMap<String, Integer>> resolveddocids=getDocsForOneOperator(operator, chainarraylist.get(0),chainarraylist.get(1));
 				chainarraylist.remove(0);
 				chainarraylist.remove(0);
 				chainarraylist.add(resolveddocids);
@@ -205,23 +213,90 @@ public class SearchRunner {
 		TermsList.add(str);
 	}
 	
-	
 	TreeMap<String, Double> IDFMap=new TreeMap<String, Double>();
 	IDFMap=calculateIDFScores(termDocCounts);
 
+	
 	TreeMap<String,Double> WtqMap=new TreeMap<String, Double>();
 	WtqMap=calculateQueryTFIDFScore(TermTFCountPairMap,IDFMap);
 	
 	HashMap<String, TreeMap<String, Double>> WtdHashmap=new HashMap<String, TreeMap<String,Double>>();
 	WtdHashmap=calculateDocTFIDFScores(FinalDocResultHashmap, IDFMap);
 	
-	@SuppressWarnings("unused")
-	HashMap<String,Double> RelevanceScores=new HashMap<String, Double>();
-	RelevanceScores=CalculateFinalDocTFIDFRelevanceScores(TermsList,WtdHashmap,WtqMap);
+	HashMap<String,Double> RelevanceScoresTFIDF=new HashMap<String, Double>();
+	RelevanceScoresTFIDF=CalculateFinalDocTFIDFRelevanceScores(TermsList,WtdHashmap,WtqMap);
 	
+	HashMap<String,Double> RelevanceScoresOKAPI=new HashMap<String, Double>();
+    RelevanceScoresOKAPI=calculateOKAPI(IDFMap,FinalDocResultHashmap);
 	
-	
+	System.out.println("Relevance Scores Obtained from TF-IDF");
+	for(Entry<String,Double> entry:RelevanceScoresTFIDF.entrySet())
+	{
+		System.out.println("Document:"+entry.getKey()+"  "+"Score:"+entry.getValue());
 	}
+	
+	System.out.println("Relevance Scores Obtained from OKAPI BM-25");
+	for(Entry<String,Double> entry:RelevanceScoresOKAPI.entrySet())
+	{
+		System.out.println("Document:"+entry.getKey()+"  "+"Score:"+entry.getValue());
+	}
+	System.out.println("Printing Done!");
+	}
+	
+	@SuppressWarnings("resource")
+	public  HashMap<String, Double> calculateOKAPI(TreeMap<String, Double> iDFMap,HashMap<String, TreeMap<String, Integer>> finalDocResultHashmap)
+	{
+        double k1=1.5;
+        double b=0.75;
+        File dictionaryFile=new File(this.indexdir+ File.separator +"DocumentDictionary2");
+        BufferedReader br;
+       int totaldocs=0;
+      int  totalterms=0;
+      HashMap<String, Double> result=new HashMap<String, Double>();
+      HashMap<String, Integer> docidlength= new HashMap<String, Integer>();
+		try {
+			br = new BufferedReader(new FileReader (dictionaryFile));
+			for(String line; (line = br.readLine()) != null;) 
+			{
+				String[] fileiddocidcountsplit=line.split(" ");
+				totaldocs=totaldocs+1;
+				totalterms=totalterms+Integer.parseInt(fileiddocidcountsplit[2].trim());
+				docidlength.put(fileiddocidcountsplit[1].trim(), Integer.parseInt(fileiddocidcountsplit[2].trim()));
+				
+			}
+			int docavaragelenth=totalterms/totaldocs;
+			for(String s :finalDocResultHashmap.keySet())
+			{
+			//	int k=docidlength.get("5842");
+				int doclength=docidlength.get(s);
+				double idf=0.0;
+				double cont=0.0;
+				double finalvalue=0.0;	
+				TreeMap<String, Integer> doctermfreq= new TreeMap<String, Integer>();
+				doctermfreq=finalDocResultHashmap.get(s);
+				for(String s1:doctermfreq.keySet())
+				{
+					if(iDFMap.containsKey(s1))
+						idf=iDFMap.get(s1);
+					int tf=doctermfreq.get(s1);
+					double upper=(k1+1)*tf;
+					double lower=((doclength/docavaragelenth)*b+(1-b))*k1+tf;
+							cont=upper/lower;
+							finalvalue=finalvalue+cont*idf;
+				}
+				result.put(s, finalvalue);
+			}		
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		return result;
+	}
+	
 	
 	
 	public HashMap<String,Double> CalculateFinalDocTFIDFRelevanceScores(ArrayList<String> TermsList,
@@ -248,6 +323,7 @@ public class SearchRunner {
 				}
 			}
 			TreeMap<String, Double> temp=new TreeMap<String, Double>();
+			temp=EntryDoc.getValue();
 			double DocumentLength=0.0;
 			for(String S:TermsList)
 			{
@@ -274,8 +350,9 @@ public class SearchRunner {
 		 * To Remove Special Chars and other Category names and Form list with Raw Terms
 		 */
 		String[] splitSpace=parsedQuery.split(" ");
-		for(String S:splitSpace)
+		for(int j=0;j<splitSpace.length;j++)
 		{
+			String S=splitSpace[j];
 			if(S.contains(":"))
 			{
 				String[] splitColon=S.split(":");
@@ -284,13 +361,23 @@ public class SearchRunner {
 				
 				while(setBraces)
 				{
-					if(str.endsWith("]")||str.endsWith("}")||str.endsWith(">")||str.endsWith("\""))
+					if(!str.startsWith("\"") && (str.endsWith("]")||str.endsWith("}")||str.endsWith(">")||str.endsWith("\"")))
 					{
 						str=str.substring(0, str.length()-1); //This will remove ] or } that are at the end 
 					}
 					else if(str.startsWith("\""))
 					{
 						str=str.substring(1, str.length());
+						j=j+1;
+						String s=splitSpace[j];
+						while(!s.endsWith("\""))
+						{
+							s.trim();
+							str=str+" "+s;
+							j=j+1;
+							s=splitSpace[j];
+						}
+						str=str+" "+s;
 					}
 					else setBraces=false;
 				}
@@ -453,33 +540,103 @@ public class SearchRunner {
 	}
 	
 	
-	public HashMap<String, TreeMap<String, Integer>> getdocsforoneoperator(String operator,HashMap<String, TreeMap<String, Integer>> first,HashMap<String, TreeMap<String, Integer>> second)
+	public HashMap<String, TreeMap<String, Integer>> getDocsForOneOperator(String operator,HashMap<String, TreeMap<String, Integer>> first,HashMap<String, TreeMap<String, Integer>> second)
 	{
-		HashMap<String, TreeMap<String, Integer>> combine=new HashMap<String, TreeMap<String, Integer>>();
-		if(operator.equalsIgnoreCase("OR"))
-		{
-			TreeMap<String, Integer> getterm=new TreeMap<String, Integer>();
-	          Set<String> term1=null;
-			Set<String> term2=null;
+			HashMap<String, TreeMap<String, Integer>> combine=new HashMap<String, TreeMap<String, Integer>>();
+			if(operator.equalsIgnoreCase("OR"))
+			{
+				if(first.size()!=0 && second.size()!=0)
+				{
+				TreeMap<String, Integer> getterm=new TreeMap<String, Integer>();
+		          Set<String> term1=null;
+				Set<String> term2=null;
+				for(String s:first.keySet())
+				{
+					getterm=first.get(s);
+					term1=getterm.keySet();/// check case of multiple terms
+					break;
+					
+				}
+				String[] term1array=term1.toArray(new String[term1.size()]);
+				for(String s:second.keySet())
+				{
+					getterm=second.get(s);
+					term2=getterm.keySet();
+					break;
+					
+				}
+				String[] term2array=term2.toArray(new String[term2.size()]);
+				for(String s :first.keySet())
+				{
+					if(second.containsKey(s))
+					{
+						TreeMap<String, Integer> copy=new TreeMap<String, Integer>();
+						TreeMap<String, Integer> copy2=new TreeMap<String, Integer>();
+						TreeMap<String, Integer> combo=new TreeMap<String, Integer>();
+						copy=first.get(s);
+						copy2=second.get(s);
+						for(String s1:copy.keySet())
+						{
+							combo.put(s1, copy.get(s1));
+						}
+						for(String s1:copy2.keySet())
+						{
+							combo.put(s1, copy2.get(s1));
+						}
+						
+						combine.put(s, combo);	
+					}
+					else
+					{
+						TreeMap<String, Integer> copy=new TreeMap<String, Integer>();
+						copy=first.get(s);
+						for(String s1:term2array)
+						copy.put(s1, 0);
+						combine.put(s, copy);
+					}
+			}
+				for(String s:second.keySet())
+				{
+					if(!(first.containsKey(s)))
+					{
+						TreeMap<String, Integer> copy=new TreeMap<String, Integer>();
+						copy=second.get(s);
+						for(String s1:term1array)
+						copy.put(s1, 0);
+						combine.put(s, copy);
+					}
+					
+				}
+					
+			}
+				else if(first.size()==0)
+				{
+					return second;
+				}
+				else
+				{
+					return first;
+				}
+			}
+			if(operator.equalsIgnoreCase("ANDNOT"))
+			{
+				if(first.size()==0 || second.size()==0)
+					return first;
+				for(String s:second.keySet())
+				{
+					if(first.keySet().contains(s))
+					{
+						first.remove(s);
+					}
+				}
+			combine=first;
+			}
+			if(operator.equalsIgnoreCase("AND"))
+			{
+				if(first.size()!=0 && second.size()!=0)
+				{
 			for(String s:first.keySet())
-			{
-				getterm=first.get(s);
-				term1=getterm.keySet();/// check case of multiple terms
-				break;
-				
-			}
-			String[] term1array=term1.toArray(new String[term1.size()]);
-			for(String s:second.keySet())
-			{
-				getterm=second.get(s);
-				term2=getterm.keySet();
-				break;
-				
-			}
-			String[] term2array=term2.toArray(new String[term2.size()]);
-			for(String s :first.keySet())
-			{
-				if(second.containsKey(s))
+				if(second.keySet().contains(s))
 				{
 					TreeMap<String, Integer> copy=new TreeMap<String, Integer>();
 					TreeMap<String, Integer> copy2=new TreeMap<String, Integer>();
@@ -495,69 +652,23 @@ public class SearchRunner {
 						combo.put(s1, copy2.get(s1));
 					}
 					
-					combine.put(s, combo);	
+					combine.put(s, combo);
+					//combine.get(s).put(copy.firstEntry());
 				}
-				else
-				{
-					TreeMap<String, Integer> copy=new TreeMap<String, Integer>();
-					copy=first.get(s);
-					for(String s1:term2array)
-					copy.put(s1, 0);
-					combine.put(s, copy);
-				}
-		}
-			for(String s:second.keySet())
-			{
-				if(!(first.containsKey(s)))
-				{
-					TreeMap<String, Integer> copy=new TreeMap<String, Integer>();
-					copy=second.get(s);
-					for(String s1:term1array)
-					copy.put(s1, 0);
-					combine.put(s, copy);
-				}
-				
+		
 			}
-				
-		}
-		if(operator.equalsIgnoreCase("ANDNOT"))
-		{
-			for(String s:second.keySet())
-			{
-				if(first.keySet().contains(s))
-				{
-					first.remove(s);
-				}
 			}
-		combine=first;
-		}
-		if(operator.equalsIgnoreCase("AND"))
-		{
-		for(String s:first.keySet())
-			if(second.keySet().contains(s))
+			else if (first.size()==0)
 			{
-				TreeMap<String, Integer> copy=new TreeMap<String, Integer>();
-				TreeMap<String, Integer> copy2=new TreeMap<String, Integer>();
-				TreeMap<String, Integer> combo=new TreeMap<String, Integer>();
-				copy=first.get(s);
-				copy2=second.get(s);
-				for(String s1:copy.keySet())
-				{
-					combo.put(s1, copy.get(s1));
-				}
-				for(String s1:copy2.keySet())
-				{
-					combo.put(s1, copy2.get(s1));
-				}
-				
-				combine.put(s, combo);
-				//combine.get(s).put(copy.firstEntry());
+				return first;
 			}
-	
+			else
+			{
+				return second;
+			}
+		return combine;
+		
 		}
-	return combine;
-	
-	}
 	/**
 	 * Method to execute queries in E mode
 	 * @param queryFile : The file from which queries are to be read and executed
@@ -614,7 +725,7 @@ public class SearchRunner {
 		String indexdir=this.indexdir;
 		IndexReader rdr=new IndexReader(indexdir, type);
 		File dictionaryFile=new File(rdr.indexType+ File.separator +"Dictionary");
-		int termPosition=0;
+		int termPosition=-1;
 		BufferedReader br;
 		HashMap<String,TreeMap<String, Integer>> docidtermfreq= new HashMap<String,TreeMap<String, Integer>>();
 		try
@@ -634,6 +745,14 @@ public class SearchRunner {
 							}	
 							}
 				}
+				
+				if(termPosition==-1)
+                {
+                        br.close();
+                        HashMap<String,TreeMap<String, Integer>> noterms= new HashMap<String,TreeMap<String, Integer>>();
+                        return noterms;
+                }
+				
 				File postingsFile=new File(rdr.indexType+ File.separator +"Postings");
 					br.close();
 					br = new BufferedReader(new FileReader(postingsFile));

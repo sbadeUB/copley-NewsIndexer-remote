@@ -4,25 +4,19 @@
  */
 package edu.buffalo.cse.irf14.query;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Stack;
 
 /**
- * @author nikhillo
+ * @author Bade
  * Static parser that converts raw text to Query objects
  */
 public class QueryParser
 {
-	static String finalQuery=null;
-	static boolean isNotSet=false;
-	static boolean isBooleanSet=false;
-	static boolean isCategoryAngledNOTFound=false;
-	static boolean isTermAngledNOTFound=false;
-	static boolean isCategoryFound=false;
-	static int NestedNumber=-1;
-	static StringBuilder multiWord=new StringBuilder();
-	static String[] Categories={"Author","Category","Place"};
-	static Stack<Character> stack = new Stack<Character>();
+	String[] Categories={"Author","Category","Place"};
+	public static StringBuilder multiword=new StringBuilder();
+	Stack<Character> generalOperatorStack=new Stack<Character>();
+	boolean endReached=true;
 	
 	/**
 	 * MEthod to parse the given user query into a Query object
@@ -33,10 +27,11 @@ public class QueryParser
 	 */
 	public static Query parse(String userQuery, String defaultOperator)
 	{
-		Query query=new Query();
-		String initUserQuery=userQuery;
+		@SuppressWarnings("unused")
+		String[] Categories={"Author","Category","Place"};
 		Stack<Character> stack = new Stack<Character>();
 		boolean isBalanced=true;
+		
 		/** 
 		 * Checking for balancing of Parenthesis
 		 */
@@ -50,43 +45,63 @@ public class QueryParser
             }
         }
         
+        
+        
         if(!stack.isEmpty()) isBalanced=false;
         
         if(isBalanced)
         {
-        	String[] splitSpace=initUserQuery.split(" ");
-    		if(splitSpace.length==1)
+        	ArrayList<String> TermsList=new ArrayList<String>();
+    		String[] splitSpace=userQuery.split(" ");
+    		for(int j=1;j<splitSpace.length;j++)
     		{
-    			finalQuery=processOnSingleWord(splitSpace[0]);
-    		}
-    		else
-    		{
-    	        
-    			multiWord.append('{');
-    			for(int i=0;i<splitSpace.length;i++)
+    			String S=splitSpace[j];
+    			if(S.contains(":"))
     			{
-    				String str=splitSpace[i];
-    				str.trim();
-    				String[] splitColon=str.split(":");
-    				if(Arrays.asList(Categories).contains(splitColon[0].trim()))
+    				String[] splitColon=S.split(":");
+    				boolean setBraces=true;
+    				String category=null;
+    				if(splitColon[0].contains("Author")) category="Author";
+    				else if(splitColon[0].contains("Category")) category="Category";
+    				else if(splitColon[0].contains("Place")) category="Place";
+    				multiword.append(splitColon[0]+":");
+    				String str=splitColon[1];
+    				String ConsumeString=null;
+    				while(setBraces)
     				{
-    					str=splitColon[1].trim();
-    					i=processOnMultiwordParenthesis(splitSpace,splitColon[0].trim(),str,i);
+    					while(str.startsWith("("))
+    					{
+    						multiword.append("(");
+    						str=str.substring(1,str.length());
+    					}
+    					//String ConsumeString=null;
+    					if(!str.startsWith("\"") && (str.endsWith("]")||str.endsWith("}")||str.endsWith(">")||str.endsWith("\"")))
+    					{
+    						str=str.substring(0, str.length()-1); //This will remove ] or } that are at the end 
+    					}
+    					else if(str.startsWith("\""))
+    					{
+    						str=str.substring(1, str.length());
+    						j=j+1;
+    						String s=splitSpace[j];
+    						while(!s.endsWith("\""))
+    						{
+    							s.trim();
+    							str=str+" "+s;
+    							j=j+1;
+    							s=splitSpace[j];
+    						}
+    						str=str+" "+s;
+    					}
+    					else setBraces=false;
     				}
-    				
-    				else if(!isCategoryFound)
-    				{
-    					i=processOnMultiwordParenthesis2(splitSpace,i,defaultOperator);
-    				}
-    				isCategoryFound=false;
+    				str=str.trim();
+    				TermsList.add(str);
     			}
-    			if(Character.isWhitespace(multiWord.charAt(multiWord.length() - 1)))
-    				multiWord.deleteCharAt(multiWord.length() - 1);
-    			multiWord.append("}");
-    			finalQuery=multiWord.toString();
     		}
-    		
-    		System.out.println("Final String:"+finalQuery);
+        	String initParsedQuery=userQuery;
+        	//Do some processing
+    		Query query=new Query(initParsedQuery,defaultOperator);
 	    	return query;
         }
 		
@@ -94,31 +109,79 @@ public class QueryParser
 		
 	}
 	
-	/**
-	 * Method to parse a single word containing user Query
-	 */
-	public static String processOnSingleWord(String input)
+	public int HandleTerms(String[] splitSpace,String cat,String str,int j,String ConsumeString)
 	{
-		input.trim();
-		String[] splitSColon=input.split(":");
-		input="";
-		if(splitSColon.length==1) return input="{Term:"+splitSColon[0]+"}"; //--{Term:Hello}---//
-		else if (splitSColon.length==2) return input="{"+splitSColon[0]+":"+splitSColon[1]+"}";//--{Author:rushdie}--//
-		else return null;
-	}
-	
-	public static int processOnMultiwordParenthesis(String[] splitSpace,String category,String str,int i)
-	{
-		if(str.contains("("))
+		int countOpenBracks=0;
+		while(str.startsWith("("))
 		{
-			stack.push('(');
-			if(!isCategoryAngledNOTFound)
-			multiWord.append("["+category+":"+str.substring(1)+" ");
-			else multiWord.append("[<"+category+":"+str.substring(1)+" ");
-			i=i+1;
-			while(!splitSpace[i].contains(")"))
+			multiword.append("(");
+			generalOperatorStack.push('(');
+			countOpenBracks=countOpenBracks+1;
+			str=str.substring(1,str.length());
+		}
+		multiword.append("* ");
+		ConsumeString=ConsumeString+" "+str;
+		generalOperatorStack.push('*'); //Indicates a word is to be appended here
+		j=j+1;
+		while(!splitSpace[j].endsWith(")"))
+		{
+			if(splitSpace[j].startsWith("("))
 			{
-				if(splitSpace[i].startsWith("("))
+				str=splitSpace[j].trim();
+				j=HandleTerms(splitSpace,cat,str,j,ConsumeString);
+				if(generalOperatorStack.isEmpty()) break;
+			}
+			else if(splitSpace[j].equals("AND") || splitSpace[j].equals("OR") || splitSpace[j].equals("NOT"))
+			{
+				multiword.append(splitSpace[j]+" ");
+			}
+			else
+			{
+				if(splitSpace[j].contains("\""))
+				{
+					multiword.append("\"");
+					multiword.append("* ");
+					ConsumeString=ConsumeString+" "+str;
+					generalOperatorStack.push('\"');
+					generalOperatorStack.push('*');
+					j=j+1;
+					while(!splitSpace[j].contains("\""))
+					{
+						splitSpace[j]=splitSpace[j].trim();
+						ConsumeString=ConsumeString+" "+splitSpace[j];
+						multiword.append("* ");
+						j=j+1;
+					}
+					if(splitSpace[j].contains("\""))
+					{
+						str=splitSpace[j];
+						multiword.append("*");
+						generalOperatorStack.push('*');
+						while((str.endsWith(")")||str.endsWith("}")||str.endsWith("\"")))
+    					{
+							String x=str.substring(str.length(), str.length());
+							str=str.substring(0, str.length()-1);
+							if(x=="\"") multiword.append("\"");
+							else multiword.append("x");
+							generalOperatorStack.push(x.charAt(0));
+    						 //This will remove ] or } or " that are at the end 
+    					}
+						ConsumeString=ConsumeString+" "+str;
+					}
+					
+				}
+				else
+				{
+					multiword.append("* ");
+					generalOperatorStack.push('*');
+					ConsumeString=ConsumeString+" "+splitSpace[j];
+				}
+			}
+			
+		}
+		
+		/*
+		 * if(splitSpace[i].startsWith("("))
 				{
 					str=splitSpace[i].trim();
 					i=processOnMultiwordParenthesis(splitSpace,category,str,i);
@@ -202,176 +265,37 @@ public class QueryParser
 					isCategoryAngledNOTFound=false;
 				}
 			}
-		}					
-		else if(!str.contains("("))
+		}	
+		 */
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		if(!str.startsWith("\"") && (str.endsWith("]")||str.endsWith("}")||str.endsWith(">")||str.endsWith("\"")))
 		{
-			if(!isCategoryAngledNOTFound)
-				multiWord.append(category+":"+str+" ");
-			else
-				multiWord.append("<"+category+":"+str+" ");
+			str=str.substring(0, str.length()-1); //This will remove ] or } that are at the end 
 		}
-		isCategoryFound=true;
-		return i;
-	}
-	
-	public static int processOnMultiwordParenthesis2(String[] splitSpace,int i,String defaultOperator)
-	{
-	if(splitSpace[i].startsWith("("))
-	{
-		stack.push('(');
-		if(!isTermAngledNOTFound)
-			multiWord.append("["+"Term"+":"+splitSpace[i].substring(1)+" ");
-		else
-			multiWord.append("["+"<Term"+":"+splitSpace[i].substring(1)+" ");
-		i=i+1;
-		while(!splitSpace[i].contains(")"))
+		else if(str.startsWith("\""))
 		{
-			if(splitSpace[i].startsWith("("))
+			str=str.substring(1, str.length());
+			j=j+1;
+			String s=splitSpace[j];
+			while(!s.endsWith("\""))
 			{
-				i=processOnMultiwordParenthesis2(splitSpace,i,defaultOperator);
-				if(stack.isEmpty()) break;
+				s.trim();
+				str=str+" "+s;
+				j=j+1;
+				s=splitSpace[j];
 			}
-			else if(splitSpace[i].equals("AND") || splitSpace[i].equals("OR"))
-			{
-				multiWord.append(splitSpace[i]+" ");
-			}
-			else if(splitSpace[i].equals("NOT"))
-			{
-				multiWord.append("AND ");
-				isTermAngledNOTFound=true;
-			}
-			else
-			{
-				if(splitSpace[i].startsWith("\""))
-				{
-					if(!isTermAngledNOTFound)
-						multiWord.append("TERM:"+splitSpace[i]+" ");
-					else
-						multiWord.append("<TERM:"+splitSpace[i]+" ");
-					i=i+1;
-					while(!splitSpace[i].endsWith("\""))
-					{
-						multiWord.append(splitSpace[i]+" ");
-						i=i+1;
-					}
-					if(splitSpace[i].endsWith("\"") && isTermAngledNOTFound)
-						multiWord.append(splitSpace[i]+">"+" ");
-					else if(!isTermAngledNOTFound) 
-						multiWord.append(splitSpace[i]+" ");
-					isTermAngledNOTFound=false;
-				}
-				else
-				{
-					if(isTermAngledNOTFound) multiWord.append("TERM:"+splitSpace[i]+">"+" ");
-					else multiWord.append("TERM:"+splitSpace[i]+" ");
-					isTermAngledNOTFound=false;
-				}
-			}
-			i=i+1;
-		}
-		if(!stack.isEmpty())
-		{
-			if(splitSpace[i].equals(")") )
-			{
-				stack.pop();
-				if(Character.isWhitespace(multiWord.charAt(multiWord.length() - 1)))
-				multiWord.deleteCharAt(multiWord.length() - 1);
-				multiWord.append("] ");
-			}
-			else if(splitSpace[i].contains(")"))
-			{
-				char[] array=splitSpace[i].toCharArray();
-				int countParenthesis=0;
-				for(int i1=0;i1<array.length;i1++)
-				{
-					if(array[i1]==')')
-					{
-						countParenthesis=countParenthesis+1;
-					}
-				}
-				if(isTermAngledNOTFound)
-					multiWord.append("<TERM:"+splitSpace[i].substring(0, splitSpace[i].length()-countParenthesis)+">");
-				else
-					multiWord.append("TERM:"+splitSpace[i].substring(0, splitSpace[i].length()-countParenthesis));
-				
-				if(countParenthesis==1)
-				{
-					multiWord.append("] ");
-					stack.pop();
-				}
-				else
-				{
-					for(int i1=1;i1<=countParenthesis-1;i1++)
-					{
-						multiWord.append("]");
-						stack.pop();
-					}
-					multiWord.append("] ");
-					stack.pop();
-				}
-				isTermAngledNOTFound=false;
-			}
-		}
-	}					
-	
-	else if(!splitSpace[i].startsWith("("))
-	{
-		if(splitSpace[i].equals("AND") || splitSpace[i].equals("OR"))
-		{
-			isBooleanSet=true;
-			String[] stringCol=splitSpace[i+1].split(":");
-			if(Arrays.asList(Categories).contains(stringCol[0].trim())) multiWord.append(splitSpace[i].trim()+" ");
-			else
-			multiWord.append(splitSpace[i].trim()+" ");
+			str=str+" "+s;
 		}
 		
-		else if(splitSpace[i].equals("NOT"))
-		{
-			isNotSet=true;
-			isTermAngledNOTFound=true;
-			multiWord.append("AND"+" ");
-		}
-		else if(splitSpace[i].startsWith("\""))
-		{
-			if(!isTermAngledNOTFound)
-			multiWord.append("TERM:"+splitSpace[i]+" ");
-			else
-				multiWord.append("<TERM:"+splitSpace[i]+" ");
-			i=i+1;
-			while(!splitSpace[i].endsWith("\""))
-			{
-				multiWord.append(splitSpace[i]+" ");
-				i=i+1;
-			}
-			if(splitSpace[i].endsWith("\"") && isTermAngledNOTFound)
-				multiWord.append(splitSpace[i]+">"+" ");
-			else if(!isTermAngledNOTFound) 
-				multiWord.append(splitSpace[i]+" ");
-			isTermAngledNOTFound=false;
-		}
-		else
-		{
-			if(isBooleanSet)
-			{
-				multiWord.append("TERM:"+splitSpace[i]+" ");
-				isBooleanSet=false;
-			}
-			else if(isNotSet)
-			{
-				multiWord.append("<TERM:"+splitSpace[i]+">"+" ");
-				isNotSet=false;
-			}
-			else if(i==0)
-			{
-				multiWord.append("Term:"+splitSpace[i]+" ");
-			}
-			else
-			{
-				multiWord.append(defaultOperator+" "+"Term:"+splitSpace[i]+" ");
-			}
-			isTermAngledNOTFound=false;
-		}
-	  }
-	return i;
+		return j;
 	}
+	
 }
