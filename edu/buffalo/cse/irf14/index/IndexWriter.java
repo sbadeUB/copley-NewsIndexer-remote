@@ -361,7 +361,7 @@ public class IndexWriter {
 	public boolean MakeHashmaps(TokenStream ts,int DocID,int FieldType)
 	{
 		
-		Map<String,Integer> tm = new TreeMap<String,Integer>();
+		Map<String,Integer> tm = new TreeMap<String,Integer>(String.CASE_INSENSITIVE_ORDER);
 		for(Token t:ts.getTokenstream())
 		{
 			String nextElement=t.getTermText();

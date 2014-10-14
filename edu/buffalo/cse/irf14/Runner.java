@@ -56,7 +56,7 @@ public class Runner {
 		IndexWriter writer = new IndexWriter(indexDir);
 		long start = System.currentTimeMillis();
 		
-		/*try {
+		try {
 			for (String cat : catDirectories) {
 				dir = new File(ipDir+ File.separator+ cat);
 				files = dir.list();
@@ -84,15 +84,15 @@ public class Runner {
 		} catch (IndexerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
 		
 		//QueryParser.parse("(blue AND black) AND Author:bruises", "OR");
 		/*String[] terms={"COMPUTER","SALE"};
-		IndexReader rdr=new IndexReader(indexDir, IndexType.TERM);*/
+		IndexReader rdr=new IndexReader(indexDir, IndexType.TERM);
 		PrintStream s=null;
 		ScoringModel model=null;
 		SearchRunner run=new SearchRunner(indexDir,ipDir, 'Q',s);
-		run.query("oil AND (invest OR ((lower OR Term:stake) AND Analysts))", model);
+		run.query("oil AND (invest OR ((lower OR stake) AND Analysts))", model);*/
 	}
 	
 

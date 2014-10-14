@@ -157,7 +157,9 @@ public class Parser {
 						    	 {
 						    		 place="";
 						    		 intermDateCont="";
-						    		 content="";
+						    		 if(dateContent[0]!=null || dateContent[0]!="")
+						    		 content=dateContent[0];
+						    		 else content="";
 						    	 }
 						
 						     docs.setField(FieldNames.FILEID, file.getName());
