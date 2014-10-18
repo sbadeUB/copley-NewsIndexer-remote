@@ -32,7 +32,7 @@ public class IndexWriter {
 	public String indexDir=null;
 	public static int DocCount=0;
 	public static ArrayList<String> CategoryList=new ArrayList<String>();
-	public static TreeMap<String,Integer> DocumentIDsList=new TreeMap<String,Integer>();
+	public static TreeMap<Integer,String> DocumentIDsList=new TreeMap<Integer,String>();
 	public static ArrayList<TreeMap<String, Integer>> CategoryPostingslist=new ArrayList<TreeMap<String,Integer>>();
 	public static ArrayList<String> PlaceList=new ArrayList<String>();
 	public static ArrayList<HashMap<String, Integer>> PlacePostingslist = new ArrayList<HashMap<String,Integer>>();
@@ -73,8 +73,8 @@ public class IndexWriter {
 		int docLen=0;
 		//--Doc ID conversion--//
 		DocCount++;
-		DocumentIDsList.put(fileid[0], DocCount);
-		int DocID=DocumentIDsList.get(fileid[0]);
+		DocumentIDsList.put(DocCount,fileid[0]);
+		int DocID=DocCount;
 		TokenStream streamForPlace=null;
 		TokenStream streamForTitle=null;
 		TokenStream streamForAuthor=null;
@@ -233,12 +233,13 @@ public class IndexWriter {
 			 if(streamForDate!=null)
 			 MakeHashmaps(streamForDate, DocID, 3);
 		
-			 if(docLen!=0)
+			// if(docLen!=0)
 				DocumentLengthList.add(docLen);
 			
 		}catch (TokenizerException e) {
 			e.printStackTrace();
 			System.out.println("tokenizer exception thrown"+e.getMessage());
+		DocumentLengthList.add(0);
 			}
 	}
 	
@@ -514,7 +515,7 @@ public class IndexWriter {
 		int i=0;
 		try {
             out = new PrintWriter( new FileWriter( InputFileName ) );
-            for(Map.Entry<String,Integer> entry : DocumentIDsList.entrySet())
+            for(Map.Entry<Integer,String> entry : DocumentIDsList.entrySet())
             {
             	Integer n=DocumentLengthList.get(i);
             	out.println(entry.getKey()+" "+entry.getValue()+" "+n.intValue());

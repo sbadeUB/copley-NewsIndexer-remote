@@ -99,7 +99,7 @@ public class IndexReader {
             ObjectInputStream ois=new ObjectInputStream(fis);
 
             @SuppressWarnings("unchecked")
-			TreeMap<String,Integer> mapInFile=(TreeMap<String,Integer>)ois.readObject();
+			TreeMap<Integer,String> mapInFile=(TreeMap<Integer,String>)ois.readObject();
             totalValueTerms=mapInFile.size();
             ois.close();
             fis.close();
@@ -177,19 +177,19 @@ public class IndexReader {
 	            ObjectInputStream ois=new ObjectInputStream(fis);
 
 	            @SuppressWarnings("unchecked")
-				TreeMap<String,Integer> mapInFile=(TreeMap<String,Integer>)ois.readObject();
+				TreeMap<Integer,String> mapInFile=(TreeMap<Integer,String>)ois.readObject();
 	           // totalValueTerms=mapInFile.size();
-	            for(Map.Entry<String,Integer> entry : mapInFile.entrySet())
+	            for(Map.Entry<Integer,String> entry : mapInFile.entrySet())
 				{
 					for(Map.Entry<String,Integer> entry2 : Posting.entrySet())
 					{
-						String w=entry.getKey();
-						int x=entry.getValue();
+						int w=entry.getKey();
+						String x=entry.getValue();
 						int y=Integer.parseInt(entry2.getKey());
 						int z=entry2.getValue();
-						if(x==y)
+						if(w==y)
 						{
-							finalPosting.put(w, z);
+							finalPosting.put(x, z);
 							break;
 						}
 					}
@@ -424,19 +424,19 @@ public class IndexReader {
 				            ObjectInputStream ois=new ObjectInputStream(fis);
 
 				            @SuppressWarnings("unchecked")
-							TreeMap<String,Integer> mapInFile=(TreeMap<String,Integer>)ois.readObject();
+							TreeMap<Integer,String> mapInFile=(TreeMap<Integer,String>)ois.readObject();
 				           // totalValueTerms=mapInFile.size();
-				            for(Map.Entry<String,Integer> entry : mapInFile.entrySet())
+				            for(Map.Entry<Integer,String> entry : mapInFile.entrySet())
 							{
 								for(Map.Entry<String,Integer> entry2 : basemap.entrySet())
 								{
-									String w=entry.getKey();
-									int x=entry.getValue();
+									int w=entry.getKey();
+									String x=entry.getValue();
 									int y=Integer.parseInt(entry2.getKey());
 									int z=entry2.getValue();
-									if(x==y)
+									if(w==y)
 									{
-										finalposting.put(w, z);
+										finalposting.put(x, z);
 										break;
 									}
 								}

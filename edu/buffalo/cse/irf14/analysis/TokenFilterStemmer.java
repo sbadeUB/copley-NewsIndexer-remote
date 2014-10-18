@@ -39,7 +39,7 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 			{
 				w=str2.toCharArray();
 				j=str2.length();
-				String regex="[a-z]+";
+				String regex="^[A-z]+$";
 	          	if(Pattern.matches(regex,str2))
 	          	{
 				   for(int c=0;c<j;c++)
