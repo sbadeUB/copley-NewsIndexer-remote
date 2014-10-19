@@ -6,7 +6,9 @@ package edu.buffalo.cse.irf14.query;
 
 
 //import java.util.ArrayList;
+import java.util.Map.Entry;
 import java.util.Stack;
+import java.util.TreeMap;
 
 import edu.buffalo.cse.irf14.analysis.Analyzer;
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
@@ -29,6 +31,8 @@ public class QueryParser
 	static String ConsumeString="";
 	private static boolean isEndReached;
 	private static boolean isError=false;
+	public static int countOperators=0;
+	public static TreeMap<Integer,Integer[]> quotesInfo=new TreeMap<Integer, Integer[]>();
 	
 	/**
 	 * MEthod to parse the given user query into a Query object
@@ -91,10 +95,13 @@ public class QueryParser
     			else if(S.equals("AND") || S.equals("OR") || S.equals("NOT") || S.equals("(") || S.equals(")"))
         		{
         			multiword.append(S+" ");
+        			countOperators=countOperators+1;
         			isSet=true;
         		}
         		else//either single word or with multiple words having no operators in between
         		{
+        			int n=j;
+        			int m=0;
         			String QuoteString="";
         			if(S.contains("\""))
         			{
@@ -103,11 +110,13 @@ public class QueryParser
         				QuoteString=QuoteString+S.substring(1);
         				generalOperandStack.push(S.substring(1));
         				j=j+1;
+        				m=m+1;
         				S=splitSpace[j];
         				while(!S.contains("\""))
         				{
         					QuoteString=QuoteString+" "+S;
         					j=j+1;
+        					m=m+1;
         					multiword.append("* ");
         					generalOperandStack.push(S);
             				S=splitSpace[j];
@@ -115,6 +124,7 @@ public class QueryParser
         				
         				multiword.append("*");
         				multiword.append("\"");
+        				m=m+1;
         				while((S.endsWith(")")||S.endsWith("\"")))
     					{
 							char x=S.charAt(S.length()-1);
@@ -132,6 +142,8 @@ public class QueryParser
     					generalOperandStack.push(S);
     					multiword.append(" ");
         				QuoteString=QuoteString+" "+S;
+        				Integer[] x={m,countOperators};
+						quotesInfo.put(n, x);
         				if(j<=splitSpace.length) 
         				{
         					S=QuoteString;
@@ -166,6 +178,7 @@ public class QueryParser
     					if(St.equals("AND") || St.equals("OR") || St.equals("NOT") || St.equals("(") || St.equals(")"))
     					{
     						multiword.append(St+" ");
+    						countOperators=countOperators+1;
     						isSet=true;
     					}
     				}
@@ -263,16 +276,43 @@ public class QueryParser
 				stream=a.getStream();
 				stream.reset();
 			}
+			int k=-1;
+			boolean isQuote=false;
 			while(stream.hasNext())
 			{
 				Token token=stream.next();
 				String temp=token.getTermText();
+				k=k+1;
+				System.out.println(temp);
 				temp.trim();
 				String[] splitSpace=temp.split(" ");
-				for(int i=0;i<splitSpace.length;i++)
-				outputOperandStack.push(splitSpace[i]);
+				if(splitSpace.length>1)
+				{
+					for(Entry<Integer, Integer[]> entry:quotesInfo.entrySet())
+					{
+						int key=entry.getKey()-entry.getValue()[1];
+						if(k==key)
+						{
+							for(int i=0;i<splitSpace.length;i++)
+							outputOperandStack.push(splitSpace[i]);
+							isQuote=true;
+							break;
+						}
+					}
+					if(!isQuote)
+					{
+						String quoteString="\""+temp+"\"";
+						outputOperandStack.push(quoteString);
+					}
+				}
+				else
+				{
+					outputOperandStack.push(temp);
+				}
+				
 			}
 			stream.reset();
+			
 		}
 		catch(Exception e)
 		{
@@ -293,10 +333,13 @@ public class QueryParser
 		}
 		if(str.contains("\""))
 		{
+			int m=0;
+			int n=j;
 			multiword.append("\"");
 			multiword.append("* ");
 			ConsumeString=ConsumeString+" "+str.substring(1);
 			generalOperandStack.push(str.substring(1));
+			m=m+1;
 			j=j+1;
 			str=splitSpace[j];
 			while(!(str.endsWith("\"") || str.endsWith(")")))
@@ -305,10 +348,12 @@ public class QueryParser
 				multiword.append("* ");
 				generalOperandStack.push(str);
 				j=j+1;
+				m=m+1;
 				str=splitSpace[j];
 			}
 			if(str.contains("\""))
 			{
+				m=m+1;
 				str=splitSpace[j];
 				multiword.append("*");
 				multiword.append("\"");
@@ -335,6 +380,9 @@ public class QueryParser
 					isEndReached=true;
 				}
 			}
+			Integer[] x={m,countOperators};
+			quotesInfo.put(n, x);
+			
 		}
 		else
 		{
@@ -360,18 +408,23 @@ public class QueryParser
 				else if(splitSpace[j].equals("AND") || splitSpace[j].equals("OR") || splitSpace[j].equals("NOT"))
 				{
 					multiword.append(splitSpace[j]+" ");
+					countOperators=countOperators+1;
 				}
 				else
 				{
 					if(splitSpace[j].contains("\""))
 					{
+						int n=j;
+						int m=0;
 						multiword.append("\"");
 						multiword.append("* ");
 						ConsumeString=ConsumeString+" "+splitSpace[j].substring(1);
 						generalOperandStack.push(splitSpace[j].substring(1));
 						j=j+1;
+						m=m+1;
 						while(!splitSpace[j].contains("\""))
 						{
+							m=m+1;
 							splitSpace[j]=splitSpace[j].trim();
 							ConsumeString=ConsumeString+" "+splitSpace[j];
 							multiword.append("* ");
@@ -380,6 +433,7 @@ public class QueryParser
 						}
 						if(splitSpace[j].contains("\""))
 						{
+							m=m+1;
 							str=splitSpace[j];
 							multiword.append("*");
 							multiword.append("\"");
@@ -404,9 +458,13 @@ public class QueryParser
 							if(j==splitSpace.length-1) 
 							{
 								isEndReached=true;
+								Integer[] x={m,countOperators};
+								quotesInfo.put(n, x);
 								break;
 							}
 						}
+						Integer[] x={m,countOperators};
+						quotesInfo.put(n, x);
 					}
 					else
 					{

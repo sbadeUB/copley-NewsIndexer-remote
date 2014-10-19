@@ -366,15 +366,38 @@ public class IndexWriter {
 		for(Token t:ts.getTokenstream())
 		{
 			String nextElement=t.getTermText();
+			nextElement.trim();
+			if(nextElement.contains(" "))
+			{
+				String[] splitSpace=nextElement.split(" ");
+				for(String s:splitSpace)
+				{
+					s.trim();
+					if(tm.size()>0 && tm.containsKey(s))
+					{
+						int val = 0;
+						if(tm.get(s)!= null)
+						{
+							val = (Integer) tm.get(s);
+							val = val+1;
+						}
+						tm.put(s, val);
+					}
+					else
+					{
+						tm.put(s, 1);
+					}
+				}
+			}
 			if(tm.size()>0 && tm.containsKey(nextElement))
 			{
-             int val = 0;
-             if(tm.get(nextElement)!= null)
-             {
-              val = (Integer) tm.get(nextElement);
-              val = val+1;
-             }
-            tm.put(nextElement, val);
+				int val = 0;
+				if(tm.get(nextElement)!= null)
+				{
+					val = (Integer) tm.get(nextElement);
+					val = val+1;
+				}
+				tm.put(nextElement, val);
 			}
 			else
 			{

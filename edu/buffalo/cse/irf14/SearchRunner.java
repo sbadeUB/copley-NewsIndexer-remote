@@ -4,12 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -21,24 +19,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import edu.buffalo.cse.irf14.query.Query;
 import edu.buffalo.cse.irf14.query.QueryParser;
-import edu.buffalo.cse.irf14.document.Document;
-import edu.buffalo.cse.irf14.document.FieldNames;
 import edu.buffalo.cse.irf14.document.ParserException;
-
-import javax.print.Doc;
-
-import sun.security.util.Length;
-
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.NoFixedFacet;
-import com.sun.xml.internal.ws.wsdl.parser.ParserUtil;
-
-import edu.buffalo.cse.irf14.document.Parser;
 import edu.buffalo.cse.irf14.index.IndexReader;
 import edu.buffalo.cse.irf14.index.IndexType;
 
@@ -53,7 +40,7 @@ public class SearchRunner {
 	public String indexdir;
 	public String corpusDir;
 	public char mode;
-		public PrintStream stream;
+	public PrintStream stream;
 	/**
 	 * Default (and only public) consructor
 	 * @param indexDir : The directory where the index resides
@@ -64,9 +51,9 @@ public class SearchRunner {
 	public SearchRunner(String indexDir, String corpusDir,char mode, PrintStream stream)
 	{
 		this.indexdir=indexDir;
-				this.corpusDir=corpusDir;
-				this.mode=mode;
-				this.stream=stream;
+		this.corpusDir=corpusDir;
+		this.mode=mode;
+		this.stream=stream;
 	}
 	
 	/**
@@ -136,6 +123,7 @@ public class SearchRunner {
 	}*/
 	
 	}
+	@SuppressWarnings("resource")
 	public List<Entry<String,Double>> getsortedmapwithcomparator(HashMap<String,Double> RelevanceScoresOKAPI)
 	{
 		HashMap<String,Double> mapwithfileids= new HashMap<String, Double>();
@@ -154,13 +142,10 @@ public class SearchRunner {
         	}
         }
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		List<Entry<String,Double>> sortedEntries = new ArrayList<Entry<String,Double>>(mapwithfileids.entrySet());
@@ -190,14 +175,8 @@ public class SearchRunner {
 			{
 			if(RelevanceScoresOKAPI.get(s)==k)
 			{
-				/*while(!sortedmap.keySet().contains(s))
-				{*/
 				sortedmap.put(s, k);
-			//	i--;
 				RelevanceScoresOKAPI.remove(s);
-				//String xyz="p";
-				//String q=xyz;
-				//}
 				break;
 			}
 			}
@@ -214,14 +193,8 @@ public class SearchRunner {
 				{
 				if(RelevanceScoresOKAPI.get(s)==k)
 				{
-					/*while(!sortedmap.keySet().contains(s))
-					{*/
 					sortedmap.put(s, k);
-				//	i--;
 					RelevanceScoresOKAPI.remove(s);
-					//String xyz="p";
-					//String q=xyz;
-					//}
 					break;
 				}
 				}
@@ -247,13 +220,10 @@ public class SearchRunner {
         	}
         }
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return sortedmapwithfileids;
@@ -513,7 +483,7 @@ public class SearchRunner {
 				}
 				result.put(s, finalvalue);
 			}	
-			/*double maxvalue=0.0;
+			double maxvalue=0.0;
 			for(String s:result.keySet())
 			{
 				if(result.get(s)>maxvalue)
@@ -526,16 +496,11 @@ public class SearchRunner {
 				double factor = 1e5; // = 1 * 10^5 = 100000.
 				double normalscore=result.get(s)/maxvalue;
 				double rounded = Math.round(normalscore * factor) / factor;
-				
 				normalizeOKAPIMAP.put(s,rounded);
 			}
-				
-			*/
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 		return result;
@@ -584,6 +549,55 @@ public class SearchRunner {
 		}
 		return RelevanceScores;
 	}
+	/*
+	 * Maps should have keys in descending order from largest to smallest
+	 */
+	public double calculateNDCGMeasure(TreeMap<String, Double> ResultantDocRelvsD1, TreeMap<String, Double> ActualDocRelvsD1)
+	{
+		double DCG=0.0;
+		double iDCG=0.0;
+		int i=1;
+		int j=1;
+		for(Entry<String,Double> entry:ActualDocRelvsD1.entrySet())
+		{
+			double r=entry.getValue();
+			if(j==1) iDCG=iDCG+r;
+			else iDCG=iDCG+(r/Math.log10(j));
+			j=j+1;
+		}
+		for(Entry<String,Double> entry:ResultantDocRelvsD1.entrySet())
+		{
+			double r=entry.getValue();
+			if(i==1) DCG=DCG+r;
+			else DCG=DCG+(r/Math.log10(i));
+			i=i+1;
+		}
+		double NDCG=(DCG/iDCG);
+		return NDCG;
+	}
+	
+	public double calculateFMeasure(ArrayList<String> ResultantDocsD1,ArrayList<String> ActualDocsD)
+	{
+		ArrayList<String> finalDocs=IntersectDocs(ResultantDocsD1,ActualDocsD);
+		 int P = (finalDocs.size()/ResultantDocsD1.size());
+		 int R = (finalDocs.size()/ActualDocsD.size());
+		 double FBy2Measure = (1.25 * P * R) / (0.25 * P + R);
+		 return FBy2Measure;
+	}
+	public ArrayList<String> IntersectDocs(ArrayList<String> ResultantDocsD1,ArrayList<String> ActualDocsD)
+	{
+		ArrayList<String> finalDocs=new ArrayList<String>();
+		HashSet <String> resultantset = new HashSet <String>();
+		for (String s : ResultantDocsD1)
+		{
+            if(ActualDocsD.contains(s))
+            {
+            	resultantset.add(s);
+            }
+        }
+		finalDocs.addAll(resultantset);
+		return finalDocs;
+	}
 	
 	public TreeMap<String,Integer> RetrieveTermsInQuery(String parsedQuery)
 	{
@@ -611,7 +625,7 @@ public class SearchRunner {
 					{
 						str=str.substring(1, str.length());
 						j=j+1;
-											String s=splitSpace[j];
+										String s=splitSpace[j];
 												while(!(s.endsWith("\"") || s.endsWith("]") || s.endsWith("}")))
 												{
 													System.out.println(s);
@@ -926,6 +940,207 @@ public class SearchRunner {
 		return combine;
 		
 		}
+	
+	@SuppressWarnings("unchecked")
+	public HashMap<String, TreeMap<String, Integer>> hashmapwithstak(String parsedQuery)
+	{
+		Stack<String> operators= new Stack<String>();
+		Stack<String> terms= new Stack<String>();
+		//Stack secondstack= new Stack();
+		String[] splitintospaces=parsedQuery.split(" ");
+		boolean quoteset=false;
+		for(String s: splitintospaces)
+		{
+			if(quoteset)
+			{
+				quoteset=false;
+				continue;
+			}
+			if(s.equals("}"))
+			{
+				int i=operators.size();
+			    while(!operators.get(i-1).equals("{"))
+			    {
+			    	String operator=operators.get(i-1);
+			    	terms.push(operator);
+			    	operators.pop();
+			    	i--;
+			    }
+			    operators.pop();
+			}
+			else if(s.equals("]"))
+			{
+				int i=operators.size();
+			    while(!operators.get(i-1).equals("["))
+			    {
+			    	String operator=operators.get(i-1);
+			    	terms.push(operator);
+			    	operators.pop();
+			    	i--;
+			    }
+			    operators.pop();
+			}
+			else if(s.equals("[")||s.equals("AND")||s.equals("OR")||s.equals("{"))
+			{
+				if((s.equals("OR")&& operators.elementAt(operators.size()-1).equals("AND"))||(s.equals("OR")&& operators.elementAt(operators.size()-1).equals("AND")))
+				{
+					operators.pop();
+					terms.push("AND");
+				}
+				operators.push(s);
+			}
+			else
+			{
+				if(s.contains("\""))
+				{
+					String sm=s;
+					s=s.replace("\"","");
+					int index=0;
+				int len=splitintospaces.length;
+				for(int i=0;i<len;i++)
+				{
+					if(splitintospaces[i].equals(sm))
+					{
+						index=i;
+						break;
+					}
+						
+				}
+				String quote=splitintospaces[index+1].substring(0,splitintospaces[index+1].length()-1);
+				s=s+" "+quote;
+				terms.add(s);
+				quoteset=true;
+				}		
+				else
+				{
+				terms.push(s);
+				}
+			}
+       	}	
+		for(int i=0;i<terms.size();i++)
+		{
+			System.out.println(terms.get(i));
+		}
+		@SuppressWarnings("rawtypes")
+		Stack thirdstack=new Stack();
+		if(terms.size()==1)
+		{
+			 String s=terms.pop();
+			 String indextermsplit[]=s.split(":");
+			 IndexType indextype;
+				if(indextermsplit[0].equalsIgnoreCase("Term"))
+				{
+					indextype=IndexType.TERM;
+				}
+				else if(indextermsplit[0].equalsIgnoreCase("Author"))
+				{
+					indextype=IndexType.AUTHOR;
+				}
+				else if(indextermsplit[0].equalsIgnoreCase("Place"))
+				{
+					indextype=IndexType.PLACE;
+				}
+				else
+				{
+					indextype=IndexType.CATEGORY;
+				}
+				HashMap<String, TreeMap<String, Integer>> onetermresult=new HashMap<String, TreeMap<String,Integer>>();
+				onetermresult=getDOCIDs(indextype,indextermsplit[1]);
+				termDocCounts.put(indextermsplit[1],onetermresult.size());
+			 return getDOCIDs(indextype,indextermsplit[1]);
+		}
+		for(int i=0;i<terms.size();i++)
+		{
+			//String datatype=terms.get(i).getClass().getName();
+			String term=terms.get(i);
+			if(!(term.equals("OR")||term.equals("AND")))
+			{
+				thirdstack.push(terms.get(i));
+			}
+			else
+			{
+				String operator= terms.get(i).toString();
+				String firstpoppeddatatype=thirdstack.elementAt(thirdstack.size()-1).getClass().getName();
+				HashMap<String, TreeMap<String, Integer>> first =new HashMap<String, TreeMap<String,Integer>>();
+				HashMap<String, TreeMap<String, Integer>> second =new HashMap<String, TreeMap<String,Integer>>();
+				if(firstpoppeddatatype!="java.lang.String")
+				{
+                    first=(HashMap<String, TreeMap<String, Integer>>) thirdstack.pop();
+				}
+				else
+				{
+					String s=(String) thirdstack.pop();
+					if(s.contains("<"))
+					{
+						s=s.substring(1,s.length()-1);
+						operator="ANDNOT";
+					}
+					String[] indextermsplitfirst=s.split(":");
+					
+					IndexType indextype;
+					if(indextermsplitfirst[0].equalsIgnoreCase("Term"))
+					{
+						indextype=IndexType.TERM;
+					}
+					else if(indextermsplitfirst[0].equalsIgnoreCase("Author"))
+					{
+						indextype=IndexType.AUTHOR;
+					}
+					else if(indextermsplitfirst[0].equalsIgnoreCase("Place"))
+					{
+						indextype=IndexType.PLACE;
+					}
+					else
+					{
+						indextype=IndexType.CATEGORY;
+					}
+					 first= getDOCIDs(indextype,indextermsplitfirst[1]);
+					termDocCounts.put(indextermsplitfirst[1], first.size());
+				}
+				String secondpoppeddatatype=thirdstack.elementAt(thirdstack.size()-1).getClass().getName();
+				if(secondpoppeddatatype!="java.lang.String")
+				{
+                           second=(HashMap<String, TreeMap<String, Integer>>) thirdstack.pop();
+				}
+				else
+				{
+					String s=(String) thirdstack.pop();
+					if(s.contains("<"))
+					{
+						s=s.substring(1,s.length()-1);
+						operator="ANDNOT";
+					}
+					String[] indextermsplitfirst=s.split(":");
+					IndexType indextype;
+					if(indextermsplitfirst[0].equalsIgnoreCase("Term"))
+					{
+						indextype=IndexType.TERM;
+					}
+					else if(indextermsplitfirst[0].equalsIgnoreCase("Author"))
+					{
+						indextype=IndexType.AUTHOR;
+					}
+					else if(indextermsplitfirst[0].equalsIgnoreCase("Place"))
+					{
+						indextype=IndexType.PLACE;
+					}
+					else
+					{
+						indextype=IndexType.CATEGORY;
+					}
+					 second= getDOCIDs(indextype,indextermsplitfirst[1]);
+					termDocCounts.put(indextermsplitfirst[1], second.size());
+				}
+				HashMap<String, TreeMap<String, Integer>> result= getDocsForOneOperator(operator, second, first);
+				thirdstack.push(result);
+			}
+				
+		}
+		return (HashMap<String, TreeMap<String, Integer>>) thirdstack.get(0);
+	}
+	
+	
+	
 	/**
 	 * Method to execute queries in E mode
 	 * @param queryFile : The file from which queries are to be read and executed
@@ -958,7 +1173,8 @@ public class SearchRunner {
 					Query query=QueryParser.parse(querystring, "OR");
 					String parsedQuery=query.toString();
 					HashMap<String, TreeMap<String, Integer>> FinalDocResultHashmap=  new HashMap<String, TreeMap<String,Integer>>();
-					FinalDocResultHashmap=gethashmap(parsedQuery);
+					//FinalDocResultHashmap=gethashmap(parsedQuery);
+					FinalDocResultHashmap=hashmapwithstak(parsedQuery);
 					TreeMap<String, Integer> TermTFCountPairMap=new TreeMap<String, Integer>();
 					TermTFCountPairMap=RetrieveTermsInQuery(parsedQuery);
 					ArrayList<String> TermsList=new ArrayList<String>();
@@ -976,50 +1192,36 @@ public class SearchRunner {
 					            
 					            for(Map.Entry<String,Double> entry : sortedmap.entrySet())
 								{
-									str=str+entry.getKey()+" "+entry.getValue()+",";
+									str=str+entry.getKey()+"#"+entry.getValue()+",";
 								}
 					            str=fullquer[0]+":"+"{"+str.substring(0, str.length()-1)+ "}";
 					            arrayOut.add(str);
 				}
-				File dir=new File(this.indexdir);
-				writeQueriesToFile(dir.getAbsolutePath() + File.separator +"queryrslt",arrayOut);
+				writeQueriesToFile(arrayOut);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		
 	}
 	
-	public boolean writeQueriesToFile(String InputFileName,ArrayList<String> arrayOut)
+	public void writeQueriesToFile(ArrayList<String> arrayOut)
 	{
-		boolean status=false;
-		/* ArrayList<String> arrayOut=new ArrayList<String>();
-		try{
-	            String str="";
-	            for(Map.Entry<String,Double> entry : sortedmap.entrySet())
-				{
-					str=str+entry.getKey()+" "+entry.getValue()+",";
-				}
-	            str="{"+str.substring(0, str.length()-1)+ "}";
-	            arrayOut.add(str);
-	        }catch(Exception e){}*/
-		PrintWriter out=null;
-		try {
-            out = new PrintWriter( new FileWriter( InputFileName ) );
-            for(String s:arrayOut)
-            out.println(s);
-        }
-        catch ( IOException error ) {
-        	System.out.println("Error while writing Postings to file2 in Index Writer:"+error.getMessage());
-        }
-		out.flush();
-        out.close();
-		return status;
+		try
+		{
+			for(String s:arrayOut)
+				stream.println(s);
+		}
+	
+		catch(Exception e)
+		{
+			System.out.println("Sorry,Some error occurred while writing back to PrintStream!"+e.getMessage());
+		}
+		stream.flush();
+		stream.close();
 	}
 	/**
 	 * General cleanup method

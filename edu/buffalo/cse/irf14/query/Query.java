@@ -10,9 +10,9 @@ import java.util.Stack;
  */
 public class Query 
 {
-	String initQueryString;
-	String defaultOperator;
-	String finalQuery;
+	String initQueryString="";
+	String defaultOperator="";
+	String finalQuery="";
 	String[] Categories={"Author","Category","Place"};
 	StringBuilder multiWord=new StringBuilder();
 	boolean isCategoryFound=false;
@@ -26,7 +26,7 @@ public class Query
 	boolean setCatSequence=false;
 	boolean isEndReached=false;
 	boolean isSet=false;
-	String ResultantUnSpacedQuery;
+	String ResultantUnSpacedQuery="";
 	
 	/**
 	 * Constructor to invoke Query Object with given initQueryString and defaultOpearator

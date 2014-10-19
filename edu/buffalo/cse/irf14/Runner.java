@@ -3,11 +3,15 @@
  */
 package edu.buffalo.cse.irf14;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.ArrayList;
 
 import edu.buffalo.cse.irf14.SearchRunner.ScoringModel;
@@ -90,42 +94,20 @@ public class Runner {
 			e.printStackTrace();
 		}*/
 		
-		//QueryParser.parse("(blue AND black) AND Author:bruises", "OR");
-		String[] terms={"COMPUTER","SALE"};
 		IndexReader rdr=new IndexReader(indexDir, IndexType.TERM);
 		PrintStream s=null;
+		try {
+			s = new PrintStream(new File(indexDir+ File.separator +"outputResults"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		ScoringModel model=null;
 		String corpdir="C:\\Users\\TEJA\\Desktop\\corpus";
-		SearchRunner run=new SearchRunner(indexDir,corpdir, 'Q',s);
-		/*File dir2=new File(indexDir);
-		indexDir=dir2.getAbsolutePath();
-		File quer=new File(indexDir+ File.separator +"quer");
-		//File dictionaryFile=new File(indexDir+ File.separator +"DocumentDictionary");
-		PrintWriter out=null;
-            try {
-				out = new PrintWriter( new FileWriter(quer) );
-				out.println("xyz");
-				out.flush();out.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
-//	run.query("Category:(bade AND (geeks AND Deltas) OR (Needs AND Deeds) OR \"shit institute\")", model);
-	//run.query("consumer price index consumer index cpi index consumer surplus",model);
-		//run.query("trade deficit foreign exchange trade surplus balance of trade",model);
-		//run.query("Place:tokyo NOT bank", model);
-		//run.query("Author:\"Petrol Sucks\" OR \"bade rocks\" norming OR Place:Bangalore AND Author:(\"Petrol Sucks\" AND oil) AND Category:(invest OR ((lower OR stake) AND \"Analysts Sucks\"))", model);
-		//run.query("Category:((\"lower class\" OR \"stake high\") OR (invest AND Baede) AND (bade OR (rozy AND rocks)) OR (bade OR (rozy AND \"rocks virgin\"))) AND Place:((\"lower class\" OR \"stake high\") OR (invest AND Baede) AND (bade OR (rozy AND rocks)) OR (bade OR (rozy AND \"rocks virgin\")))", model);
-		//run.query("Category:acq OR computer", model);
-		run.query("Category:(((acq OR cdf) OR (retail OR (rubber AND rye)) OR (ship OR (silver AND wheat)) OR (yen OR (silver AND zinc)))) OR Place:((LAKE OR SAN) OR (DUBLIN AND Atlanta) AND (ROME OR (mass AND ROME)) OR (MIAMI OR (Tenn AND PARIS)))", model);
+		SearchRunner run=new SearchRunner(indexDir,corpdir, 'E',s);
+		File file=new File(indexDir+ File.separator +"quer");
+		run.query(file);
 		
-		//Category:((acq OR retail) OR (rubber AND rye) OR (ship OR (silver AND wheat)) OR (yen OR (silver AND zinc))) OR 
-		//run.query("author:torday AND (debt OR currency)", model);
-		//run.query("Category:war AND Author:Dutt AND Place:Baghdad AND prisoners detainees rebels", model);
-		//run.query("(love NOT war) AND Category:(movies NOT crime)", model);
-		//Query2:{author:(brian OR richard) AND place:(paris OR washington)}
-	//	Query3:{place:washington AND federal treasury}
-	//run.query(quer);
-		String rm="gjhckzjdv";
 	}
+	
 }
