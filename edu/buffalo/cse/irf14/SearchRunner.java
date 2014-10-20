@@ -171,216 +171,6 @@ public class SearchRunner {
 	}
 
 	
-	public  HashMap<String, TreeMap<String,Integer>>gethashmap(String parsedQuery)
-	{
-		String[] splitintospaces=parsedQuery.split(" ");
-		boolean quoteset=false;
-		//String[] splitintospaces=userQuery.split(" ");
-		boolean started=false;
-		IndexType indextype;
-		HashMap<String, TreeMap<String, Integer>> docids=new HashMap<String, TreeMap<String, Integer>>();
-		ArrayList<HashMap<String, TreeMap<String, Integer>>> chainarraylist=new ArrayList<HashMap<String, TreeMap<String, Integer>>>();
-		String operator="";
-		String[] priorityoperator= new String[4];
-		boolean operatorset=false;
-		boolean priorityoperatorset=false;
-		boolean bracketstrt=false;
-	    boolean getresult=false;
-	    @SuppressWarnings("unused")
-		boolean notset=false;
-	    int count=0;
-	    int ends=0;
-	    int starts=0;
-	    ArrayList<HashMap<String, TreeMap<String, Integer>>> priorityarraylist=new ArrayList<HashMap<String, TreeMap<String, Integer>>>();
-		for(String s:splitintospaces )
-		{
-			String sm=s;
-			if(quoteset)
-			{
-				quoteset=false;
-				continue;
-			}
-			if(s.startsWith("{"))
-			{
-				started=true;
-				s=s.substring(1);
-			}
-			if(s.endsWith("}"))
-			{
-				s=s.substring(0,s.length()-1);
-				started=false;
-			}
-				if(s.contains("["))
-				{
-					while((s.contains("["))) ///check loop interchange
-					{
-					s=s.substring(s.indexOf("[")+1);
-					bracketstrt=true;
-					getresult=false;
-					priorityoperatorset=false;
-					starts++;
-					}
-					count++;
-				}
-				if(s.contains("]"))
-				{
-				while((s.contains("]"))) ///check loop interchange
-				{
-					s=s.substring(0, s.length()-1);
-					if(starts==1)
-					bracketstrt=false;
-					getresult=true;
-					ends++;
-					starts--;
-				}
-				}
-				if(s.contains("AND")||s.contains("OR")||s.contains("NOT"))
-				{
-					if(bracketstrt || starts>0)
-					{
-						priorityoperator[count]=s;
-						priorityoperatorset=true;
-						continue;
-					}
-					else
-					{
-					operator=s;
-					operatorset=true;
-					continue;
-					}
-				}
-				if(s.contains("<"))
-				{
-					s=s.substring(s.indexOf("<")+1,s.indexOf(">"));
-					notset=true;
-					if(bracketstrt||getresult)
-						priorityoperator[count]="ANDNOT";
-					else
-					operator="ANDNOT";
-				}
-				if(s.contains("\""))
-				{
-					String st=s.replace("\"","");
-					int index=0;
-				int len=splitintospaces.length;
-				for(int i=0;i<len;i++)
-				{
-					if(splitintospaces[i].equals(sm))
-					{
-						index=i;
-						break;
-					}
-						
-				}
-				String quote=splitintospaces[index+1];
-				if(quote.endsWith("}"))
-				{
-					started=false;
-					quote=quote.substring(0, quote.length()-1);
-					//s=st+" "+quote;
-				}
-				if(quote.contains("]"))
-				{
-					while((quote.contains("]"))) ///check loop interchange
-					{
-						quote=quote.substring(0, quote.length()-1);
-						if(starts==1)
-						bracketstrt=false;
-						getresult=true;
-						ends++;
-						starts--;
-					}
-				}
-				if(!(quote.endsWith("}")||quote.endsWith("]")))
-				{
-				quote=quote.substring(0, quote.length()-1);
-				s=st+" "+quote;
-				quoteset=true;
-				}
-				
-				}
-				
-				String[] indexandtermsplit=s.split(":");
-				if(indexandtermsplit[0].equalsIgnoreCase("Term"))
-				{
-					indextype=IndexType.TERM;
-				}
-				else if(indexandtermsplit[0].equalsIgnoreCase("Author"))
-				{
-					indextype=IndexType.AUTHOR;
-				}
-				else if(indexandtermsplit[0].equalsIgnoreCase("Place"))
-				{
-					indextype=IndexType.PLACE;
-				}
-				else
-				{
-					indextype=IndexType.CATEGORY;
-				}
-				
-				docids=getDOCIDs(indextype, indexandtermsplit[1]);
-				termDocCounts.put(indexandtermsplit[1], docids.size());
-				
-				if(bracketstrt|| getresult)
-				{
-					priorityarraylist.add(docids);
-					System.out.println("added to prio "+ indexandtermsplit[1]);
-				}
-				else
-				{
-				chainarraylist.add(docids);
-				System.out.println("added to chain "+indexandtermsplit[1]);
-				}
-				if(getresult||priorityoperatorset)
-				{
-					while(count>=0 && priorityarraylist.size()>1 && starts<=count) ///ckeck whether using duplicate for count and ends ///// check for three terms//check for large ones term
-					{
-						HashMap<String, TreeMap<String, Integer>> resolveddocids=getDocsForOneOperator(priorityoperator[count], priorityarraylist.get(count-1),priorityarraylist.get(count));
-						priorityarraylist.remove(count-1);
-						priorityarraylist.remove(count-1);
-						priorityarraylist.add(resolveddocids);
-						priorityoperatorset=false;
-				        System.out.println("operator "+ priorityoperator[count]+" applied");
-						/*if (!(starts>0))
-							count--;*/
-				        if(ends>0 ||!(starts>0))
-							count--;
-				        
-						if(ends>0)
-						ends--;
-						
-						/*if(ends==0)
-							break;*/
-					} 
-					if(starts>count)
-			        	count++;
-				}
-				if(count==0 && starts==0)
-				{
-				if(getresult) ////have to check only at the end it has to be added;all closed bracs are closed only
-				{
-				chainarraylist.add(priorityarraylist.get(0));
-				System.out.println("prio resolved and added to chain");
-				priorityarraylist.remove(0);
-				getresult=false;
-				}
-				}
-				if(operatorset && !(bracketstrt))
-				{
-					HashMap<String, TreeMap<String, Integer>> resolveddocids=getDocsForOneOperator(operator, chainarraylist.get(0),chainarraylist.get(1));
-					chainarraylist.remove(0);
-					chainarraylist.remove(0);
-					chainarraylist.add(resolveddocids);
-					System.out.println("chain done with operator "+operator);
-				}
-				if(!started)
-					break;
-			}
-		HashMap<String, TreeMap<String, Integer>> FinalDocResultHashmap=new HashMap<String, TreeMap<String, Integer>>();
-		FinalDocResultHashmap=chainarraylist.get(0);
-		
-		return FinalDocResultHashmap;
-	}
 	
 	@SuppressWarnings("resource")
 	public  HashMap<String, Double> calculateOKAPI(TreeMap<String, Double> iDFMap,HashMap<String, TreeMap<String, Integer>> finalDocResultHashmap)
@@ -1160,6 +950,7 @@ public class SearchRunner {
 		//TODO: IMPLEMENT THIS METHOD
 		BufferedReader br;
 		int noofqueries;
+		int numresults=0;
 		 ArrayList<String> arrayOut=new ArrayList<String>();
 		try {
 			br=new BufferedReader(new FileReader(queryFile));
@@ -1170,8 +961,6 @@ public class SearchRunner {
 					{
 						String[] splittedline=line.split("=");
 						noofqueries=Integer.parseInt(splittedline[1]);
-						String str="numresults "+noofqueries;
-						arrayOut.add(str);
 						continue;			
 					}
 					String[] fullquer=line.split(":");
@@ -1197,7 +986,10 @@ public class SearchRunner {
 					HashMap<String,Double> RelevanceScoresOKAPI=new HashMap<String, Double>();
 					RelevanceScoresOKAPI=calculateOKAPI(IDFMap,FinalDocResultHashmap);
 					List<Entry<String,Double>> sortedList=getsortedmapwithcomparator(RelevanceScoresOKAPI);//also return the file ids
-					
+					if(FinalDocResultHashmap.size()!=0)
+					{
+						numresults=numresults+1;
+					}
 					            String str="";
 					            
 					            for(Entry<String,Double> entry : sortedList)
@@ -1207,7 +999,7 @@ public class SearchRunner {
 					            str=fullquer[0]+":"+"{"+str.substring(0, str.length()-2)+ "}";
 					            arrayOut.add(str);
 				}
-				writeQueriesToFile(arrayOut);
+				writeQueriesToFile(arrayOut,numresults);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -1218,10 +1010,11 @@ public class SearchRunner {
 		
 	}
 	
-	public void writeQueriesToFile(ArrayList<String> arrayOut)
+	public void writeQueriesToFile(ArrayList<String> arrayOut,int num)
 	{
 		try
 		{
+			stream.println("numResults="+num);
 			for(String s:arrayOut)
 				stream.println(s);
 		}
