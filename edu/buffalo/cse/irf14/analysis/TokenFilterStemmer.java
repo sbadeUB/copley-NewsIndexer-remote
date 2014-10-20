@@ -30,18 +30,24 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 		
 		
 		 char[] w = new char[501];
-		
-			
-			int j=0;
+		 int caseType=0;
+		 int j=0;
 			String[] divideWords=str.split(" ");
 			str="";
 			for(String str2:divideWords)
 			{
+				str2.trim();
+				if(str2.matches("^[A-Z]+$"))
+					caseType=2;
+				else if(str2.matches("^[A-Z][a-z]+$"))
+					caseType=1;
+				str2=str2.toLowerCase().trim();
 				w=str2.toCharArray();
 				j=str2.length();
 				String regex="^[A-z]+$";
 	          	if(Pattern.matches(regex,str2))
 	          	{
+	          		
 				   for(int c=0;c<j;c++)
 				    {
 					   this.add(w[c]);
@@ -49,7 +55,10 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 				   this.stem();
 				   str2= this.toString();
 	          	}
+	          	if(caseType==2) str2=str2.toUpperCase();
+	          	else if(caseType==1) str2=toCamelCase(str2);
 				str=str+str2+" ";
+				caseType=0;
 			}
 			str=str.trim();
 	
@@ -69,6 +78,11 @@ public TokenFilter stemmerProcessing(TokenStream ts)
 
 	tfs =new TokenFilterStemmer(ts);
 	return tfs;
+}
+
+static String toCamelCase(String str) {
+    return str.substring(0, 1).toUpperCase() +
+               str.substring(1).toLowerCase();
 }
 
 /**

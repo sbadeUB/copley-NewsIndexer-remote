@@ -26,7 +26,7 @@ public class Query
 	boolean setCatSequence=false;
 	boolean isEndReached=false;
 	boolean isSet=false;
-	String ResultantUnSpacedQuery="";
+	//String ResultantUnSpacedQuery="";
 	
 	/**
 	 * Constructor to invoke Query Object with given initQueryString and defaultOpearator
@@ -105,17 +105,17 @@ public class Query
     			finalQuery=multiWord.toString();
     		}
     		
-    		System.out.println("Final String before:"+finalQuery);
-    		this.ResultantUnSpacedQuery=finalQuery;
+    		/*System.out.println("Final String before:"+finalQuery);
+    		this.ResultantUnSpacedQuery=finalQuery;*/
     		finalQuery=addSpaces(finalQuery);
     		System.out.println("Final String after:"+finalQuery);
 	    	return finalQuery;
 	}
 	
-	public String getStringWithOutSpaces()
+	/*public String getStringWithOutSpaces()
 	{
 		return this.ResultantUnSpacedQuery;
-	}
+	}*/
 	
 	public String addSpaces(String finalQuery)
 	{

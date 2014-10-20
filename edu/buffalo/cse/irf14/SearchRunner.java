@@ -5,11 +5,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +23,9 @@ import java.util.Map.Entry;
 
 import edu.buffalo.cse.irf14.query.Query;
 import edu.buffalo.cse.irf14.query.QueryParser;
+import edu.buffalo.cse.irf14.document.Document;
+import edu.buffalo.cse.irf14.document.FieldNames;
+import edu.buffalo.cse.irf14.document.Parser;
 import edu.buffalo.cse.irf14.document.ParserException;
 import edu.buffalo.cse.irf14.index.IndexReader;
 import edu.buffalo.cse.irf14.index.IndexType;
@@ -68,9 +69,8 @@ public class SearchRunner {
 		System.out.println("In search Runner!");
 			Query query=QueryParser.parse(userQuery, "OR");
 			String parsedQuery=query.toString();
-			parsedQuery=query.getStringWithOutSpaces();
 			HashMap<String, TreeMap<String, Integer>> FinalDocResultHashmap=  new HashMap<String, TreeMap<String,Integer>>();
-			FinalDocResultHashmap=gethashmap(parsedQuery);
+			FinalDocResultHashmap=hashmapwithstak(parsedQuery);
 	TreeMap<String, Integer> TermTFCountPairMap=new TreeMap<String, Integer>();
 	TermTFCountPairMap=RetrieveTermsInQuery(parsedQuery);
 	ArrayList<String> TermsList=new ArrayList<String>();
@@ -80,47 +80,57 @@ public class SearchRunner {
 	}
 	TreeMap<String, Double> IDFMap=new TreeMap<String, Double>();
 	IDFMap=calculateIDFScores(termDocCounts);
-//	TreeMap<String,Double> WtqMap=new TreeMap<String, Double>();
-//	WtqMap=calculateQueryTFIDFScore(TermTFCountPairMap,IDFMap);
-//	
-//	HashMap<String, TreeMap<String, Double>> WtdHashmap=new HashMap<String, TreeMap<String,Double>>();
-//	WtdHashmap=calculateDocTFIDFScores(FinalDocResultHashmap, IDFMap);
-//	
-//	@SuppressWarnings("unused")
-//	HashMap<String,Double> RelevanceScores=new HashMap<String, Double>();
-//	RelevanceScores=CalculateFinalDocTFIDFRelevanceScores(TermsList,WtdHashmap,WtqMap);
-//	HashMap<String,Double> sortedmap=getsortedmapofOKAPIvalues(RelevanceScores);
 	
-	/*for(String s:RelevanceScores.keySet())
-		System.out.println(s+" "+RelevanceScores.get(s));*/
-	HashMap<String,Double> RelevanceScoresOKAPI=new HashMap<String, Double>();
-	RelevanceScoresOKAPI=calculateOKAPI(IDFMap,FinalDocResultHashmap);
-	List<Entry<String,Double>> sortedmapwithfileids=getsortedmapwithcomparator(RelevanceScoresOKAPI);
+	TreeMap<String,Double> WtqMap=new TreeMap<String, Double>();
+	HashMap<String, TreeMap<String, Double>> WtdHashmap=new HashMap<String, TreeMap<String,Double>>();
+	HashMap<String,Double> RelevanceScores=new HashMap<String, Double>();
+	
+	switch(model)
+	{
+	case TFIDF:
+	{
+		WtqMap=calculateQueryTFIDFScore(TermTFCountPairMap,IDFMap);
+		WtdHashmap=calculateDocTFIDFScores(FinalDocResultHashmap, IDFMap);
+		RelevanceScores=CalculateFinalDocTFIDFRelevanceScores(TermsList,WtdHashmap,WtqMap);
+		break;
+	}
+		
+	case OKAPI:
+	{
+		RelevanceScores=calculateOKAPI(IDFMap,FinalDocResultHashmap);
+		break;
+	}
+		
+	default:break;
+	}
+	List<Entry<String,Double>> sortedmapwithfileids=getsortedmapwithcomparator(RelevanceScores);
 	for(Entry<String,Double> s:sortedmapwithfileids)
 	{
 		System.out.println(s);
 	}
-	/*HashMap<String,Double> sortedmap=getsortedmapofOKAPIvalues(RelevanceScoresOKAPI);
-	for(String s:sortedmap.keySet())
-		System.out.println(s+" "+sortedmap.get(s));*/
-	/*File corpDirectory = new File(corpusDir);
-	Document d=null;
-	String[] files=corpDirectory.list();
 	long queryends = System.currentTimeMillis();
-	System.out.println((queryends-querystarts)/1000+" secs");
-	for(String s:sortedmap.keySet())
+	System.out.println("Query: "+userQuery);
+	System.out.println("Query Time: "+(queryends-querystarts)+" in ms");
+	File corpDirectory = new File(corpusDir);
+	Document d=null;
+	int i=1;
+	for(Entry<String,Double> entry:sortedmapwithfileids)
 	{
-		d = Parser.parse(corpDirectory.getAbsolutePath() + File.separator +s);
-		System.out.println(d.getField(FieldNames.TITLE)[0]);
+		System.out.println("Result Rank: "+i);
+		d = Parser.parse(corpDirectory.getAbsolutePath() + File.separator +entry.getKey());
+		System.out.println("Result Title: "+d.getField(FieldNames.TITLE)[0]);
 		String[] con=d.getField(FieldNames.CONTENT);
 		String str=con[0];
 		String[] contentarray=str.split("\r");
-		System.out.println(contentarray[0]);
-		if(!contentarray[1].isEmpty())
-		System.out.println(contentarray[1]);
-		if(!contentarray[2].isEmpty())
-		System.out.println(contentarray[2]);
-	}*/
+		System.out.println("Result Snippet: "+contentarray[0]);
+		if(contentarray.length>3)
+		{
+			System.out.println(contentarray[1]);
+			System.out.println(contentarray[2]);
+		}
+		System.out.println("Result relevancy: "+entry.getValue()+"\n");
+		i=i+1;
+	}
 	
 	}
 	@SuppressWarnings("resource")
@@ -155,79 +165,12 @@ public class SearchRunner {
             }
         }
 		);
+		if(sortedEntries.size()>10)
+		sortedEntries=sortedEntries.subList(0, 10);
 		return sortedEntries;
 	}
 
-	@SuppressWarnings("resource")
-	public HashMap<String,Double> getsortedmapofOKAPIvalues(HashMap<String,Double> RelevanceScoresOKAPI)
-	{
-		List<String> keys= new ArrayList<String>(RelevanceScoresOKAPI.keySet());
-		List<Double> values= new ArrayList<Double>(RelevanceScoresOKAPI.values());
-		Collections.sort(keys);
-		Collections.sort(values);
-		HashMap<String, Double> sortedmap=new HashMap<String, Double>();
-		if(values.size()>10)
-		{
-		for(int i=values.size();i>0;i--)//change to i>values.size()-10,now will return all
-		{
-			double k=values.get(i-1);
-			for(String s:RelevanceScoresOKAPI.keySet())
-			{
-			if(RelevanceScoresOKAPI.get(s)==k)
-			{
-				sortedmap.put(s, k);
-				RelevanceScoresOKAPI.remove(s);
-				break;
-			}
-			}
-		}
-		
-           
-		}
-		else
-		{
-			for(int i=values.size();i>0;i--)
-			{
-				double k=values.get(i-1);
-				for(String s:RelevanceScoresOKAPI.keySet())
-				{
-				if(RelevanceScoresOKAPI.get(s)==k)
-				{
-					sortedmap.put(s, k);
-					RelevanceScoresOKAPI.remove(s);
-					break;
-				}
-				}
-			}
-		}
-		HashMap<String,Double> sortedmapwithfileids= new HashMap<String, Double>();
-		File documentdictionaryFile=new File(indexdir+ File.separator +"DocumentDictionary");
-		
-        
-        FileInputStream fis;
-		try {
-			fis = new FileInputStream(documentdictionaryFile);
-		
-        ObjectInputStream ois=new ObjectInputStream(fis);
-
-		@SuppressWarnings("unchecked")
-		TreeMap<Integer,String> mapInFile=(TreeMap<Integer,String>)ois.readObject();
-        for(String s:sortedmap.keySet())
-        {
-        	if(mapInFile.containsKey(Integer.parseInt(s)))
-        	{
-        		sortedmapwithfileids.put(mapInFile.get(Integer.parseInt(s)),sortedmap.get(s));
-        	}
-        }
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return sortedmapwithfileids;
-	}
+	
 	public  HashMap<String, TreeMap<String,Integer>>gethashmap(String parsedQuery)
 	{
 		String[] splitintospaces=parsedQuery.split(" ");
@@ -503,12 +446,31 @@ public class SearchRunner {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}	
-		return result;
+		return normalizeOKAPIMAP;
 	}
 
-	public HashMap<String,Double> CalculateFinalDocTFIDFRelevanceScores(ArrayList<String> TermsList,
-			HashMap<String, TreeMap<String, Double>> WtdHashmap,TreeMap<String,Double> WtqMap)
+	@SuppressWarnings("resource")
+	public HashMap<String,Double> CalculateFinalDocTFIDFRelevanceScores(ArrayList<String> TermsList,HashMap<String, TreeMap<String, Double>> WtdHashmap,TreeMap<String,Double> WtqMap)
 	{
+		 File dictionaryFile=new File(this.indexdir+ File.separator +"DocumentDictionary2");
+	        BufferedReader br;
+	      int  totalterms=0;
+	      HashMap<String, Integer> docidlength= new HashMap<String, Integer>();
+	      try
+	      {
+				br = new BufferedReader(new FileReader (dictionaryFile));
+				for(String line; (line = br.readLine()) != null;) 
+				{
+					String[] docidfileidcountsplit=line.split(" ");
+					totalterms=totalterms+Integer.parseInt(docidfileidcountsplit[2].trim());
+					docidlength.put(docidfileidcountsplit[0].trim(), Integer.parseInt(docidfileidcountsplit[2].trim()));		
+				}
+	      }
+	      catch(Exception e)
+	      {
+	    	  System.out.println(e.getMessage());
+	      }
+	      
 		HashMap<String,Double> RelevanceScores=new HashMap<String, Double>();
 		String[] DocIDsList=WtdHashmap.keySet().toArray(new String[WtdHashmap.size()]);
 		double[] Scores=new double[DocIDsList.length];
@@ -545,9 +507,34 @@ public class SearchRunner {
 			}
 			DocumentLength=Math.sqrt(DocumentLength);
 			Scores[d]=(Scores[d]/(QueryLength*DocumentLength));
+			String docid=DocIDsList[d];
+			int doculength=0;
+			for(String s: docidlength.keySet())
+			{
+				if(s.equals(docid))
+				{
+					doculength=docidlength.get(s);
+				}
+			}
+			Scores[d]=Scores[d]/doculength;
 			RelevanceScores.put(EntryDoc.getKey(), Scores[d]);
 		}
-		return RelevanceScores;
+		HashMap<String,Double> tempRelevanceScores= new HashMap<String, Double>();
+		double highest = Scores[0];
+	    for (int index = 1; index < Scores.length; index ++) {
+	        if (Scores[index] > highest) {
+	            highest = Scores [index];
+	        }
+	        for(String s:RelevanceScores.keySet())
+	        {
+	        	double score=RelevanceScores.get(s);
+	        	score=score/highest;
+	        	double factor=1e5;
+	        	double rounded = Math.round(score * factor) / factor;
+	        	tempRelevanceScores.put(s, rounded);
+	        }
+	    }
+		return tempRelevanceScores;
 	}
 	/*
 	 * Maps should have keys in descending order from largest to smallest
@@ -944,17 +931,28 @@ public class SearchRunner {
 	@SuppressWarnings("unchecked")
 	public HashMap<String, TreeMap<String, Integer>> hashmapwithstak(String parsedQuery)
 	{
+		
 		Stack<String> operators= new Stack<String>();
 		Stack<String> terms= new Stack<String>();
 		//Stack secondstack= new Stack();
 		String[] splitintospaces=parsedQuery.split(" ");
 		boolean quoteset=false;
+		int index=0;
+		int nextindex=0;
+		@SuppressWarnings("rawtypes")
+		Stack thirdstack=new Stack();
+		try
+		{
 		for(String s: splitintospaces)
 		{
 			if(quoteset)
 			{
+				if(index<nextindex)
+				{
+					index++;
+					continue;
+				}
 				quoteset=false;
-				continue;
 			}
 			if(s.equals("}"))
 			{
@@ -995,7 +993,7 @@ public class SearchRunner {
 				{
 					String sm=s;
 					s=s.replace("\"","");
-					int index=0;
+				//	int index=0;
 				int len=splitintospaces.length;
 				for(int i=0;i<len;i++)
 				{
@@ -1003,11 +1001,23 @@ public class SearchRunner {
 					{
 						index=i;
 						break;
-					}
-						
+					}		
 				}
-				String quote=splitintospaces[index+1].substring(0,splitintospaces[index+1].length()-1);
-				s=s+" "+quote;
+				//int nextindex=0;
+				for(int i=index+1;i<splitintospaces.length;i++)
+				{
+					if(splitintospaces[i].contains("\""))
+					{
+						nextindex=i;
+						break;
+					}
+				}
+				String quote="";
+				for(int i=index+1;i<=nextindex;i++)
+				{
+					quote=quote+" "+splitintospaces[i].substring(0,splitintospaces[i].length());	
+				}
+				s=s+" "+quote.substring(1,quote.length()-1);
 				terms.add(s);
 				quoteset=true;
 				}		
@@ -1021,8 +1031,6 @@ public class SearchRunner {
 		{
 			System.out.println(terms.get(i));
 		}
-		@SuppressWarnings("rawtypes")
-		Stack thirdstack=new Stack();
 		if(terms.size()==1)
 		{
 			 String s=terms.pop();
@@ -1051,7 +1059,6 @@ public class SearchRunner {
 		}
 		for(int i=0;i<terms.size();i++)
 		{
-			//String datatype=terms.get(i).getClass().getName();
 			String term=terms.get(i);
 			if(!(term.equals("OR")||term.equals("AND")))
 			{
@@ -1136,9 +1143,13 @@ public class SearchRunner {
 			}
 				
 		}
+		}
+		catch(Exception e)
+		{
+			System.out.println("error in stack implementation"+e.getMessage());
+		}
 		return (HashMap<String, TreeMap<String, Integer>>) thirdstack.get(0);
 	}
-	
 	
 	
 	/**
@@ -1173,7 +1184,6 @@ public class SearchRunner {
 					Query query=QueryParser.parse(querystring, "OR");
 					String parsedQuery=query.toString();
 					HashMap<String, TreeMap<String, Integer>> FinalDocResultHashmap=  new HashMap<String, TreeMap<String,Integer>>();
-					//FinalDocResultHashmap=gethashmap(parsedQuery);
 					FinalDocResultHashmap=hashmapwithstak(parsedQuery);
 					TreeMap<String, Integer> TermTFCountPairMap=new TreeMap<String, Integer>();
 					TermTFCountPairMap=RetrieveTermsInQuery(parsedQuery);
@@ -1186,15 +1196,15 @@ public class SearchRunner {
 					IDFMap=calculateIDFScores(termDocCounts);
 					HashMap<String,Double> RelevanceScoresOKAPI=new HashMap<String, Double>();
 					RelevanceScoresOKAPI=calculateOKAPI(IDFMap,FinalDocResultHashmap);
-					HashMap<String,Double> sortedmap=getsortedmapofOKAPIvalues(RelevanceScoresOKAPI);//also return the file ids
+					List<Entry<String,Double>> sortedList=getsortedmapwithcomparator(RelevanceScoresOKAPI);//also return the file ids
 					
 					            String str="";
 					            
-					            for(Map.Entry<String,Double> entry : sortedmap.entrySet())
+					            for(Entry<String,Double> entry : sortedList)
 								{
-									str=str+entry.getKey()+"#"+entry.getValue()+",";
+									str=str+entry.getKey()+"#"+entry.getValue()+", ";
 								}
-					            str=fullquer[0]+":"+"{"+str.substring(0, str.length()-1)+ "}";
+					            str=fullquer[0]+":"+"{"+str.substring(0, str.length()-2)+ "}";
 					            arrayOut.add(str);
 				}
 				writeQueriesToFile(arrayOut);
@@ -1220,14 +1230,14 @@ public class SearchRunner {
 		{
 			System.out.println("Sorry,Some error occurred while writing back to PrintStream!"+e.getMessage());
 		}
-		stream.flush();
-		stream.close();
+		
 	}
 	/**
 	 * General cleanup method
 	 */
 	public void close() {
-		//TODO : IMPLEMENT THIS METHOD
+		stream.flush();
+		stream.close();
 	}
 	
 	/**
@@ -1289,7 +1299,17 @@ public class SearchRunner {
 								l=l+1;
 								break;
 							}	
-							}
+					}
+					else if(KeyIndexSplit.length==3)
+					{
+						String search=KeyIndexSplit[0].trim()+" "+KeyIndexSplit[1].trim();
+						if(search.equalsIgnoreCase(term))
+						{
+							termPosition=Integer.parseInt(KeyIndexSplit[2].trim());
+							l=l+1;
+							break;
+						}	
+					}
 				}
 				if(termPosition==-1)
 				{

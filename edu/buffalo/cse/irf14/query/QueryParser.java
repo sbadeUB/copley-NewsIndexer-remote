@@ -9,7 +9,6 @@ package edu.buffalo.cse.irf14.query;
 import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.TreeMap;
-
 import edu.buffalo.cse.irf14.analysis.Analyzer;
 import edu.buffalo.cse.irf14.analysis.AnalyzerFactory;
 import edu.buffalo.cse.irf14.analysis.Token;
@@ -29,7 +28,7 @@ public class QueryParser
 	static Stack<String> outputOperandStack=new Stack<String>();
 	static int countOpenParenthesis=0;
 	static String ConsumeString="";
-	private static boolean isEndReached;
+	private static boolean isEndReached=false;
 	private static boolean isError=false;
 	public static int countOperators=0;
 	public static TreeMap<Integer,Integer[]> quotesInfo=new TreeMap<Integer, Integer[]>();
@@ -193,9 +192,24 @@ public class QueryParser
     		String initParsedQuery=getFinalParsedQuery();
     		if(isError) initParsedQuery=userQuery;
     		Query query=new Query(initParsedQuery,defaultOperator);
+    		DisposeParameters();
 	    	return query;
         }
         else return null;
+	}
+	
+	public static void DisposeParameters()
+	{
+		multiword.delete(0, multiword.length());
+		generalOperandStack=new Stack<String>();
+		generalOperatorStack=new Stack<Character>();
+		outputOperandStack=new Stack<String>();
+		countOpenParenthesis=0;
+		ConsumeString="";
+		isEndReached=false;
+		isError=false;
+		countOperators=0;
+		quotesInfo=new TreeMap<Integer, Integer[]>();
 	}
 	
 	public static String getFinalParsedQuery()
