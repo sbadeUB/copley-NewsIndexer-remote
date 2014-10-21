@@ -1135,11 +1135,13 @@ public class SearchRunner {
 	 */
 	public List<String> getCorrections() {
 		//TODO: IMPLEMENT THIS METHOD IFF SPELLCHECK EXECUTED
-		List<String> xList=new ArrayList<String>();
+		List<List<String>> xList=new ArrayList<List<String>>();
+		List<String> resultantList=new ArrayList<String>();
 		String str1="(Category:\"Computer Machine\")";
 		String str2="(Category:(\"Computer Machine\" AND Bade)";
 		String str3="(Category:(\"Computer Machine\" AND \"bade Rocks\")";
-		StringBuilder multiword=new StringBuilder();
+		StringBuilder multiwordOpens=new StringBuilder();
+		StringBuilder multiwordCloses=new StringBuilder();
 		String[] splitSpace=str1.split(" ");
 		String category=null;
 		boolean isCategorySet=false;
@@ -1149,36 +1151,61 @@ public class SearchRunner {
 		for(int i=0;i<splitSpace.length;i++)
 		{
 			String S=splitSpace[i];
-			while((S.endsWith(")")||S.endsWith("\"")))
+			while((S.startsWith("(")||S.startsWith("\"")))
 			{
 				//char x=str.charAt(str.length()-1);
 				char x=S.charAt(0);
 				S=splitSpace[i].substring(0, S.length()-1);
-				multiword.append(x);
+				multiwordOpens.append(x);
 			}
 			while((S.endsWith(")")||S.endsWith("\"")))
 			{
 				//char x=str.charAt(str.length()-1);
 				char x=S.charAt(S.length()-1);
 				S=splitSpace[i].substring(0, S.length()-1);
-				multiword.append(x);
+				multiwordCloses.append(x);
 				countEnds=countEnds+1;
 			}
 			if(S.contains(":"))
     		{
     			String[] splitColon=S.split(":");
-    			multiword.append(splitColon[0]+":");
     			isCategorySet=true;
     			Category=splitColon[0];
     			S=splitColon[1];
+    			List<String> temp=getTermSuggestions(Category, S);
     		}
-			else if(S.equals("AND") || S.equals("OR") || S.equals("NOT") || S.equals("(") || S.equals(")"))
+			else if(S.equals("AND") || S.equals("OR") || S.equals("NOT"))
     		{
-    			multiword.append(S+" ");
+    			multiwordOpens.append(S+" ");
     		}
 		}
-		return xList;
+		return resultantList;
 	}
+	public List<String> getTermSuggestions(String Indextype,String term)
+	{
+		List<String> suggestedTermsList=new ArrayList<String>();
+		if(Indextype==null) Indextype="Term";
+		IndexType indextype;
+		if(Indextype.equalsIgnoreCase("Term"))
+		{
+			indextype=IndexType.TERM;
+		}
+		else if(Indextype.equalsIgnoreCase("Author"))
+		{
+			indextype=IndexType.AUTHOR;
+		}
+		else if(Indextype.equalsIgnoreCase("Place"))
+		{
+			indextype=IndexType.PLACE;
+		}
+		else if(Indextype.equalsIgnoreCase("Category"))
+		{
+			indextype=IndexType.CATEGORY;
+		}
+		
+		return suggestedTermsList;
+	}
+	
 	public HashMap<String,TreeMap<String, Integer>> getDOCIDs(IndexType type,String term) {
 		String indexdir=this.indexdir;
 		IndexReader rdr=new IndexReader(indexdir, type);
