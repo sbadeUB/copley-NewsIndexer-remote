@@ -38,6 +38,12 @@ public class Query
 		this.defaultOperator=defaultOpearator;
 	}
 	
+	public String retrieveQueryString()
+	{
+		return this.initQueryString;
+	}
+	
+	
 	/**
 	 * Method to convert given parsed query into string
 	 */

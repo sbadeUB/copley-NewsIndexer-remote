@@ -65,139 +65,144 @@ public class QueryParser
         	
         	HandleSequentialTerms(userQuery,defaultOperator);
         	userQuery=multiword.toString();
-        	userQuery.trim();
-        	
-        	multiword=new StringBuilder();//re-Initialize to null
-    		String[] splitSpace=userQuery.split(" ");
-			String category=null;
-			boolean isCategorySet=false;
-			boolean isSet=false;
-    		for(int j=0;j<splitSpace.length;j++)
-    		{
-    			String S=splitSpace[j];
-    			if(S.contains(":"))
-        		{
-        			String[] splitColon=S.split(":");
-    				if(splitColon[0].contains("Author")) category="Author";
-    				else if(splitColon[0].contains("Category")) category="Category";
-    				else if(splitColon[0].contains("Place")) category="Place";
-    				isCategorySet=true;
-        			multiword.append(splitColon[0]+":");
-        			S=splitColon[1];
-        		}
-    			if(S.startsWith("("))
-    			{
-    				j=loadExpressionToStack(splitSpace,category,S,j);
-    				S=ConsumeString.trim();
-    				ConsumeString="";
-    			}
-    			else if(S.equals("AND") || S.equals("OR") || S.equals("NOT") || S.equals("(") || S.equals(")"))
-        		{
-        			multiword.append(S+" ");
-        			countOperators=countOperators+1;
-        			isSet=true;
-        		}
-        		else//either single word or with multiple words having no operators in between
-        		{
-        			int n=j;
-        			int m=0;
-        			String QuoteString="";
-        			if(S.contains("\""))
-        			{
-        				multiword.append("\"");
-        				multiword.append("* ");
-        				QuoteString=QuoteString+S.substring(1);
-        				generalOperandStack.push(S.substring(1));
-        				j=j+1;
-        				m=m+1;
-        				S=splitSpace[j];
-        				while(!S.contains("\""))
-        				{
-        					QuoteString=QuoteString+" "+S;
-        					j=j+1;
-        					m=m+1;
-        					multiword.append("* ");
-        					generalOperandStack.push(S);
-            				S=splitSpace[j];
-        				}
-        				
-        				multiword.append("*");
-        				multiword.append("\"");
-        				m=m+1;
-        				while((S.endsWith(")")||S.endsWith("\"")))
-    					{
-							char x=S.charAt(S.length()-1);
-							S=S.substring(0, S.length()-1);
-							if(!(x=='\"')) 								
-							{
-								multiword.append(x);
-								generalOperatorStack.pop();
-							}
-							else
-							{
-								
-							}
-    					}
-    					generalOperandStack.push(S);
-    					multiword.append(" ");
-        				QuoteString=QuoteString+" "+S;
-        				Integer[] x={m,countOperators};
-						quotesInfo.put(n, x);
-        				if(j<=splitSpace.length) 
-        				{
-        					S=QuoteString;
-        					S.trim();
-        				}
-        				else
-        				{
-        					break;
-        				}
-        			}
-        			else
-        			{
-        				int indcloses=0;
-        				while(S.endsWith(")"))
-        				{
-        					indcloses=indcloses+1;
-        					S=S.substring(0,S.length()-1);
-        					generalOperatorStack.pop();
-        				}
-        				multiword.append("*");
-        				for(int i=1;i<=indcloses;i++)
-        					multiword.append(")");
-        				multiword.append(" ");
-        				generalOperandStack.push(S);
-        			}
-        		 }
-    			if(!isSet)
-    			{
-    				if(j<splitSpace.length)
-    				{
-    					String St=splitSpace[j];
-    					if(St.equals("AND") || St.equals("OR") || St.equals("NOT") || St.equals("(") || St.equals(")"))
-    					{
-    						multiword.append(St+" ");
-    						countOperators=countOperators+1;
-    						isSet=true;
-    					}
-    				}
-    			}
-    			if(!isCategorySet) category="Term";
-    			PassTermsToTokenFilters(S,category);
-    			category=null;
-    			isCategorySet=false;
-    			isSet=false;
-    		}
-    		String initParsedQuery=getFinalParsedQuery();
-    		if(isError) initParsedQuery=userQuery;
-    		Query query=new Query(initParsedQuery,defaultOperator);
-    		DisposeParameters();
+        	userQuery.trim();  
+        	DisposeParameters();
+    		Query query=new Query(userQuery,defaultOperator);
 	    	return query;
         }
         else 
         	{
         		return null;
         	}
+	}
+	
+	public static Query passQueryToTokenFilter(String userQuery,String defaultOperator)
+	{
+		String[] splitSpace=userQuery.split(" ");
+		String category=null;
+		boolean isCategorySet=false;
+		boolean isSet=false;
+		for(int j=0;j<splitSpace.length;j++)
+		{
+			String S=splitSpace[j];
+			if(S.contains(":"))
+    		{
+    			String[] splitColon=S.split(":");
+				if(splitColon[0].contains("Author")) category="Author";
+				else if(splitColon[0].contains("Category")) category="Category";
+				else if(splitColon[0].contains("Place")) category="Place";
+				isCategorySet=true;
+    			multiword.append(splitColon[0]+":");
+    			S=splitColon[1];
+    		}
+			if(S.startsWith("("))
+			{
+				j=loadExpressionToStack(splitSpace,category,S,j);
+				S=ConsumeString.trim();
+				ConsumeString="";
+			}
+			else if(S.equals("AND") || S.equals("OR") || S.equals("NOT") || S.equals("(") || S.equals(")"))
+    		{
+    			multiword.append(S+" ");
+    			countOperators=countOperators+1;
+    			isSet=true;
+    		}
+    		else//either single word or with multiple words having no operators in between
+    		{
+    			int n=j;
+    			int m=0;
+    			String QuoteString="";
+    			if(S.contains("\""))
+    			{
+    				multiword.append("\"");
+    				multiword.append("* ");
+    				QuoteString=QuoteString+S.substring(1);
+    				generalOperandStack.push(S.substring(1));
+    				j=j+1;
+    				m=m+1;
+    				S=splitSpace[j];
+    				while(!S.contains("\""))
+    				{
+    					QuoteString=QuoteString+" "+S;
+    					j=j+1;
+    					m=m+1;
+    					multiword.append("* ");
+    					generalOperandStack.push(S);
+        				S=splitSpace[j];
+    				}
+    				
+    				multiword.append("*");
+    				multiword.append("\"");
+    				m=m+1;
+    				while((S.endsWith(")")||S.endsWith("\"")))
+					{
+						char x=S.charAt(S.length()-1);
+						S=S.substring(0, S.length()-1);
+						if(!(x=='\"')) 								
+						{
+							multiword.append(x);
+							generalOperatorStack.pop();
+						}
+						else
+						{
+							
+						}
+					}
+					generalOperandStack.push(S);
+					multiword.append(" ");
+    				QuoteString=QuoteString+" "+S;
+    				Integer[] x={m,countOperators};
+					quotesInfo.put(n, x);
+    				if(j<=splitSpace.length) 
+    				{
+    					S=QuoteString;
+    					S.trim();
+    				}
+    				else
+    				{
+    					break;
+    				}
+    			}
+    			else
+    			{
+    				int indcloses=0;
+    				while(S.endsWith(")"))
+    				{
+    					indcloses=indcloses+1;
+    					S=S.substring(0,S.length()-1);
+    					generalOperatorStack.pop();
+    				}
+    				multiword.append("*");
+    				for(int i=1;i<=indcloses;i++)
+    					multiword.append(")");
+    				multiword.append(" ");
+    				generalOperandStack.push(S);
+    			}
+    		 }
+			if(!isSet)
+			{
+				if(j<splitSpace.length)
+				{
+					String St=splitSpace[j];
+					if(St.equals("AND") || St.equals("OR") || St.equals("NOT") || St.equals("(") || St.equals(")"))
+					{
+						multiword.append(St+" ");
+						countOperators=countOperators+1;
+						isSet=true;
+					}
+				}
+			}
+			if(!isCategorySet) category="Term";
+			PassTermsToTokenFilters(S,category);
+			category=null;
+			isCategorySet=false;
+			isSet=false;
+		}
+		String initParsedQuery=getFinalParsedQuery();
+		if(isError) initParsedQuery=userQuery;
+		Query query=new Query(initParsedQuery,defaultOperator);
+		DisposeParameters();
+		return query;
 	}
 	
 	public static void DisposeParameters()

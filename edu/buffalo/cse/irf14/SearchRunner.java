@@ -65,11 +65,14 @@ public class SearchRunner {
 	 TreeMap<String,Integer> termDocCounts= new TreeMap<String, Integer>();
 	public void query(String userQuery, ScoringModel model)
 	{
+		
 		long querystarts = System.currentTimeMillis();
 		Query query=QueryParser.parse(userQuery, "OR");
+		String parsedQuery=query.retrieveQueryString();
+		query=QueryParser.passQueryToTokenFilter(parsedQuery,"OR");
 		if(query!=null)
 		{
-		String parsedQuery=query.toString();
+		parsedQuery=query.toString();
 		HashMap<String, TreeMap<String, Integer>> FinalDocResultHashmap=  new HashMap<String, TreeMap<String,Integer>>();
 		FinalDocResultHashmap=hashmapwithstak(parsedQuery);
 		TreeMap<String, Integer> TermTFCountPairMap=new TreeMap<String, Integer>();
@@ -85,7 +88,7 @@ public class SearchRunner {
 		TreeMap<String,Double> WtqMap=new TreeMap<String, Double>();
 		HashMap<String, TreeMap<String, Double>> WtdHashmap=new HashMap<String, TreeMap<String,Double>>();
 		HashMap<String,Double> RelevanceScores=new HashMap<String, Double>();
-		
+		if(model==null) model=ScoringModel.OKAPI;
 		switch(model)
 		{
 		case TFIDF:
@@ -102,7 +105,11 @@ public class SearchRunner {
 			break;
 		}
 			
-		default:break;
+		default:
+		{
+			RelevanceScores=calculateOKAPI(IDFMap,TermTFCountPairMap,FinalDocResultHashmap);
+			break;
+		}
 		}
 		List<Entry<String,Double>> sortedmapwithfileids=getsortedmapwithcomparator(RelevanceScores);
 		long queryends = System.currentTimeMillis();
@@ -132,9 +139,58 @@ public class SearchRunner {
 			stream.println("Result relevancy: "+entry.getValue()+"\n");
 			i=i+1;
 		}
+	  }
 	}
 	
+	
+	
+	/*
+	 * Reference: http://www.programcreek.com/2013/12/edit-distance-in-java/
+	 */
+	public static int minDistance(String word1, String word2) {
+		int len1 = word1.length();
+		int len2 = word2.length();
+	 
+		// len1+1, len2+1, because finally return dp[len1][len2]
+		int[][] dp = new int[len1 + 1][len2 + 1];
+	 
+		for (int i = 0; i <= len1; i++) {
+			dp[i][0] = i;
+		}
+	 
+		for (int j = 0; j <= len2; j++) {
+			dp[0][j] = j;
+		}
+	 
+		//iterate though, and check last char
+		for (int i = 0; i < len1; i++)
+		{
+			char c1 = word1.charAt(i);
+			c1=Character.toLowerCase(c1);
+			for (int j = 0; j < len2; j++)
+			{
+				char c2 = word2.charAt(j);
+				c2=Character.toLowerCase(c2);
+	 
+				//if last two chars equal
+				if (c1 == c2) {
+					//update dp value for +1 length
+					dp[i + 1][j + 1] = dp[i][j];
+				} else {
+					int replace = dp[i][j] + 1;
+					int insert = dp[i][j + 1] + 1;
+					int delete = dp[i + 1][j] + 1;
+	 
+					int min = replace > insert ? insert : replace;
+					min = delete > min ? min : delete;
+					dp[i + 1][j + 1] = min;
+				}
+			}
+		}
+	 
+		return dp[len1][len2];
 	}
+	
 	@SuppressWarnings("resource")
 	public List<Entry<String,Double>> getsortedmapwithcomparator(HashMap<String,Double> RelevanceScoresOKAPI)
 	{
@@ -947,8 +1003,9 @@ public class SearchRunner {
 	 * Method to execute queries in E mode
 	 * @param queryFile : The file from which queries are to be read and executed
 	 */
-	public void query(File queryFile) {
-		//TODO: IMPLEMENT THIS METHOD
+	public void query(File queryFile)
+	{
+		
 		BufferedReader br;
 		@SuppressWarnings("unused")
 		int noofqueries=0;
@@ -973,9 +1030,11 @@ public class SearchRunner {
 					}
 					String querystring=fullquery.substring(1,fullquery.length()-2);
 					Query query=QueryParser.parse(querystring, "OR");
+					String parsedQuery=query.retrieveQueryString();
+					query=QueryParser.passQueryToTokenFilter(parsedQuery,"OR");
 					if(query!=null)
 					{
-						String parsedQuery=query.toString();
+					parsedQuery=query.toString();
 						HashMap<String, TreeMap<String, Integer>> FinalDocResultHashmap=  new HashMap<String, TreeMap<String,Integer>>();
 						FinalDocResultHashmap=hashmapwithstak(parsedQuery);
 						TreeMap<String, Integer> TermTFCountPairMap=new TreeMap<String, Integer>();
@@ -996,11 +1055,12 @@ public class SearchRunner {
 							numresults=numresults+1;
 						}
 						String str="";
-						            
+						System.out.println(numresults);
 						 for(Entry<String,Double> entry : sortedList)
 						{
 							 str=str+entry.getKey()+"#"+entry.getValue()+", ";
 						}
+						 
 					    str=fullquer[0]+":"+"{"+str.substring(0, str.length()-2)+ "}";
 					    arrayOut.add(str);
 					}
@@ -1012,7 +1072,6 @@ public class SearchRunner {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
 		
 	}
 	
@@ -1065,6 +1124,8 @@ public class SearchRunner {
 	 */
 	public static boolean spellCorrectSupported() {
 		//TODO: CHANGE THIS TO TRUE ONLY IF SPELLCHECK BONUS ATTEMPTED
+		
+		
 		return false;
 	}
 	
@@ -1074,7 +1135,49 @@ public class SearchRunner {
 	 */
 	public List<String> getCorrections() {
 		//TODO: IMPLEMENT THIS METHOD IFF SPELLCHECK EXECUTED
-		return null;
+		List<String> xList=new ArrayList<String>();
+		String str1="(Category:\"Computer Machine\")";
+		String str2="(Category:(\"Computer Machine\" AND Bade)";
+		String str3="(Category:(\"Computer Machine\" AND \"bade Rocks\")";
+		StringBuilder multiword=new StringBuilder();
+		String[] splitSpace=str1.split(" ");
+		String category=null;
+		boolean isCategorySet=false;
+		String Category=null;
+		boolean isSet=false;
+		int countEnds=0;
+		for(int i=0;i<splitSpace.length;i++)
+		{
+			String S=splitSpace[i];
+			while((S.endsWith(")")||S.endsWith("\"")))
+			{
+				//char x=str.charAt(str.length()-1);
+				char x=S.charAt(0);
+				S=splitSpace[i].substring(0, S.length()-1);
+				multiword.append(x);
+			}
+			while((S.endsWith(")")||S.endsWith("\"")))
+			{
+				//char x=str.charAt(str.length()-1);
+				char x=S.charAt(S.length()-1);
+				S=splitSpace[i].substring(0, S.length()-1);
+				multiword.append(x);
+				countEnds=countEnds+1;
+			}
+			if(S.contains(":"))
+    		{
+    			String[] splitColon=S.split(":");
+    			multiword.append(splitColon[0]+":");
+    			isCategorySet=true;
+    			Category=splitColon[0];
+    			S=splitColon[1];
+    		}
+			else if(S.equals("AND") || S.equals("OR") || S.equals("NOT") || S.equals("(") || S.equals(")"))
+    		{
+    			multiword.append(S+" ");
+    		}
+		}
+		return xList;
 	}
 	public HashMap<String,TreeMap<String, Integer>> getDOCIDs(IndexType type,String term) {
 		String indexdir=this.indexdir;
