@@ -4,19 +4,11 @@
 package edu.buffalo.cse.irf14;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-
-import edu.buffalo.cse.irf14.SearchRunner.ScoringModel;
 import edu.buffalo.cse.irf14.document.Document;
 import edu.buffalo.cse.irf14.document.Parser;
 import edu.buffalo.cse.irf14.document.ParserException;
-import edu.buffalo.cse.irf14.index.IndexReader;
-import edu.buffalo.cse.irf14.index.IndexType;
 import edu.buffalo.cse.irf14.index.IndexWriter;
 import edu.buffalo.cse.irf14.index.IndexerException;
-import edu.buffalo.cse.irf14.query.Query;
-import edu.buffalo.cse.irf14.query.QueryParser;
 
 /**
  * @author nikhillo
@@ -48,7 +40,7 @@ public class Runner {
 		Document d = null;
 		IndexWriter writer = new IndexWriter(indexDir);
 		
-		/*try {
+		try {
 			for (String cat : catDirectories) {
 				dir = new File(ipDir+ File.separator+ cat);
 				files = dir.list();
@@ -74,27 +66,7 @@ public class Runner {
 		} catch (IndexerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
-		IndexReader rdr=new IndexReader(indexDir, IndexType.TERM);
-		PrintStream s=null;
-		try {
-			s = new PrintStream(new File(indexDir+ File.separator +"outputResults"));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		ScoringModel model=null;
-		String corpdir="C:\\Users\\srinivasareddy\\Desktop\\corpus";
-		SearchRunner run=new SearchRunner(indexDir,corpdir, 'E',s);
-		File file=new File(indexDir+ File.separator +"quer");
-		//run.query(file);
-		//run.query("NATO", model);
-		//run.query("trade deficit foreign exchange trade surplus balance of trade",model);
-		//run.query("Place:washington AND federal treasury", model);
-		//run.query("Computer",model);
-		int dist=SearchRunner.minDistance("computer", "Computer");
-		System.out.println(dist);
-		
 	}
 
 
