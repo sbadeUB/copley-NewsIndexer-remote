@@ -104,11 +104,7 @@ public class Query
     			multiWord.append("}");
     			finalQuery=multiWord.toString();
     		}
-    		
-    		/*System.out.println("Final String before:"+finalQuery);
-    		this.ResultantUnSpacedQuery=finalQuery;*/
     		finalQuery=addSpaces(finalQuery);
-    		System.out.println("Final String after:"+finalQuery);
 	    	return finalQuery;
 	}
 	

@@ -5,7 +5,6 @@
 package edu.buffalo.cse.irf14.query;
 
 
-//import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -44,6 +43,7 @@ public class QueryParser
 	{
 		Stack<Character> stack = new Stack<Character>();
 		boolean isBalanced=true;
+		 
 		
 		/** 
 		 * Checking for balancing of Parenthesis
@@ -62,10 +62,10 @@ public class QueryParser
         
         if(isBalanced)
         {
+        	
         	HandleSequentialTerms(userQuery,defaultOperator);
         	userQuery=multiword.toString();
         	userQuery.trim();
-        	System.out.println(userQuery);
         	
         	multiword=new StringBuilder();//re-Initialize to null
     		String[] splitSpace=userQuery.split(" ");
@@ -188,14 +188,16 @@ public class QueryParser
     			isCategorySet=false;
     			isSet=false;
     		}
-    		System.out.println(multiword.toString());
     		String initParsedQuery=getFinalParsedQuery();
     		if(isError) initParsedQuery=userQuery;
     		Query query=new Query(initParsedQuery,defaultOperator);
     		DisposeParameters();
 	    	return query;
         }
-        else return null;
+        else 
+        	{
+        		return null;
+        	}
 	}
 	
 	public static void DisposeParameters()
@@ -238,14 +240,12 @@ public class QueryParser
 				String temp=tempStack.pop();
 				multiword.append(temp+" ");
 			}
-			System.out.println(multiword);
 			finalQuery=multiword.toString();
 			finalQuery.trim();
 		}
 		else
 		{
 			isError=true;
-			System.out.println("Sorry, some problem while applying tokenfilters to QUERY");
 		}
 		
 		return finalQuery;
@@ -297,7 +297,6 @@ public class QueryParser
 				Token token=stream.next();
 				String temp=token.getTermText();
 				k=k+1;
-				System.out.println(temp);
 				temp.trim();
 				String[] splitSpace=temp.split(" ");
 				if(splitSpace.length>1)
@@ -601,12 +600,29 @@ public class QueryParser
     			}
     		
     			boolean TargetSet=false;
+    			boolean endSet=false;
     			while(k<(splitSpace.length-1))
     			{
     				String x=splitSpace[k+1];
-    				 if(!(x.equals("AND") || x.equals("OR") || x.equals("NOT")))
+    				 if(!(x.equals("AND") || x.equals("OR") || x.equals("NOT")) || S.contains("("))
     				 {
-    					 if(TargetSet==false)
+    					 if(S.contains("("))
+    					 {
+    						 multiword.append(" "+defaultOperator+" "+S);
+    						 k=k+1;
+    						 S=splitSpace[k];
+    						 while(!(S.endsWith(")")))
+    						 {
+    							 multiword.append(" "+S);
+    							 k=k+1;
+    							 S=splitSpace[k];
+    						 }
+    						 if(S.endsWith(")"))
+    							 multiword.append(" "+S);
+    						 if(k==splitSpace.length-1)
+    							 endSet=true;
+    					 }
+    					 else if(TargetSet==false)
          				{
          					multiword.append("("+S);
          					TargetSet=true;
@@ -615,16 +631,27 @@ public class QueryParser
          				{
          					multiword.append(" "+defaultOperator+" "+S);
          				}
-         				k=k+1;
-         				S=splitSpace[k];
+    					 if(k<splitSpace.length-1) 
+    	    			{
+    						 k=k+1;
+    						 S=splitSpace[k];
+    	    			}
+    	    			else
+    	    			{
+    	    				break;
+    	    			}
     				 }
     				 else
     				 {
     					 break;
     				 }
     			}
-    			if(TargetSet) multiword.append(" "+defaultOperator+" "+S+")"+" ");
-    			else multiword.append(S+" ");
+    			if(TargetSet && !endSet) multiword.append(" "+defaultOperator+" "+S+")"+" ");
+    			else if(!TargetSet && !endSet) multiword.append(S+" ");
+    			else if(TargetSet && endSet) {
+    				multiword.append(")");
+    				endSet=false;
+    			}
     			TargetSet=false;
     		}
     		

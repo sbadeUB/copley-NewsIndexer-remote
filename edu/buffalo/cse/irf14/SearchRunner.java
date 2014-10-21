@@ -63,73 +63,75 @@ public class SearchRunner {
 	 * @param model : Scoring Model to use for ranking results
 	 */
 	 TreeMap<String,Integer> termDocCounts= new TreeMap<String, Integer>();
-	public void query(String userQuery, ScoringModel model) throws ParserException
+	public void query(String userQuery, ScoringModel model)
 	{
 		long querystarts = System.currentTimeMillis();
-		System.out.println("In search Runner!");
-			Query query=QueryParser.parse(userQuery, "OR");
-			String parsedQuery=query.toString();
-			HashMap<String, TreeMap<String, Integer>> FinalDocResultHashmap=  new HashMap<String, TreeMap<String,Integer>>();
-			FinalDocResultHashmap=hashmapwithstak(parsedQuery);
-	TreeMap<String, Integer> TermTFCountPairMap=new TreeMap<String, Integer>();
-	TermTFCountPairMap=RetrieveTermsInQuery(parsedQuery);
-	ArrayList<String> TermsList=new ArrayList<String>();
-	for(String str:TermTFCountPairMap.keySet())
-	{
-		TermsList.add(str);
-	}
-	TreeMap<String, Double> IDFMap=new TreeMap<String, Double>();
-	IDFMap=calculateIDFScores(termDocCounts);
-	
-	TreeMap<String,Double> WtqMap=new TreeMap<String, Double>();
-	HashMap<String, TreeMap<String, Double>> WtdHashmap=new HashMap<String, TreeMap<String,Double>>();
-	HashMap<String,Double> RelevanceScores=new HashMap<String, Double>();
-	
-	switch(model)
-	{
-	case TFIDF:
-	{
-		WtqMap=calculateQueryTFIDFScore(TermTFCountPairMap,IDFMap);
-		WtdHashmap=calculateDocTFIDFScores(FinalDocResultHashmap, IDFMap);
-		RelevanceScores=CalculateFinalDocTFIDFRelevanceScores(TermsList,WtdHashmap,WtqMap);
-		break;
-	}
-		
-	case OKAPI:
-	{
-		RelevanceScores=calculateOKAPI(IDFMap,FinalDocResultHashmap);
-		break;
-	}
-		
-	default:break;
-	}
-	List<Entry<String,Double>> sortedmapwithfileids=getsortedmapwithcomparator(RelevanceScores);
-	for(Entry<String,Double> s:sortedmapwithfileids)
-	{
-		System.out.println(s);
-	}
-	long queryends = System.currentTimeMillis();
-	System.out.println("Query: "+userQuery);
-	System.out.println("Query Time: "+(queryends-querystarts)+" in ms");
-	File corpDirectory = new File(corpusDir);
-	Document d=null;
-	int i=1;
-	for(Entry<String,Double> entry:sortedmapwithfileids)
-	{
-		System.out.println("Result Rank: "+i);
-		d = Parser.parse(corpDirectory.getAbsolutePath() + File.separator +entry.getKey());
-		System.out.println("Result Title: "+d.getField(FieldNames.TITLE)[0]);
-		String[] con=d.getField(FieldNames.CONTENT);
-		String str=con[0];
-		String[] contentarray=str.split("\r");
-		System.out.println("Result Snippet: "+contentarray[0]);
-		if(contentarray.length>3)
+		Query query=QueryParser.parse(userQuery, "OR");
+		if(query!=null)
 		{
-			System.out.println(contentarray[1]);
-			System.out.println(contentarray[2]);
+		String parsedQuery=query.toString();
+		HashMap<String, TreeMap<String, Integer>> FinalDocResultHashmap=  new HashMap<String, TreeMap<String,Integer>>();
+		FinalDocResultHashmap=hashmapwithstak(parsedQuery);
+		TreeMap<String, Integer> TermTFCountPairMap=new TreeMap<String, Integer>();
+		TermTFCountPairMap=RetrieveTermsInQuery(parsedQuery);
+		ArrayList<String> TermsList=new ArrayList<String>();
+		for(String str:TermTFCountPairMap.keySet())
+		{
+			TermsList.add(str);
 		}
-		System.out.println("Result relevancy: "+entry.getValue()+"\n");
-		i=i+1;
+		TreeMap<String, Double> IDFMap=new TreeMap<String, Double>();
+		IDFMap=calculateIDFScores(termDocCounts);
+		
+		TreeMap<String,Double> WtqMap=new TreeMap<String, Double>();
+		HashMap<String, TreeMap<String, Double>> WtdHashmap=new HashMap<String, TreeMap<String,Double>>();
+		HashMap<String,Double> RelevanceScores=new HashMap<String, Double>();
+		
+		switch(model)
+		{
+		case TFIDF:
+		{
+			WtqMap=calculateQueryTFIDFScore(TermTFCountPairMap,IDFMap);
+			WtdHashmap=calculateDocTFIDFScores(FinalDocResultHashmap, IDFMap);
+			RelevanceScores=CalculateFinalDocTFIDFRelevanceScores(TermsList,WtdHashmap,WtqMap);
+			break;
+		}
+			
+		case OKAPI:
+		{
+			RelevanceScores=calculateOKAPI(IDFMap,FinalDocResultHashmap);
+			break;
+		}
+			
+		default:break;
+		}
+		List<Entry<String,Double>> sortedmapwithfileids=getsortedmapwithcomparator(RelevanceScores);
+		long queryends = System.currentTimeMillis();
+		stream.println("Query: "+userQuery);
+		stream.println("Query Time: "+(queryends-querystarts)+" in ms");
+		File corpDirectory = new File(corpusDir);
+		Document d=null;
+		int i=1;
+		for(Entry<String,Double> entry:sortedmapwithfileids)
+		{
+			stream.println("Result Rank: "+i);
+			try {
+				d = Parser.parse(corpDirectory.getAbsolutePath() + File.separator +entry.getKey());
+			} catch (ParserException e) {
+				e.printStackTrace();
+			}
+			stream.println("Result Title: "+d.getField(FieldNames.TITLE)[0]);
+			String[] con=d.getField(FieldNames.CONTENT);
+			String str=con[0];
+			String[] contentarray=str.split("\r");
+			stream.println("Result Snippet: "+contentarray[0]);
+			if(contentarray.length>3)
+			{
+				stream.println(contentarray[1]);
+				stream.println(contentarray[2]);
+			}
+			stream.println("Result relevancy: "+entry.getValue()+"\n");
+			i=i+1;
+		}
 	}
 	
 	}
@@ -405,7 +407,6 @@ public class SearchRunner {
 										String s=splitSpace[j];
 												while(!(s.endsWith("\"") || s.endsWith("]") || s.endsWith("}")))
 												{
-													System.out.println(s);
 													s.trim();
 													str=str+" "+s;
 													j=j+1;
@@ -816,11 +817,7 @@ public class SearchRunner {
 				terms.push(s);
 				}
 			}
-       	}	
-		for(int i=0;i<terms.size();i++)
-		{
-			System.out.println(terms.get(i));
-		}
+       	}
 		if(terms.size()==1)
 		{
 			 String s=terms.pop();
@@ -949,7 +946,8 @@ public class SearchRunner {
 	public void query(File queryFile) {
 		//TODO: IMPLEMENT THIS METHOD
 		BufferedReader br;
-		int noofqueries;
+		@SuppressWarnings("unused")
+		int noofqueries=0;
 		int numresults=0;
 		 ArrayList<String> arrayOut=new ArrayList<String>();
 		try {
@@ -971,33 +969,36 @@ public class SearchRunner {
 					}
 					String querystring=fullquery.substring(1,fullquery.length()-2);
 					Query query=QueryParser.parse(querystring, "OR");
-					String parsedQuery=query.toString();
-					HashMap<String, TreeMap<String, Integer>> FinalDocResultHashmap=  new HashMap<String, TreeMap<String,Integer>>();
-					FinalDocResultHashmap=hashmapwithstak(parsedQuery);
-					TreeMap<String, Integer> TermTFCountPairMap=new TreeMap<String, Integer>();
-					TermTFCountPairMap=RetrieveTermsInQuery(parsedQuery);
-					ArrayList<String> TermsList=new ArrayList<String>();
-					for(String str:TermTFCountPairMap.keySet())
+					if(query!=null)
 					{
-						TermsList.add(str);
+						String parsedQuery=query.toString();
+						HashMap<String, TreeMap<String, Integer>> FinalDocResultHashmap=  new HashMap<String, TreeMap<String,Integer>>();
+						FinalDocResultHashmap=hashmapwithstak(parsedQuery);
+						TreeMap<String, Integer> TermTFCountPairMap=new TreeMap<String, Integer>();
+						TermTFCountPairMap=RetrieveTermsInQuery(parsedQuery);
+						ArrayList<String> TermsList=new ArrayList<String>();
+						for(String str:TermTFCountPairMap.keySet())
+						{
+							TermsList.add(str);
+						}
+						TreeMap<String, Double> IDFMap=new TreeMap<String, Double>();
+						IDFMap=calculateIDFScores(termDocCounts);
+						HashMap<String,Double> RelevanceScoresOKAPI=new HashMap<String, Double>();
+						RelevanceScoresOKAPI=calculateOKAPI(IDFMap,FinalDocResultHashmap);
+						List<Entry<String,Double>> sortedList=getsortedmapwithcomparator(RelevanceScoresOKAPI);//also return the file ids
+						if(FinalDocResultHashmap.size()!=0)
+						{
+							numresults=numresults+1;
+						}
+						String str="";
+						            
+						 for(Entry<String,Double> entry : sortedList)
+						{
+							 str=str+entry.getKey()+"#"+entry.getValue()+", ";
+						}
+					    str=fullquer[0]+":"+"{"+str.substring(0, str.length()-2)+ "}";
+					    arrayOut.add(str);
 					}
-					TreeMap<String, Double> IDFMap=new TreeMap<String, Double>();
-					IDFMap=calculateIDFScores(termDocCounts);
-					HashMap<String,Double> RelevanceScoresOKAPI=new HashMap<String, Double>();
-					RelevanceScoresOKAPI=calculateOKAPI(IDFMap,FinalDocResultHashmap);
-					List<Entry<String,Double>> sortedList=getsortedmapwithcomparator(RelevanceScoresOKAPI);//also return the file ids
-					if(FinalDocResultHashmap.size()!=0)
-					{
-						numresults=numresults+1;
-					}
-					            String str="";
-					            
-					            for(Entry<String,Double> entry : sortedList)
-								{
-									str=str+entry.getKey()+"#"+entry.getValue()+", ";
-								}
-					            str=fullquer[0]+":"+"{"+str.substring(0, str.length()-2)+ "}";
-					            arrayOut.add(str);
 				}
 				writeQueriesToFile(arrayOut,numresults);
 			} catch (IOException e) {
