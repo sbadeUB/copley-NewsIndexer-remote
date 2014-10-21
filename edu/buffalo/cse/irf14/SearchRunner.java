@@ -98,7 +98,7 @@ public class SearchRunner {
 			
 		case OKAPI:
 		{
-			RelevanceScores=calculateOKAPI(IDFMap,FinalDocResultHashmap);
+			RelevanceScores=calculateOKAPI(IDFMap,TermTFCountPairMap,FinalDocResultHashmap);
 			break;
 		}
 			
@@ -175,9 +175,10 @@ public class SearchRunner {
 	
 	
 	@SuppressWarnings("resource")
-	public  HashMap<String, Double> calculateOKAPI(TreeMap<String, Double> iDFMap,HashMap<String, TreeMap<String, Integer>> finalDocResultHashmap)
+	public  HashMap<String, Double> calculateOKAPI(TreeMap<String, Double> iDFMap,TreeMap<String,Integer> TFCountPairMap,HashMap<String, TreeMap<String, Integer>> finalDocResultHashmap)
 	{
         double k1=1.5;
+        double k3=1.5;
         double b=0.75;
         File dictionaryFile=new File(this.indexdir+ File.separator +"DocumentDictionary2");
         BufferedReader br;
@@ -208,11 +209,14 @@ public class SearchRunner {
 				doctermfreq=finalDocResultHashmap.get(s);
 				for(String s1:doctermfreq.keySet())
 				{
+					int tftq=0;
 					if(iDFMap.containsKey(s1))
 						idf=iDFMap.get(s1);
+					if(TFCountPairMap.containsKey(s1))
+						tftq=TFCountPairMap.get(s1);
 					int tf=doctermfreq.get(s1);
-					double upper=(k1+1)*tf;
-					double lower=((doclength/docavaragelenth)*b+(1-b))*k1+tf;
+					double upper=((k1+1)*tf)*((k3+1)*tftq);
+					double lower=(((doclength/docavaragelenth)*b+(1-b))*k1+tf)*(k3+tftq);
 							cont=upper/lower;
 							finalvalue=finalvalue+cont*idf;
 				}
@@ -983,9 +987,10 @@ public class SearchRunner {
 						}
 						TreeMap<String, Double> IDFMap=new TreeMap<String, Double>();
 						IDFMap=calculateIDFScores(termDocCounts);
-						HashMap<String,Double> RelevanceScoresOKAPI=new HashMap<String, Double>();
-						RelevanceScoresOKAPI=calculateOKAPI(IDFMap,FinalDocResultHashmap);
-						List<Entry<String,Double>> sortedList=getsortedmapwithcomparator(RelevanceScoresOKAPI);//also return the file ids
+						
+						HashMap<String,Double> RelevanceScores=new HashMap<String, Double>();
+						RelevanceScores=calculateOKAPI(IDFMap,TermTFCountPairMap,FinalDocResultHashmap);
+						List<Entry<String,Double>> sortedList=getsortedmapwithcomparator(RelevanceScores);//also return the file ids
 						if(FinalDocResultHashmap.size()!=0)
 						{
 							numresults=numresults+1;
