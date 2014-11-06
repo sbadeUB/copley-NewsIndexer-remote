@@ -661,8 +661,6 @@ public class SearchRunner {
 					}
 					
 				}
-				/*String xyz="p";
-				String p=xyz;*/
 				return combine;
 					
 			}
@@ -1033,7 +1031,6 @@ public class SearchRunner {
 			for(String s:arrayOut)
 				stream.println(s);
 		}
-	
 		catch(Exception e)
 		{
 			System.out.println("Sorry,Some error occurred while writing back to PrintStream!"+e.getMessage());

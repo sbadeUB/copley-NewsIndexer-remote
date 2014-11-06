@@ -40,7 +40,7 @@ public class Runner {
 		Document d = null;
 		IndexWriter writer = new IndexWriter(indexDir);
 		
-		try {
+	try {
 			for (String cat : catDirectories) {
 				dir = new File(ipDir+ File.separator+ cat);
 				files = dir.list();
@@ -68,6 +68,4 @@ public class Runner {
 			e.printStackTrace();
 		}
 	}
-
-
 }

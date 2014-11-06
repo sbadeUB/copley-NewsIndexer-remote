@@ -466,9 +466,9 @@ public class Query
 		if(splitSpace[i].startsWith("\""))
 		{
 			if(!isTermAngledNOTFound)
-				multiWord.append("TERM:"+splitSpace[i]+" ");
+				multiWord.append("Term:"+splitSpace[i]+" ");
 			else
-				multiWord.append("<TERM:"+splitSpace[i]+" ");
+				multiWord.append("<Term:"+splitSpace[i]+" ");
 			i=i+1;
 			while(!(splitSpace[i].endsWith("\"") || splitSpace[i].endsWith(")")))
 			{
@@ -536,9 +536,9 @@ public class Query
 					if(splitSpace[i].startsWith("\""))
 					{
 						if(!isTermAngledNOTFound)
-							multiWord.append("TERM:"+splitSpace[i]+" ");
+							multiWord.append("Term:"+splitSpace[i]+" ");
 						else
-							multiWord.append("<TERM:"+splitSpace[i]+" ");
+							multiWord.append("<Term:"+splitSpace[i]+" ");
 						i=i+1;
 						while(!(splitSpace[i].endsWith("\"") || splitSpace[i].endsWith(")")))
 						{
@@ -577,8 +577,8 @@ public class Query
 					}
 					else
 					{
-						if(isTermAngledNOTFound) multiWord.append("TERM:"+splitSpace[i]+">"+" ");
-						else multiWord.append("TERM:"+splitSpace[i]+" ");
+						if(isTermAngledNOTFound) multiWord.append("Term:"+splitSpace[i]+">"+" ");
+						else multiWord.append("Term:"+splitSpace[i]+" ");
 						isTermAngledNOTFound=false;
 					}
 				}
@@ -607,9 +607,9 @@ public class Query
 					}
 				}
 				if(isTermAngledNOTFound)
-					multiWord.append("<TERM:"+splitSpace[i].substring(0, splitSpace[i].length()-countClosingParenthesis)+">");
+					multiWord.append("<Term:"+splitSpace[i].substring(0, splitSpace[i].length()-countClosingParenthesis)+">");
 				else
-					multiWord.append("TERM:"+splitSpace[i].substring(0, splitSpace[i].length()-countClosingParenthesis));
+					multiWord.append("Term:"+splitSpace[i].substring(0, splitSpace[i].length()-countClosingParenthesis));
 				
 				if(countClosingParenthesis==1)
 				{
@@ -658,9 +658,9 @@ public class Query
 			if(!isBooleanSet && !isNotSet && i!=0)
 				multiWord.append(defaultOperator+" ");
 			if(!isTermAngledNOTFound)
-			multiWord.append("TERM:"+splitSpace[i]+" ");
+			multiWord.append("Term:"+splitSpace[i]+" ");
 			else
-				multiWord.append("<TERM:"+splitSpace[i]+" ");
+				multiWord.append("<Term:"+splitSpace[i]+" ");
 			i=i+1;
 			while(!(splitSpace[i].endsWith("\"") || splitSpace[i].endsWith(")")))
 			{
@@ -705,12 +705,12 @@ public class Query
 			}
 			if(isBooleanSet)
 			{
-				multiWord.append("TERM:"+splitSpace[i]);
+				multiWord.append("Term:"+splitSpace[i]);
 				isBooleanSet=false;
 			}
 			else if(isNotSet)
 			{
-				multiWord.append("<TERM:"+splitSpace[i]+">");
+				multiWord.append("<Term:"+splitSpace[i]+">");
 				isNotSet=false;
 			}
 			else if(i==0)

@@ -295,6 +295,7 @@ public class QueryParser
 		
 		try
 		{
+			s=s.toLowerCase();
 			Tokenizer tokenizer=new Tokenizer();
 			AnalyzerFactory af=AnalyzerFactory.getInstance();
 			TokenStream stream = tokenizer.consume(s);
